@@ -152,6 +152,15 @@
                 ></textarea>
             </Label.Root>
 
+            <label for="enableTOC" class="checkbox-inline">
+                <input
+                    id="enableTOC"
+                    type="checkbox"
+                    bind:checked={appState.config.enableTOC}
+                />
+                <span>Generar índice</span>
+            </label>
+
             <!-- Metadatos de contenido -->
             <Label.Root for="dedication">
                 <span class="label-with-hint">

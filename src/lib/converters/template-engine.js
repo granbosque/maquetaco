@@ -11,6 +11,9 @@ import previewTemplate from '$lib/templates/preview.html?raw';
 import pdfScreenTemplate from '$lib/export-themes/screen/template.html?raw';
 import pdfPrintTemplate from '$lib/export-themes/print/template.html?raw';
 
+// Importar generador de TOC
+import { generateTableOfContents } from './md-to-html.js';
+
 /**
  * Plantillas disponibles
  */
@@ -107,6 +110,11 @@ export function prepareTemplateData(frontmatter, bodyHtml) {
     // Detectar si debemos usar una portada compacta (sin salto de página)
     // Se usa cuando NO hay: publisher, copyright, dedicatoria, TOC ni H1 (capítulos)
     data.compactTitlePage = !data.publisher && !data.copyright && !data.hasDedication && !data.toc && !hasH1;
+
+    // Generar TOC si se solicita
+    if (data.toc) {
+        data.tableOfContents = generateTableOfContents(bodyHtml);
+    }
 
     return data;
 }

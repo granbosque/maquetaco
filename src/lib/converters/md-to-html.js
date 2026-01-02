@@ -205,3 +205,33 @@ export function convertDocument(content, lang) {
     const html = markdownToHtml(body, lang);
     return { frontmatter, html };
 }
+
+/**
+ * Genera una tabla de contenidos HTML a partir del contenido HTML
+ * Busca los h1, extrae su texto y ID, y crea una lista de enlaces.
+ * @param {string} html - Contenido HTML del cuerpo
+ * @returns {string} HTML de la tabla de contenidos (ul.toc-list)
+ */
+export function generateTableOfContents(html) {
+    if (!html) return '';
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const headings = doc.querySelectorAll('h1');
+
+    if (headings.length === 0) return '';
+
+    let tocHtml = '<ul class="toc-list">\n';
+
+    headings.forEach(heading => {
+        const text = heading.textContent;
+        const id = heading.id;
+        if (text && id) {
+            tocHtml += `  <li><a href="#${id}"><span class="toc-text">${text}</span></a></li>\n`;
+        }
+    });
+
+    tocHtml += '</ul>';
+
+    return tocHtml;
+}

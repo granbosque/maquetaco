@@ -10,6 +10,31 @@
     font-family: var(--font-base) !important;
 }
 
+.preview-content .toc-list a {
+    display: flex;
+    text-decoration: none;
+    color: inherit;
+}
+
+.toc-text {
+    white-space: nowrap;
+}
+
+/* Puntos de relleno - estilo moderno */
+.toc-list a::before {
+    content: "";
+    flex: 1;
+    border-bottom: 1px dotted;
+    margin: 0 0.5em 0.3em;
+    opacity: 0.4;
+    order: 1;
+}
+
+.toc-list a::after {
+    content: "";
+    order: 2;
+}
+
 /* === BLOQUE DE TÍTULO DEL DOCUMENTO === */
 .preview-content .title-block {
     text-align: center;
@@ -231,6 +256,7 @@
 /* Para que las partes del documento salgan visualmente separadas (espacios en los saltos de línea) */
 
 .preview-content .title-block,
+.preview-content .toc-preview,
 .preview-content section {
     border: solid 1px f7f7f7;
     background-color: white;

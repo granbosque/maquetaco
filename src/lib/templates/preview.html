@@ -19,6 +19,13 @@
     </div>
     {{/title}}
 
+    {{#toc}}
+    <nav class="toc-preview">
+        <h2>Índice</h2>
+        {{{tableOfContents}}}
+    </nav>
+    {{/toc}}
+
     <main class="main-content">
         {{{body}}}
     </main>

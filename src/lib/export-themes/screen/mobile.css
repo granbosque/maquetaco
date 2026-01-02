@@ -107,6 +107,18 @@
         padding: 0;
     }
 
+    /* Página de TOC (Tabla de Contenidos) - Sin numeración, márgenes estándar */
+    @page toc-page {
+        margin-top: 12mm;
+        margin-bottom: 12mm;
+        margin-left: 8mm;
+        margin-right: 8mm;
+
+        @bottom-center {
+            content: none;
+        }
+    }
+
     /* ASIGNACIÓN DE ESTILOS DE PÁGINA */
 
     /* Imagen de portada */
@@ -139,6 +151,74 @@
         flex-direction: column;
         justify-content: space-between;
         text-align: center;
+    }
+
+    /* Tabla de Contenidos */
+    nav#TOC {
+        page: toc-page;
+        break-before: page;
+    }
+
+    nav#TOC h1 {
+        text-align: center;
+        font-size: 1.2em;
+        font-weight: normal;
+        font-variant: small-caps;
+        margin-bottom: 1.2em;
+        margin-top: 0;
+    }
+
+    nav#TOC ul.toc-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    nav#TOC ul.toc-list li {
+        position: relative;
+        margin-bottom: 0.35em;
+        line-height: 1.3;
+        font-size: 0.95em;
+    }
+
+    nav#TOC ul.toc-list li a {
+        display: block;
+        position: relative;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    /* Leader dots usando pseudo-elemento */
+    nav#TOC ul.toc-list li a::before {
+        content: ".................................................................................................................";
+        text-align: right;
+        color: #bbb;
+        letter-spacing: 1.5px;
+        width: 100%;
+        font-size: 0.75em;
+        position: absolute;
+        bottom: 0.1em;
+        left: 0;
+        overflow: hidden;
+        z-index: 0;
+    }
+
+    nav#TOC ul.toc-list li a .toc-text {
+        position: relative;
+        z-index: 1;
+        background: white;
+        padding-right: 0.2em;
+    }
+
+    /* Número de página al final (target-counter) */
+    nav#TOC ul.toc-list li a::after {
+        content: target-counter(attr(href url), page);
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        background: white;
+        padding-left: 0.2em;
+        z-index: 1;
     }
 
     /* Contenido principal */

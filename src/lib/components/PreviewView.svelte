@@ -19,6 +19,14 @@
             lang: appState.config.lang || "es",
         };
 
+        // Lógica de TOC (igual que en ExportView)
+        const h1Count = (html.match(/<h1/g) || []).length;
+        if (appState.config.enableTOC === undefined) {
+            metadata.toc = h1Count > 2;
+        } else {
+            metadata.toc = appState.config.enableTOC;
+        }
+
         return renderTemplate("preview", metadata, html);
     });
 </script>

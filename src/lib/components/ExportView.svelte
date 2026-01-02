@@ -66,6 +66,16 @@
             includeBranding: appState.config.includeBranding !== false,
         };
 
+        // Lógica de Tabla de Contenidos (TOC)
+        const h1Count = (contentHtml.match(/<h1/g) || []).length;
+        if (appState.config.enableTOC === undefined) {
+            // Automático: si hay más de 2 capítulos
+            meta.toc = h1Count > 2;
+        } else {
+            // Manual: lo que diga el usuario
+            meta.toc = appState.config.enableTOC;
+        }
+
         // Inyectar imagen de portada
         if (appState.config.imagePreview) {
             // Prioridad 1: Imagen cargada en UI (no regenerar)

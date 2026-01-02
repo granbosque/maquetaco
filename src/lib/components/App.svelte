@@ -51,6 +51,20 @@
         // Restablecer metadatos si es necesario
     }
 
+    /**
+     * Cuenta los encabezados h1 en el contenido markdown y activa TOC si hay más de 2
+     * @param {string} content - Contenido markdown
+     */
+    function updateTOCFromContent(content) {
+        // Contar líneas que empiezan con exactamente un # (h1)
+        const h1Regex = /^# [^#]/gm;
+        const matches = content.match(h1Regex);
+        const h1Count = matches ? matches.length : 0;
+
+        // Activar TOC automáticamente si hay más de 2 capítulos
+        appState.config.enableTOC = h1Count > 2;
+    }
+
     function handleFileInput(event) {
         const file = event.target.files[0];
         if (file) {
@@ -113,6 +127,9 @@
 
                 appState.config.content = content;
                 appState.config.fileName = file.name;
+
+                // Actualizar TOC automáticamente según número de capítulos
+                updateTOCFromContent(content);
             } catch (e) {
                 console.error("Error procesando DOCX:", e);
                 appState.config.fileName = `Error: ${file.name}`;
@@ -145,6 +162,9 @@
                 // Guardar solo el contenido (sin frontmatter)
                 appState.config.content = content;
                 appState.config.fileName = file.name;
+
+                // Actualizar TOC automáticamente según número de capítulos
+                updateTOCFromContent(content);
             };
             reader.readAsText(file);
         } else {

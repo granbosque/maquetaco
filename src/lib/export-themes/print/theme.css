@@ -213,6 +213,14 @@
         padding: 0;
     }
 
+    /* Página de TOC (Tabla de Contenidos) - Sin numeración, márgenes estándar */
+    @page toc-page {
+        margin-top: 26mm;
+        margin-bottom: 26mm;
+        margin-left: 22mm;
+        margin-right: 14mm;
+    }
+
 
     /* Páginas en blanco explícitas */
     .blank-page {
@@ -258,6 +266,74 @@
 
     section.dedication {
         page: dedication-page;
+    }
+
+    /* Tabla de Contenidos */
+    nav#TOC {
+        page: toc-page;
+        break-before: right;
+        /* Empieza en página impar */
+    }
+
+    nav#TOC h1 {
+        text-align: center;
+        font-size: 1.5em;
+        font-weight: normal;
+        font-variant: small-caps;
+        margin-bottom: 2em;
+        margin-top: 0;
+    }
+
+    nav#TOC ul.toc-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    nav#TOC ul.toc-list li {
+        position: relative;
+        margin-bottom: 0.5em;
+        line-height: 1.4;
+    }
+
+    nav#TOC ul.toc-list li a {
+        display: block;
+        position: relative;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    /* Leader dots usando pseudo-elemento */
+    nav#TOC ul.toc-list li a::before {
+        content: ".................................................................................................................";
+        text-align: right;
+        color: #aaa;
+        letter-spacing: 2px;
+        width: 100%;
+        font-size: 0.8em;
+        position: absolute;
+        bottom: 0.15em;
+        left: 0;
+        overflow: hidden;
+        z-index: 0;
+    }
+
+    nav#TOC ul.toc-list li a .toc-text {
+        position: relative;
+        z-index: 1;
+        background: white;
+        padding-right: 0.3em;
+    }
+
+    /* Número de página al final (target-counter) */
+    nav#TOC ul.toc-list li a::after {
+        content: target-counter(attr(href url), page);
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        background: white;
+        padding-left: 0.3em;
+        z-index: 1;
     }
 
     section.epigraph {
