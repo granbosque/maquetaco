@@ -1,9 +1,9 @@
 <script>
     import { AlertDialog } from "bits-ui";
     import {
-        FileUp,
-        Pencil,
-        Download,
+        FileText,
+        PencilRuler,
+        BookText,
         ChevronRight,
         Code2,
         Laptop,
@@ -56,22 +56,39 @@
             <!-- Steps -->
             <div class="steps">
                 <div class="step">
-                    <div class="step-icon import"><FileUp size={24} /></div>
+                    <div class="step-icon import">
+                        <FileText size={32} strokeWidth={2.5} />
+                    </div>
                     <strong>Importar</strong>
                     <span>Word o Markdown</span>
                 </div>
                 <ChevronRight size={20} class="arrow" />
                 <div class="step">
-                    <div class="step-icon edit"><Pencil size={24} /></div>
+                    <div class="step-icon edit">
+                        <PencilRuler size={32} strokeWidth={2.5} />
+                    </div>
                     <strong>Maquetar</strong>
                     <span>Ajustar estilos</span>
                 </div>
                 <ChevronRight size={20} class="arrow" />
                 <div class="step">
-                    <div class="step-icon export"><Download size={24} /></div>
+                    <div class="step-icon export">
+                        <BookText size={32} strokeWidth={2.5} />
+                    </div>
                     <strong>Exportar</strong>
                     <span>PDF o EPUB</span>
                 </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="cta-container">
+                <AlertDialog.Action onclick={handleStart} class="cta">
+                    Comenzar
+                    <ChevronRight size={18} />
+                </AlertDialog.Action>
+                <p class="cta-hint">
+                    Al comenzar se cargará una guía de inicio
+                </p>
             </div>
 
             <!-- Footer -->
@@ -110,16 +127,6 @@
                     </button>
                 </div>
             </footer>
-
-            <div class="cta-container">
-                <AlertDialog.Action onclick={handleStart} class="cta">
-                    Comenzar
-                    <ChevronRight size={18} />
-                </AlertDialog.Action>
-                <p class="cta-hint">
-                    Al comenzar se cargará una guía de inicio
-                </p>
-            </div>
         </AlertDialog.Content>
     </AlertDialog.Portal>
 </AlertDialog.Root>
@@ -133,7 +140,7 @@
         inset: 0;
         background: rgba(0, 0, 0, 0.3);
         backdrop-filter: blur(6px);
-        z-index: 50;
+        z-index: 1000;
     }
 
     /* Modal */
@@ -147,7 +154,7 @@
         border-radius: 24px;
         padding: 2rem;
         box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.15);
-        z-index: 51;
+        z-index: 1001;
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
@@ -175,9 +182,9 @@
     }
 
     .logo {
-        width: 64px;
-        height: 64px;
-        margin-bottom: 0.5rem;
+        width: 80px;
+        height: 80px;
+        margin-bottom: 0.25rem;
     }
 
     :global(.title) {
@@ -189,7 +196,7 @@
     }
 
     .highlight {
-        color: var(--color-accent);
+        color: #555;
     }
 
     :global(.subtitle) {
@@ -241,9 +248,6 @@
     }
 
     .step-icon {
-        width: 52px;
-        height: 52px;
-        border-radius: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -252,22 +256,19 @@
     }
 
     .step:hover .step-icon {
-        transform: scale(1.05);
+        transform: scale(1.1);
     }
 
     .step-icon.import {
-        background: rgba(255, 200, 0, 0.15);
-        color: #d97706;
+        color: #f97316;
     }
 
     .step-icon.edit {
-        background: rgba(127, 215, 188, 0.2);
-        color: #047857;
+        color: #14b8a6;
     }
 
     .step-icon.export {
-        background: var(--color-primary);
-        color: rgba(0, 0, 0, 0.8);
+        color: #3b82f6;
     }
 
     .step strong {
@@ -291,7 +292,6 @@
         align-items: center;
         justify-content: space-between;
         padding-top: 1rem;
-        border-top: 1px solid var(--border);
     }
 
     .checkbox {
