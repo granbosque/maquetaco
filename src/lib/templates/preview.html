@@ -1,0 +1,25 @@
+<!--
+  Plantilla de vista previa para Maquetaco
+  Versión sencilla sin portada ni TOC automático
+  
+  Variables disponibles:
+  - title: Título del documento
+  - author: Autor(es)
+  - date: Fecha
+  - body: Contenido HTML del documento
+-->
+<article class="preview-document">
+    {{#title}}
+    <div class="title-block">
+        <h1 class="document-title">{{title}}</h1>
+        {{#author}}<p class="document-author">{{author}}</p>{{/author}}
+
+
+        {{#copyright}} <div class="metadata">{{copyright}}</div>{{/copyright}}
+    </div>
+    {{/title}}
+
+    <main class="main-content">
+        {{{body}}}
+    </main>
+</article>

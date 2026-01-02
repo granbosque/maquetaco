@@ -1,0 +1,240 @@
+/* 
+ * Estilos para la vista previa del documento
+ * Estos estilos simulan el aspecto final del documento (epub, pdf)
+ */
+
+/* === TIPOGRAFÍA BASE === */
+.preview-content {
+    --font-base: 'Garamond', 'Noto Serif', serif !important;
+    --font-title: var(--font-base) !important;
+    font-family: var(--font-base) !important;
+}
+
+/* === BLOQUE DE TÍTULO DEL DOCUMENTO === */
+.preview-content .title-block {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+    width: 100%;
+}
+
+.preview-content .title-block p {
+    text-align: center;
+    text-indent: 0;
+}
+
+.preview-content .title-block .document-title {
+    margin: 0 0 0.5rem;
+    font-size: 2rem;
+
+}
+
+.preview-content .title-block .document-author {
+    margin: 0;
+    font-variant: small-caps;
+    font-size: 1.1rem;
+    opacity: 0.8;
+
+}
+
+.preview-content .title-block .document-date {
+    margin: 0.5rem 0 0;
+    font-size: 0.9rem;
+    opacity: 0.6;
+}
+
+.preview-content .title-block .metadata {
+    width: 70%;
+    margin: 1rem auto 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    text-align: center;
+    white-space: pre-wrap;
+}
+
+/* === PÁRRAFOS === */
+.preview-content p {
+    text-indent: 0;
+    margin: 0;
+    text-align: justify;
+    hyphens: auto;
+    hyphenate-limit-chars: 5 2 2;
+    hyphenate-limit-lines: 3;
+    hyphenate-limit-zone: 0%;
+    line-height: 1.25;
+}
+
+/* Sangría en párrafos consecutivos */
+.preview-content p+p {
+    text-indent: 2em;
+}
+
+/* === TÍTULOS === */
+.preview-content h1,
+.preview-content h2 {
+    text-align: center;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.preview-content h1 {
+    font-size: 1.75rem;
+}
+
+.preview-content h2 {
+    font-size: 1.35rem;
+}
+
+.preview-content h3 {
+    font-size: 1.15rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.preview-content h4 {
+    font-size: 1.15rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.preview-content h5 {
+    font-size: 1.15rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.preview-content h6 {
+    font-size: 1.15rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+/* === LISTAS === */
+.preview-content ul,
+.preview-content ol {
+    margin: 1rem 0;
+    padding-left: 2em;
+}
+
+.preview-content li {
+    margin-bottom: 0.25em;
+    line-height: 1.4;
+}
+
+.preview-content li p {
+    text-indent: 0;
+    margin: 0;
+}
+
+/* === SEPARADORES === */
+.preview-content hr {
+    border: 0;
+    height: 1rem;
+}
+
+/* === TITLEPAGE (portada) === */
+.preview-content .titlepage {
+    width: 90%;
+    max-width: 15em;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.preview-content .titlepage p {
+    text-indent: 0;
+    text-align: center;
+}
+
+.preview-content .titlepage .author {
+    font-variant: small-caps;
+    margin-bottom: 2em;
+}
+
+.preview-content .titlepage .date,
+.preview-content .titlepage .rights {
+    font-size: 0.8em;
+}
+
+/* === SECCIONES ESPECIALES (COLOFÓN, DEDICATORIA, EPÍGRAFE) === */
+.preview-content section.colophon,
+.preview-content section.dedication,
+.preview-content section.epigraph {
+    padding-top: 25%;
+    max-width: 60%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.preview-content .colophon p,
+.preview-content .dedication p,
+.preview-content .epigraph p {
+    text-align: center;
+    text-indent: 0;
+}
+
+/* === TÍTULOS OCULTOS (unlisted) === */
+.preview-content h1.unlisted,
+.preview-content h2.unlisted,
+.preview-content h3.unlisted,
+.preview-content h4.unlisted,
+.preview-content h5.unlisted,
+.preview-content h6.unlisted {
+    display: none;
+}
+
+/* === ESTILOS PARA TÍTULOS OCULTOS === */
+/* Colofón, Dedicatoria, Epígrafe */
+.preview-content h1.colophon,
+.preview-content h2.colophon,
+.preview-content h1.dedication,
+.preview-content h2.dedication,
+.preview-content h1.epigraph,
+.preview-content h2.epigraph {
+    font-variant: small-caps;
+    opacity: 0.3;
+    font-size: 1.1rem;
+    border: dashed 2px darkgray;
+    border-radius: 0.5rem;
+}
+
+.preview-content .colophon::after,
+.preview-content .dedication::after,
+.preview-content .epigraph::after {
+    content: "(Este título no se mostrará)";
+    font-size: 0.6rem;
+    color: darkgray;
+    font-variant: normal;
+}
+
+.preview-content .colophon>p,
+.preview-content .dedication>p,
+.preview-content .epigraph>p {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+
+.preview-content strong {
+    font-variant: small-caps;
+}
+
+.preview-content a,
+.preview-content a:visited {
+    color: blue;
+    text-decoration: underline;
+}
+
+/* Estilos específicos para la web de maquetaco */
+
+/* Para que las partes del documento salgan visualmente separadas (espacios en los saltos de línea) */
+
+.preview-content .title-block,
+.preview-content section {
+    border: solid 1px f7f7f7;
+    background-color: white;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+}

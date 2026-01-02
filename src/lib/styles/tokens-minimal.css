@@ -1,0 +1,97 @@
+/* =========================================
+   DESIGN TOKENS MINIMAL - Clean & Neutral
+   ========================================= */
+
+:root {
+    /* === COLORES PRINCIPALES (Paleta Taco) === */
+    --color-primary: #FFC800;
+    /* Maíz Dorado */
+    --color-primary-hover: #E6B400;
+    /* Maíz más oscuro */
+
+    --color-secondary: #7fd7bc;
+    /* Salsa Verde (Emerald 600) */
+    --color-secondary-hover: #047857;
+    /* Salsa más oscura */
+
+    --color-accent: #EA580C;
+    /* Adobe (Orange 600) */
+    --color-danger: #DC2626;
+    /* Rojo para errores */
+
+    /* === FONDOS === */
+    --bg-app: #FAFAFA;
+    /* Gris muy claro, casi blanco */
+    --bg-surface: #FFFFFF;
+    --bg-muted: #F5F5F5;
+    --bg-hover: #F0F0F0;
+    --bg-active: #E5E5E5;
+
+    /* === TEXTO === */
+    --text: #1F2937;
+    /* Tinta (Gray 800) */
+    --text-muted: #4B5563;
+    /* Gray 600 */
+    --text-subtle: #9CA3AF;
+    /* Gray 400 */
+
+    /* === TIPOGRAFÍA - TAMAÑOS === */
+    --text-xs: 0.75rem;
+    /* 12px */
+    --text-sm: 0.875rem;
+    /* 14px */
+    --text-base: 1rem;
+    /* 16px */
+    --text-lg: 1.25rem;
+    /* 20px */
+    --text-xl: 1.5rem;
+    /* 24px */
+
+    /* === TIPOGRAFÍA - PESOS === */
+    --weight-normal: 400;
+    --weight-medium: 500;
+    --weight-semibold: 600;
+    --weight-bold: 700;
+
+    /* === BORDES === */
+    --border: #E5E7EB;
+    /* Gray 200 */
+    --border-muted: rgba(0, 0, 0, 0.06);
+
+    /* === SOMBRAS === */
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 16px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 4px 24px rgba(0, 0, 0, 0.08), 0 8px 48px rgba(0, 0, 0, 0.05);
+
+    /* === TRANSICIONES === */
+    --transition: 0.15s ease;
+
+    /* === TIPOGRAFÍA - FUENTES === */
+    --font-main: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-title: 'Pally', sans-serif;
+    --font-editor: 'Zilla Slab', serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    /* === RADII === */
+    --radius: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-full: 999px;
+
+    /* === SPACING === */
+    --space-xxs: 0.125rem;
+    /* 2px */
+    --space-xs: 0.25rem;
+    /* 4px */
+    --space-sm: 0.5rem;
+    /* 8px */
+    --space-md: 0.75rem;
+    /* 12px */
+    --space-lg: 1rem;
+    /* 16px */
+    --space-xl: 1.5rem;
+    /* 24px */
+
+    /* === BREAKPOINTS === */
+    --breakpoint-sm: 640px;
+    --breakpoint-md: 1024px;
+    --breakpoint-lg: 1280px;
+}

@@ -1,0 +1,83 @@
+
+/* Estilos generales para todos los formatos: epub, pdf */
+
+
+/* Descripción genral del aspecto:
+  - párrafos sin separación
+  - sangría de primera línea excepto el primer párrafo de un bloque
+  - Títulos centrados  
+  - Primera página (título, autor, copyright...) centrado y con ancho reducido
+  - Texto justificado
+
+*/
+
+p {
+    text-indent: 0;
+    margin: 0;
+}
+
+p+p {
+    text-indent: 2em;
+}
+
+h1, h2 {
+    /* revisar esto porque no funciona con kindle */
+    text-align: center;
+    break-before: page;
+}
+
+h1 + h2 {
+    break-before: avoid;
+}
+
+hr, .hr {
+    border: 0;
+    height: 1rem;
+}
+
+p {
+    text-align: justify;
+    hyphens: auto;
+    hyphenate-limit-chars: 5 2 2;
+    hyphenate-limit-lines: 3;
+    hyphenate-limit-zone: 0%;
+}
+
+
+/* titlepage es para la primera página (título, autor, copyright...) solamente en epub.
+   En pdf no se usa esa clase */
+.titlepage {
+    width: 90%;
+    max-width: 15em; /* usa em */
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+.titlepage p {
+    text-indent: 0;
+    text-align: center;    
+}
+.titlepage .author {
+    font-variant: small-caps;
+    margin-bottom: 2em;
+}
+.titlepage .date, .titlepage .rights {
+    font-size: 0.8em;
+}
+
+
+
+section.colophon {
+    padding-top: 25%;
+    max-width: 60%;
+    margin-left: auto;
+    margin-right: auto;
+}
+.colophon p {
+    text-align: center;
+    text-indent: 0;
+}
+
+h1.unlisted, h2.unlisted, h3.unlisted, h4.unlisted, h5.unlisted, h6.unlisted {
+        display: none;
+}

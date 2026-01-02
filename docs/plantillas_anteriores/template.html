@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="$if(lang)$$lang$$else$es$endif$">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Language" content="es">
+
+  $if(title)$
+  <meta name="title" content="$title$">
+  $endif$
+  $if(author)$
+  <meta name="author" content="$author$">
+  $endif$
+  $if(date)$
+  <meta name="date" content="$date$">
+  $endif$
+  
+  $for(css)$
+    <link rel="stylesheet" href="$css$" />
+  $endfor$
+
+  <script src="https://unpkg.com/pagedjs/dist/paged.polyfill.js"></script>
+
+</head>
+<body>
+
+  $if(cover-image)$
+  <div class="cover-image">
+    <img src="$cover-image$" alt="Portada" />
+  </div>
+  $endif$
+  
+  $if(title)$
+  <header>
+
+    <div class="title_and_authors">
+        <div class="title">$title$</div>
+        $for(author)$
+        <div class="author">$author$</div>
+        $endfor$
+    </div>
+
+    <div class="metadata">
+        $if(date)$
+        <p class="date">$date$</p>
+        $endif$
+        $if(editor)$
+        <p class="editor">$editor$</p>
+        $endif$
+        $if(rights)$
+        <p class="rights">$rights$</p>
+        $endif$
+    </div>
+  </header>
+  $endif$
+
+  $if(toc)$
+    <nav id="TOC" role="doc-toc">
+      $table-of-contents$
+    </nav>
+  $endif$
+
+  <main class="main-content">
+    $body$
+  </main>
+
+  $if(back-page)$
+    <div class="back-page">
+      <div class="back-content">
+        $back-page$
+      </div>
+    </div>
+  $endif$
+</body>
+</html>
+
+

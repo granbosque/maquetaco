@@ -1,0 +1,90 @@
+<!--
+  Plantilla PDF para Lectura en Pantalla (A5)
+  Adaptada de legacy docs/templates/pdf_template.html
+-->
+<!DOCTYPE html>
+<html lang="{{lang}}">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    {{#title}}
+    <meta name="title" content="{{title}}">{{/title}}
+    {{#author}}
+    <meta name="author" content="{{author}}">{{/author}}
+    {{#date}}
+    <meta name="date" content="{{date}}">{{/date}}
+</head>
+
+<body>
+
+    <!-- Imagen de Portada -->
+    {{#coverImage}}
+    <div class="cover-image">
+        <img src="{{coverImage}}" alt="Portada" />
+    </div>
+    {{/coverImage}}
+
+    <!-- Página de Título -->
+    {{#title}}
+    <header>
+        <div class="title_and_authors">
+            <div class="title">{{title}}</div>
+            {{#authorList}}
+            <div class="author">{{.}}</div>
+            {{/authorList}}
+            {{^authorList}}
+            {{#author}}<div class="author">{{author}}</div>{{/author}}
+            {{/authorList}}
+        </div>
+
+        {{#publisher}}
+        <div class="publisher">{{publisher}}</div>
+        {{/publisher}}
+
+        {{#copyright}}
+        <div class="metadata">
+            <p>{{copyright}}</p>
+        </div>
+        {{/copyright}}
+    </header>
+    {{/title}}
+
+    <!-- Dedicatoria (si existe en metadatos) -->
+    {{#dedication}}
+    <div class="dedication">
+        <p>{{dedication}}</p>
+    </div>
+    {{/dedication}}
+
+    <!-- Tabla de Contenidos -->
+    {{#toc}}
+    <nav id="TOC" role="doc-toc">
+        {{{tableOfContents}}}
+    </nav>
+    {{/toc}}
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        {{{body}}}
+    </main>
+
+    <!-- Colofón (si existe en metadatos) -->
+    {{#colophon}}
+    <section class="colophon">
+        <p>{{colophon}}</p>
+    </section>
+    {{/colophon}}
+
+    <!-- Página "Maquetado con Maquetaco" -->
+    {{#includeBranding}}
+    <div class="made-with-page">
+        <img src="/icon-mini.svg" alt="Maquetaco Logo" class="made-with-logo" />
+        <p class="made-with-text">Maquetado con Maquetaco</p>
+    </div>
+    {{/includeBranding}}
+
+</body>
+
+</html>

@@ -1,0 +1,119 @@
+body {
+    font-family: Garamond, Georgia, serif;
+    font-size: 1em;
+    line-height: 1.5;
+    margin: 1em;
+    text-align: justify;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    line-height: 1.2;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    page-break-after: avoid;
+}
+
+h1 {
+    font-size: 1.8em;
+    text-align: center;
+    page-break-before: always;
+    break-before: page;
+}
+
+section {
+    page-break-before: always;
+    break-before: page;
+}
+
+h2 {
+    font-size: 1.4em;
+}
+
+h3 {
+    font-size: 1.2em;
+}
+
+h4 {
+    font-size: 1.1em;
+    font-style: italic;
+}
+
+h5 {
+    font-size: 1em;
+}
+
+h6 {
+    font-size: 0.95em;
+    font-style: italic;
+}
+
+p {
+    margin: 0;
+    text-indent: 1.5em;
+}
+
+p:first-of-type,
+h1+p,
+h2+p,
+h3+p {
+    text-indent: 0;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+hr {
+    width: 5em;
+    margin: 1em auto;
+    border: none;
+}
+
+strong,
+b {
+    font-variant: small-caps;
+    font-weight: normal;
+}
+
+/* Clases especiales */
+
+.colophon h1,
+.dedication h1,
+.epigraph h1,
+.unlisted {
+    display: none;
+}
+
+.dedication {
+    margin-top: 30%;
+    margin-left: 10%;
+    margin-right: 10%;
+    text-align: right;
+    font-style: italic;
+}
+
+.colophon {
+    margin-top: 20%;
+    text-align: left;
+    font-size: 0.8em;
+}
+
+.epigraph {
+    margin-top: 10%;
+    margin-left: 20%;
+    text-align: left;
+}
+
+.made-with-page {
+    margin-top: 4em;
+    text-align: center;
+    page-break-before: always;
+    color: #888;
+    font-size: 0.8em;
+}

@@ -1,0 +1,863 @@
+/* CSS para generar un PDF imprimible con control fino de maquetación.
+   Usa paged.js para compatibilidad con @page, margin boxes y saltos.
+   Qué incluye:
+   - primera página en blanco
+   - página de portada con título, autor y metadatos
+   - todos los capítulos (h1) empiezan en página derecha. Se insertan páginas en blanco si son necesarias.
+   - control de viudas/huérfanas
+   - cabecera de página con el número página en lado exterior (izquierdo/derecho), y título de obra y autor en la parte interior.
+   - página final con colofón, sin numeración.
+   
+   Para personalizar, modficar las variables en :root. Excepto el tamaño de página, que no se puede cambiar en variables (paged.js no lo soporta).
+*/
+
+@media print {
+
+    /* variables para configurar facilmente el aspecto de la página 
+       Nota: el tamaño y márgenes de página no soportan variables ni calc, eso hay que cambiarlo en @page
+    */
+    :root {
+        /* tamaño de página, NO SE DEFINE EN VARIABLES porque no es compatible con paged.js, está en los estilos de páginas más abajo. Si quieres modificarlo, revisa todos los sitios donde ponga "mm" o "in". Usamos tamaño de página de 6x9 pulgadas */
+
+        /* Tipografía base */
+        --body-font-family: 'Garamond', 'Noto Serif', serif;
+        /* Familia. Opciones: 'Noto Serif', 'Noto Sans', Garamond, Georgia, serif, sans-serif */
+        --body-font-size: 10.5pt;
+        /* Tamaño base. Opciones: 11pt, 12pt, 13pt */
+        --body-line-height: 1;
+        /* Altura de línea. Opciones: 1–1.6 */
+
+        /* Control de composición */
+        --paragraph-orphans: 2;
+        /* Mín. líneas al final */
+        --paragraph-widows: 2;
+        /* Mín. líneas al inicio */
+        --first-paragraph-widows: 4;
+        /* Mín. líneas al inicio después de un título o separador */
+        --section-last-paragraph-orphans: 2;
+        /* Último párrafo de sección */
+        --section-last-paragraph-widows: 4;
+        /* Último párrafo de sección */
+
+        /* Páginas finales */
+        --colophon-page-justify: flex-end;
+        /* Alineación vertical. Opciones: flex-start, center, flex-end, space-between */
+        --colophon-page-text-align: center;
+        /* Alineación del texto. Opciones: left, center, right, justify */
+
+        /* Copyright */
+        --copyright-text-align: left;
+        --copyright-font-size: 0.8rem;
+        --copyright-justify: flex-end;
+
+        /* Dedicatoria */
+        --dedication-page-justify: center;
+        /* Alineación vertical. Opciones: flex-start, center, flex-end */
+        --dedication-page-text-align: right;
+        /* Alineación horizontal texto. */
+        --dedication-font-style: italic;
+
+        /* Epígrafe */
+        --epigraph-page-justify: flex-start;
+        /* Alineación vertical. */
+        --epigraph-page-text-align: left;
+        /* Alineación horizontal texto. */
+        /* Epígrafe */
+        --epigraph-page-justify: flex-start;
+        /* Alineación vertical. */
+        --epigraph-page-text-align: left;
+        /* Alineación horizontal texto. */
+        --epigraph-font-style: normal;
+
+        /* Portada (Title Page) */
+        --title-page-margin-top: 15%;
+        --title-page-margin-bottom: 10%;
+        --title-page-max-width: 80%;
+
+        /* Página de portada*/
+        --metadata-text-align: center;
+        /* Alineación del texto de metadata. Opciones: left, center, right, justify */
+        --title-font-variant: normal;
+        /* Variante. Opciones: normal, small-caps */
+        --author-font-variant: small-caps;
+        /* Variante. Opciones: normal, small-caps */
+
+        /* Páginas de contenido */
+        --h1-text-align: center;
+        /* Alineación h1. Opciones: inherit, left, center, right, justify */
+        --h2-text-align: center;
+        /* Alineación h2. Opciones: inherit, left, center, right, justify */
+
+    }
+
+    /* textos para mostrar en encabezado o pie */
+    header .title {
+        string-set: book-title content(text);
+    }
+
+    header .author {
+        string-set: book-author content(text);
+    }
+
+    h1 {
+        string-set: book-h1 content(text);
+    }
+
+
+
+    /* Reglas para disposición de páginas.
+       Resumen de esta plantilla con los valores por defecto
+       - Página general en tamaño A5 con márgenes simétricos
+       - No hay diferencia entre páginas izquierdas y derechas
+       - Página de portada con seudoclase cover-page, sin márgenes ni numeración 
+       - Página de título, sin numeración, con seudoclase title con dos bloques:
+         - Título y autor en la parte superior (campos title y author de los metadatos del archivo markdown)
+         - Fecha y copyright en la parte inferior (campos date, editor y rights de los metadatos del archivo markdown)
+       - Pagias de contenido, con seudoclase content, numeración en la parte inferior centrada
+       - Página final, con clase .colophon
+       */
+    @page {
+        /* Este tamaño se aplica a todas las páginas */
+        size: 6in 9in;
+        margin: 0;
+        /* IMPORTANTE poner aquí margin:0 para que no se añada márgenes adicionales,
+           los márgenes se pueden poner estilos de páginas (por ejemplo @page content-pages o @page header) y ahí no afectan al tamaño de página de impresión. */
+    }
+
+    @page blank-page {
+        /* Mismo tamaño que @page general, sin márgenes ni encabezados */
+        size: 6in 9in;
+        margin: 0;
+    }
+
+
+    @page title-page {
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    @page half-title-page {
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    @page copyright-page {
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    /* Páginas de contenido, márgenes diferentes en izquierda y derecha, numeración en el exterior */
+    @page content-pages {
+        margin-top: 26mm;
+        margin-bottom: 26mm;
+    }
+
+    @page content-pages:left {
+        margin-left: 14mm;
+        margin-right: 32mm;
+
+        @top-left {
+            content: counter(page);
+            font-size: 8pt;
+        }
+
+        @top-right {
+            content: string(book-title);
+            /* puedes usar book-title, book-author o book-h1, que sería el nombre del capítulo actual */
+            font-size: 8pt;
+            font-variant: small-caps;
+        }
+    }
+
+    @page content-pages:right {
+        margin-left: 32mm;
+        margin-right: 14mm;
+
+        @top-right {
+            content: counter(page);
+            font-size: 8pt;
+        }
+
+        @top-left {
+            content: string(book-author);
+            font-size: 8pt;
+            font-variant: small-caps;
+        }
+    }
+
+    /*  primera página de cada sección/capítulo con estilo diferente, sin numeración */
+    @page content-pages:first {
+        @top-left {
+            content: none;
+        }
+
+        @top-right {
+            content: none;
+        }
+    }
+
+
+    /* Página final sin numeración */
+    @page final-page {
+        margin: 0;
+        padding: 0;
+    }
+
+    @page dedication-page {
+        margin: 0;
+        padding: 0;
+    }
+
+    @page epigraph-page {
+        margin: 0;
+        padding: 0;
+    }
+
+
+    /* Páginas en blanco explícitas */
+    .blank-page {
+        page: blank-page;
+        height: 100%;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Solo la segunda página en blanco necesita break-before */
+    .blank-page+.blank-page {
+        break-before: page;
+    }
+
+
+    /* Reglas para definir qué estilo de página aplicar.
+       En todas las páginas se aplica el estilo general de page (arriba) 
+       pero además, si contiene cierto elemento, se suma el estilo correspondiente */
+    /* Reglas para definir qué estilo de página aplicar. */
+
+    /* Portadilla (Solo título) */
+    .half-title-page {
+        page: half-title-page;
+    }
+
+    /* Portada (Título + Autor) */
+    header {
+        page: title-page;
+    }
+
+    /* Copyright */
+    .copyright-page {
+        page: copyright-page;
+    }
+
+    .main-content {
+        break-before: right;
+    }
+
+    section.colophon {
+        page: colophon-page;
+    }
+
+    section.dedication {
+        page: dedication-page;
+    }
+
+    section.epigraph {
+        page: epigraph-page;
+    }
+
+    .made-with-page {
+        page: made-with-page;
+    }
+
+    .made-with-page {
+        page: made-with-page;
+    }
+
+    section {
+        page: content-pages;
+    }
+
+    strong,
+    b {
+        font-variant: small-caps;
+        font-weight: normal;
+    }
+
+
+    /* Reglas de tipografía generales */
+    body {
+        /* esto se puede personalizar arriba en las variables de :root */
+        line-height: var(--body-line-height);
+        font-size: var(--body-font-size);
+        font-family: var(--body-font-family);
+
+        /* configuración mejorada para hifenación */
+        hyphens: auto;
+        hyphenate-character: "-";
+        hyphenate-limit-chars: 6 3 3;
+        hyphenate-limit-zone: 8%;
+        -webkit-hyphens: auto;
+        -webkit-hyphenate-character: "-";
+        -webkit-hyphenate-limit-before: 3;
+        -webkit-hyphenate-limit-after: 3;
+        -moz-hyphens: auto;
+        -ms-hyphens: auto;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Página de título */
+    /* Portadilla (Half Title) */
+    .half-title-page {
+        height: 100%;
+        padding: 45mm 14mm 26mm 22mm;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        text-align: center;
+        break-before: right;
+        /* Siempre página impar */
+    }
+
+    .half-title-page .title {
+        font-variant: var(--title-font-variant);
+        font-size: 150%;
+    }
+
+    /* Portada Principal (Header) */
+    header {
+        height: 100%;
+        padding: 45mm 14mm 26mm 22mm;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        /* Inicio superior */
+        text-align: center;
+        break-before: right;
+        /* Siempre página impar */
+    }
+
+    header .title_and_authors {
+        width: 100%;
+        margin-bottom: auto;
+        /* Empuja el publisher abajo */
+    }
+
+    header .publisher {
+        width: 100%;
+        font-variant: small-caps;
+        font-size: 0.9em;
+    }
+
+    /* Copyright Page */
+    .copyright-page {
+        height: 100%;
+        padding: 26mm 14mm 26mm 22mm;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: var(--copyright-justify);
+        /* Alineado abajo */
+        text-align: var(--copyright-text-align);
+        font-size: var(--copyright-font-size);
+        break-before: page;
+        /* Siguiente página (par) */
+    }
+
+    .copyright-page p {
+        text-align: var(--copyright-text-align);
+        text-indent: 0;
+    }
+
+    header .title {
+        font-variant: var(--title-font-variant);
+        font-size: 180%;
+        /* Un poco más grande en portada principal */
+    }
+
+    header .author {
+        margin-top: 2em;
+        font-variant: var(--author-font-variant);
+        font-size: 120%;
+    }
+
+    section:not(first-of-type) {
+        page-break-before: right;
+        page-break-after: avoid;
+        break-before: right;
+        break-after: avoid;
+    }
+
+    /* Los capítulos deben empezar una nueva página 
+    h1 {
+        page-break-before: right;
+        page-break-after: avoid;
+        break-before: right;
+        break-after: avoid;
+    }
+    h1 + h2 {
+        page-break-before: avoid;
+        break-before: avoid;
+    }*/
+
+
+    /* Estilos para el cuerpo principal */
+    /* Estilos para el cuerpo principal */
+    h1 {
+        text-align: var(--h1-text-align);
+        margin-top: 30%;
+        /* Inicio de capítulo bajado */
+        margin-bottom: 3rem;
+        /* Espacio generoso antes del texto */
+        font-weight: normal;
+        font-size: 2.2em;
+        line-height: 1.2;
+    }
+
+    h2 {
+        text-align: center;
+        /* H2 centrado como subtítulo mayor */
+        margin-top: 2rem;
+        margin-bottom: 1.5rem;
+        font-weight: normal;
+        font-size: 1.5em;
+    }
+
+    /* H3 en adelante alineados a la izquierda para estructura interna */
+    h3 {
+        text-align: left;
+        font-size: 1.25em;
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+        font-weight: bold;
+    }
+
+    h4 {
+        text-align: left;
+        font-size: 1.1em;
+        font-style: italic;
+        margin-top: 1.2em;
+        margin-bottom: 0.4em;
+        font-weight: normal;
+    }
+
+    h5 {
+        text-align: left;
+        font-size: 1em;
+        margin-top: 1em;
+        margin-bottom: 0.3em;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    h6 {
+        text-align: left;
+        font-size: 1em;
+        font-style: italic;
+        margin-top: 1em;
+        margin-bottom: 0.3em;
+        font-weight: normal;
+    }
+
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        page-break-after: avoid;
+        break-after: avoid;
+    }
+
+    p,
+    li {
+        orphans: var(--paragraph-orphans);
+        widows: var(--paragraph-widows);
+    }
+
+    p:not(:has(+ p)) {
+        orphans: var(--section-last-paragraph-orphans);
+        widows: var(--section-last-paragraph-widows);
+    }
+
+    hr+p,
+    h2+p,
+    h1+p {
+        widows: var(--first-paragraph-widows);
+    }
+
+    /* sangría de primera linea excepto el primer párrafo de un bloque */
+    main p {
+        text-indent: 0;
+        text-align: justify;
+        hyphens: auto;
+        -webkit-hyphens: auto;
+        -moz-hyphens: auto;
+        -ms-hyphens: auto;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        margin: 0;
+    }
+
+    main p+p {
+        text-indent: 2em;
+    }
+
+    hr,
+    .hr {
+        border: 0;
+        height: 1rem;
+    }
+
+    img,
+    svg {
+        max-width: 100%;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+
+    /* Página final, texto alineado abajo, mismo truco que en la portada*/
+    section.colophon {
+        height: 6.5in;
+        padding-top: 26mm;
+        box-sizing: border-box;
+        font-size: small;
+        display: flex;
+        flex-direction: column;
+        justify-content: var(--colophon-page-justify);
+        text-align: var(--colophon-page-text-align);
+    }
+
+    section.colophon p {
+        text-align: var(--colophon-page-text-align);
+        text-indent: 0;
+        margin-bottom: 1em;
+        /* Separation between paragraphs */
+    }
+
+    section.colophon h1 {
+        display: none;
+    }
+
+    /* Dedicatoria */
+    section.dedication {
+        height: 6.5in;
+        padding-top: 26mm;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: var(--dedication-page-justify);
+        text-align: var(--dedication-page-text-align);
+        font-style: var(--dedication-font-style);
+    }
+
+    section.dedication h1 {
+        display: none;
+    }
+
+    section.dedication p {
+        text-align: var(--dedication-page-text-align);
+        text-indent: 0;
+    }
+
+    /* Epígrafe */
+    section.epigraph {
+        height: 6.5in;
+        padding-top: 26mm;
+        /* Ajustar padding superior si queremos que empiece más abajo */
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: var(--epigraph-page-justify);
+        text-align: var(--epigraph-page-text-align);
+        font-style: var(--epigraph-font-style);
+    }
+
+    section.epigraph h1 {
+        display: none;
+    }
+
+    section.epigraph p {
+        text-align: var(--epigraph-page-text-align);
+        text-indent: 0;
+    }
+
+    h1.unlisted,
+    h2.unlisted,
+    h3.unlisted,
+    h4.unlisted,
+    h5.unlisted,
+    h6.unlisted {
+        display: none;
+    }
+
+}
+
+
+/* A partir de aquí es código de paged.js para la vista previa en el navegador */
+/* CSS for Paged.js interface – v0.4 */
+
+/* Change the look */
+:root {
+    --color-background: gray;
+    --color-pageSheet: #cfcfcf;
+    --color-pageBox: violet;
+    --color-paper: white;
+    --color-marginBox: transparent;
+    --pagedjs-crop-color: black;
+    --pagedjs-crop-shadow: white;
+    --pagedjs-crop-stroke: 1px;
+}
+
+/* To define how the book look on the screen: */
+@media screen,
+pagedjs-ignore {
+    body {
+        background-color: var(--color-background);
+    }
+
+    .pagedjs_pages {
+        display: flex;
+        width: calc(var(--pagedjs-width) * 2);
+        flex: 0;
+        flex-wrap: wrap;
+        margin: 0 auto;
+    }
+
+    .pagedjs_page {
+        background-color: var(--color-paper);
+        box-shadow: 0 0 0 1px var(--color-pageSheet);
+        margin: 0;
+        flex-shrink: 0;
+        flex-grow: 0;
+        margin-top: 10mm;
+    }
+
+    .pagedjs_first_page {
+        margin-left: var(--pagedjs-width);
+    }
+
+    .pagedjs_page:last-of-type {
+        margin-bottom: 10mm;
+    }
+
+    .pagedjs_pagebox {
+        box-shadow: 0 0 0 1px var(--color-pageBox);
+    }
+
+    .pagedjs_left_page {
+        z-index: 20;
+        width: calc(var(--pagedjs-bleed-left) + var(--pagedjs-pagebox-width)) !important;
+    }
+
+    .pagedjs_left_page .pagedjs_bleed-right .pagedjs_marks-crop {
+        border-color: transparent;
+    }
+
+    .pagedjs_left_page .pagedjs_bleed-right .pagedjs_marks-middle {
+        width: 0;
+    }
+
+    .pagedjs_right_page {
+        z-index: 10;
+        position: relative;
+        left: calc(var(--pagedjs-bleed-left)*-1);
+    }
+
+    /* show the margin-box */
+
+    .pagedjs_margin-top-left-corner-holder,
+    .pagedjs_margin-top,
+    .pagedjs_margin-top-left,
+    .pagedjs_margin-top-center,
+    .pagedjs_margin-top-right,
+    .pagedjs_margin-top-right-corner-holder,
+    .pagedjs_margin-bottom-left-corner-holder,
+    .pagedjs_margin-bottom,
+    .pagedjs_margin-bottom-left,
+    .pagedjs_margin-bottom-center,
+    .pagedjs_margin-bottom-right,
+    .pagedjs_margin-bottom-right-corner-holder,
+    .pagedjs_margin-right,
+    .pagedjs_margin-right-top,
+    .pagedjs_margin-right-middle,
+    .pagedjs_margin-right-bottom,
+    .pagedjs_margin-left,
+    .pagedjs_margin-left-top,
+    .pagedjs_margin-left-middle,
+    .pagedjs_margin-left-bottom {
+        box-shadow: 0 0 0 1px inset var(--color-marginBox);
+    }
+
+    /* uncomment this part for recto/verso book : ------------------------------------ */
+
+    /*
+    .pagedjs_pages {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .pagedjs_first_page {
+        margin-left: 0;
+    }
+
+    .pagedjs_page {
+        margin: 0 auto;
+        margin-top: 10mm;
+    } 
+
+    .pagedjs_left_page{
+        width: calc(var(--pagedjs-bleed-left) + var(--pagedjs-pagebox-width) + var(--pagedjs-bleed-left))!important;
+    }
+
+    .pagedjs_left_page .pagedjs_bleed-right .pagedjs_marks-crop{
+        border-color: var(--pagedjs-crop-color);
+    }
+
+    .pagedjs_left_page .pagedjs_bleed-right .pagedjs_marks-middle{
+        width: var(--pagedjs-cross-size)!important;
+    } 
+
+    .pagedjs_right_page{
+        left: 0; 
+    } 
+    */
+
+
+
+    /*--------------------------------------------------------------------------------------*/
+
+
+
+    /* uncomment this par to see the baseline : -------------------------------------------*/
+
+
+    /* .pagedjs_pagebox {
+        --pagedjs-baseline: 22px;
+        --pagedjs-baseline-position: 5px;
+        --pagedjs-baseline-color: cyan;
+        background: linear-gradient(transparent 0%, transparent calc(var(--pagedjs-baseline) - 1px), var(--pagedjs-baseline-color) calc(var(--pagedjs-baseline) - 1px), var(--pagedjs-baseline-color) var(--pagedjs-baseline)), transparent;
+        background-size: 100% var(--pagedjs-baseline);
+        background-repeat: repeat-y;
+        background-position-y: var(--pagedjs-baseline-position);
+    }  */
+
+
+    /*--------------------------------------------------------------------------------------*/
+}
+
+
+
+
+
+/* Marks (to delete when merge in paged.js) */
+
+.pagedjs_marks-crop {
+    z-index: 999999999999;
+
+}
+
+.pagedjs_bleed-top .pagedjs_marks-crop,
+.pagedjs_bleed-bottom .pagedjs_marks-crop {
+    box-shadow: 1px 0px 0px 0px var(--pagedjs-crop-shadow);
+}
+
+.pagedjs_bleed-top .pagedjs_marks-crop:last-child,
+.pagedjs_bleed-bottom .pagedjs_marks-crop:last-child {
+    box-shadow: -1px 0px 0px 0px var(--pagedjs-crop-shadow);
+}
+
+.pagedjs_bleed-left .pagedjs_marks-crop,
+.pagedjs_bleed-right .pagedjs_marks-crop {
+    box-shadow: 0px 1px 0px 0px var(--pagedjs-crop-shadow);
+}
+
+.pagedjs_bleed-left .pagedjs_marks-crop:last-child,
+.pagedjs_bleed-right .pagedjs_marks-crop:last-child {
+    box-shadow: 0px -1px 0px 0px var(--pagedjs-crop-shadow);
+}
+
+
+/* ============================================
+   DEBUG: Mensajes en páginas en blanco
+   Solo visible en pantalla, no al imprimir
+   ============================================ */
+
+@media screen,
+pagedjs-ignore {
+
+    /* Estilos base para mensajes centrados */
+    .blank-page,
+    .pagedjs_blank_page .pagedjs_page_content {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Made With Page */
+    .made-with-page {
+        break-before: right;
+        /* Force odd page */
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        text-align: center;
+        padding-bottom: 20mm;
+        box-sizing: border-box;
+    }
+
+    .made-with-logo {
+        width: 8mm;
+        /* Smaller, balanced */
+        height: auto;
+        margin-bottom: 4mm;
+        opacity: 0.8;
+    }
+
+    .made-with-text {
+        font-family: var(--body-font-family);
+        font-size: 9pt;
+        color: #666;
+        margin: 0;
+    }
+
+    .blank-page {
+        height: 9in;
+        width: 6in;
+    }
+
+    /* Estilo compartido de texto */
+    .blank-page::after,
+    .pagedjs_blank_page .pagedjs_page_content::after,
+    .pagedjs_first_page .pagedjs_sheet::after {
+        font-size: 10pt;
+        color: #bbb;
+        text-align: center;
+        font-style: italic;
+        white-space: pre-wrap;
+    }
+
+    /* Mensajes específicos */
+    .blank-page::after {
+        content: "Página en blanco intencionada" "\a" "(Página de cortesía)";
+    }
+
+    .pagedjs_blank_page .pagedjs_page_content::after {
+        content: "Página en blanco intencionada" "\a" "(Antes de capítulo en página derecha)";
+    }
+
+    .pagedjs_first_page .pagedjs_sheet::after {
+        /* mensaje informativo */
+        content: "Páginas en blanco intencionadas" "\a" "Este documento inserta páginas en blanco para asegurar que los capítulos comiencen a la derecha.";
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+    }
+}

@@ -1,0 +1,119 @@
+<!--
+  Plantilla PDF para impresión
+  Sin portada con imagen, con páginas en blanco iniciales para que la portadilla quede en página impar
+  
+  Variables disponibles:
+  - lang: Idioma del documento (default: es)
+  - title: Título del documento
+  - author: Autor(es) - puede ser string o array
+  - date: Fecha
+  - editor: Nombre del editor
+  - copyright: Derechos de autor
+  - toc: Si es true, muestra tabla de contenidos
+  - tableOfContents: HTML de la tabla de contenidos
+  - body: Contenido HTML del documento
+  - colophon: Contenido de la página final (colofón)
+-->
+<!DOCTYPE html>
+<html lang="{{lang}}">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {{#title}}
+    <meta name="title" content="{{title}}">{{/title}}
+    {{#author}}
+    <meta name="author" content="{{author}}">{{/author}}
+    {{#date}}
+    <meta name="date" content="{{date}}">{{/date}}
+</head>
+
+<body>
+
+    <!-- Página en blanco inicial para impresión (la portadilla queda en página impar) -->
+    <div class="blank-page"></div>
+
+    {{#title}}
+    <!-- Portadilla (Half title) - Página impar -->
+    <div class="half-title-page">
+        <div class="title">{{title}}</div>
+    </div>
+
+    <!-- Si NO hay dedicatoria NI epígrafe: Copyright va aquí (Página 4, par) -->
+    {{^hasDedication}}
+    {{^hasEpigraph}}
+    <div class="copyright-page">
+        {{#copyright}}<p class="copyright">{{copyright}}</p>{{/copyright}}
+    </div>
+    {{/hasEpigraph}}
+    {{/hasDedication}}
+
+    <!-- Portada (Title page) - Página impar -->
+    <header>
+        <div class="title_and_authors">
+            <div class="title">{{title}}</div>
+            {{#authorList}}
+            <div class="author">{{.}}</div>
+            {{/authorList}}
+            {{^authorList}}
+            {{#author}}<div class="author">{{author}}</div>{{/author}}
+            {{/authorList}}
+        </div>
+
+        {{#publisher}}
+        <div class="publisher">{{publisher}}</div>
+        {{/publisher}}
+    </header>
+
+    <!-- Si HAY dedicatoria O epígrafe: Copyright va aquí (Página 6, par) -->
+    <!-- Caso 1: Hay dedicatoria -->
+    {{#hasDedication}}
+    <div class="copyright-page">
+        {{#copyright}}<p class="copyright">{{copyright}}</p>{{/copyright}}
+    </div>
+
+    <!-- Renderizar Dedicatoria (si existe en metadatos, tiene prioridad visual propia aquí) -->
+    {{#dedication}}
+    <div class="dedication">
+        <p>{{dedication}}</p>
+    </div>
+    {{/dedication}}
+    {{/hasDedication}}
+    <!-- Caso 2: No hay dedicatoria pero sí epígrafe -->
+    {{^hasDedication}}
+    {{#hasEpigraph}}
+    <div class="copyright-page">
+        {{#copyright}}<p class="copyright">{{copyright}}</p>{{/copyright}}
+    </div>
+    {{/hasEpigraph}}
+    {{/hasDedication}}
+    {{/title}}
+
+    {{#toc}}
+    <nav id="TOC" role="doc-toc">
+        {{{tableOfContents}}}
+    </nav>
+    {{/toc}}
+
+    <main class="main-content">
+        {{{body}}}
+    </main>
+
+    <!-- Colofón (si existe en metadatos) -->
+    {{#colophon}}
+    <section class="colophon">
+        <p>{{colophon}}</p>
+    </section>
+    {{/colophon}}
+
+    <!-- Página "Maquetado con Maquetaco" -->
+    {{#includeBranding}}
+    <div class="made-with-page">
+        <img src="/icon-mini.svg" alt="Maquetaco Logo" class="made-with-logo" />
+        <p class="made-with-text">Maquetado con Maquetaco</p>
+    </div>
+    {{/includeBranding}}
+
+</body>
+
+</html>

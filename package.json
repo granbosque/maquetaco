@@ -1,0 +1,41 @@
+{
+	"name": "maquetaco",
+	"private": true,
+	"version": "0.0.1",
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo ''"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-static": "^3.0.10",
+		"@sveltejs/kit": "^2.49.1",
+		"@sveltejs/vite-plugin-svelte": "^6.2.1",
+		"svelte": "^5.45.6",
+		"vite": "^7.2.6"
+	},
+	"dependencies": {
+		"@codemirror/lang-markdown": "^6.5.0",
+		"@codemirror/lang-yaml": "^6.1.2",
+		"@rstacruz/rehype-sectionize": "^0.7.0",
+		"bits-ui": "^2.14.4",
+		"epubjs": "^0.3.93",
+		"js-yaml": "^4.1.1",
+		"jszip": "^3.10.1",
+		"lucide-svelte": "^0.562.0",
+		"mammoth": "^1.11.0",
+		"mustache": "^4.2.0",
+		"pagedjs": "^0.4.3",
+		"rehype-slug": "^6.0.0",
+		"rehype-stringify": "^10.0.1",
+		"remark-gfm": "^4.0.1",
+		"remark-parse": "^11.0.0",
+		"remark-rehype": "^11.1.2",
+		"remark-smartypants": "^3.0.2",
+		"svelte-codemirror-editor": "^2.1.0",
+		"turndown": "^7.2.2",
+		"unified": "^11.0.5"
+	}
+}

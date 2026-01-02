@@ -1,0 +1,437 @@
+/* CSS para generar un PDF para lectura en pantallas móviles.
+   Basado en screen.css pero optimizado para dispositivos pequeños.
+   
+   Características:
+   - Tamaño de página vertical optimizado para móviles (aspect ratio 9:16)
+   - Tipografía más grande para mejor legibilidad
+   - Márgenes reducidos para aprovechar el espacio
+*/
+
+@media print {
+
+    :root {
+        /* Tipografía base - Optimizada para móviles */
+        --body-font-family: 'Garamond', 'Noto Serif', serif;
+        --body-font-size: 10pt;
+        --body-line-height: 1.25;
+
+        /* Control de composición */
+        --paragraph-orphans: 2;
+        --paragraph-widows: 2;
+        --first-paragraph-widows: 3;
+        --section-last-paragraph-orphans: 2;
+        --section-last-paragraph-widows: 3;
+
+        /* Alineaciones */
+        --colophon-page-justify: flex-end;
+        --colophon-page-text-align: center;
+        --colophon-page-text-align: center;
+        --metadata-text-align: left;
+
+        /* Copyright / Metadata */
+        --copyright-text-align: left;
+        --copyright-font-size: 0.7rem;
+        --copyright-justify: flex-end;
+        --title-font-variant: normal;
+        --author-font-variant: small-caps;
+        --h1-text-align: center;
+        --h2-text-align: center;
+
+        /* Numeración */
+        --page-number-content-center: counter(page);
+
+        /* Dedicatoria */
+        --dedication-page-justify: center;
+        --dedication-page-text-align: right;
+        --dedication-font-style: italic;
+
+        /* Epígrafe */
+        --epigraph-page-justify: flex-start;
+        --epigraph-page-text-align: left;
+        --epigraph-font-style: normal;
+
+        /* Portada (Title Page) */
+        --title-page-margin-top: 20%;
+        --title-page-margin-bottom: 10%;
+        --title-page-max-width: 90%;
+    }
+
+    /* Reglas generales de página - Formato vertical móvil (9:16) */
+    @page {
+        size: 90mm 160mm;
+        margin: 0;
+    }
+
+    /* Portada (imagen) - Usamos :first para evitar salto de página inicial */
+    @page: first {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Página de título (texto) */
+    @page title-page {
+        margin: 0;
+        box-sizing: border-box;
+
+        @bottom-center {
+            content: none;
+        }
+    }
+
+    /* Páginas de contenido - Márgenes reducidos para móviles */
+    @page content-pages {
+        margin-top: 12mm;
+        margin-bottom: 12mm;
+        margin-left: 8mm;
+        margin-right: 8mm;
+
+        @bottom-center {
+            content: var(--page-number-content-center);
+            font-size: 9pt;
+        }
+    }
+
+    /* Página final */
+    @page colophon-page {
+        margin: 0;
+        padding: 0;
+    }
+
+    @page dedication-page {
+        margin: 0;
+        padding: 0;
+    }
+
+    @page epigraph-page {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* ASIGNACIÓN DE ESTILOS DE PÁGINA */
+
+    /* Imagen de portada */
+    .cover-image {
+        /* page: cover-page; <-- Eliminado para evitar salto */
+        width: 90mm;
+        height: 160mm;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        page-break-inside: avoid;
+        break-inside: avoid;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cover-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Header con metadatos -> Usamos 'content-pages' para compartir página por defecto */
+    header:has(.metadata>p),
+    header:has(.title_and_authors) {
+        page: content-pages;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        text-align: center;
+    }
+
+    /* Contenido principal */
+    .main-content {
+        page: content-pages;
+    }
+
+    /* Colofón */
+    .colophon {
+        page: colophon-page;
+        min-height: 160mm;
+        padding: 12mm 8mm 12mm 8mm;
+        box-sizing: border-box;
+        font-size: small;
+        display: flex;
+        flex-direction: column;
+        justify-content: var(--colophon-page-justify);
+        text-align: var(--colophon-page-text-align);
+        hyphens: none;
+    }
+
+    .colophon p {
+        text-align: var(--colophon-page-text-align);
+        text-indent: 0;
+        margin-bottom: 1em;
+        hyphens: none;
+    }
+
+    .colophon h1 {
+        display: none;
+    }
+
+    /* Dedicatoria */
+    .dedication {
+        page: dedication-page;
+        min-height: 160mm;
+        padding: 12mm 8mm 12mm 8mm;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: var(--dedication-page-justify);
+        text-align: var(--dedication-page-text-align);
+        font-style: var(--dedication-font-style);
+    }
+
+    .dedication h1 {
+        display: none;
+    }
+
+    .dedication p {
+        text-align: var(--dedication-page-text-align);
+        text-indent: 0;
+    }
+
+    /* Epígrafe */
+    .epigraph {
+        page: epigraph-page;
+        min-height: 160mm;
+        padding: 12mm 8mm 12mm 8mm;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: var(--epigraph-page-justify);
+        text-align: var(--epigraph-page-text-align);
+        font-style: var(--epigraph-font-style);
+    }
+
+    .epigraph h1 {
+        display: none;
+    }
+
+    .epigraph p {
+        text-align: var(--epigraph-page-text-align);
+        text-indent: 0;
+    }
+
+    /* ESTILOS DE TEXTO */
+
+    body {
+        line-height: var(--body-line-height);
+        font-size: var(--body-font-size);
+        font-family: var(--body-font-family);
+        hyphens: auto;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Title Page - Modo compacto por defecto (sin publisher) */
+    header {
+        padding-top: 2em;
+        padding-bottom: 2em;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        /* Sin break-after: el texto fluye debajo si no hay section */
+    }
+
+    /* Portadilla completa: cuando hay publisher O cuando hay un H1 en el contenido */
+    header:has(.publisher),
+    body:has(.main-content h1) header {
+        page: title-page;
+        height: 100%;
+        padding-top: var(--title-page-margin-top);
+        padding-bottom: var(--title-page-margin-bottom);
+        break-after: page;
+    }
+
+    header .metadata {
+        width: 80%;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 1.5rem;
+        font-size: var(--copyright-font-size);
+        text-align: center;
+    }
+
+    header .metadata p {
+        text-align: center;
+        text-indent: 0;
+        margin: 0;
+    }
+
+    header .title_and_authors {
+        width: 100%;
+        max-width: var(--title-page-max-width);
+    }
+
+    /* En modo completo, empuja title_and_authors hacia arriba */
+    header:has(.publisher) .title_and_authors {
+        margin-bottom: auto;
+    }
+
+    header .title {
+        font-variant: var(--title-font-variant);
+        font-size: 140%;
+    }
+
+    header .author {
+        margin-top: 1em;
+        font-variant: var(--author-font-variant);
+    }
+
+    header .publisher {
+        width: 100%;
+        max-width: var(--title-page-max-width);
+        font-variant: small-caps;
+        font-size: 0.9rem;
+    }
+
+    h1 {
+        text-align: var(--h1-text-align);
+        font-variant: small-caps;
+        font-size: 1.2em;
+        margin-top: 1.5em;
+        margin-bottom: 0.8em;
+    }
+
+    h2 {
+        text-align: var(--h2-text-align);
+        font-size: 1.1em;
+        margin-top: 1.2em;
+        margin-bottom: 0.6em;
+    }
+
+    h3 {
+        font-size: 1.05em;
+        margin-top: 1.2em;
+        margin-bottom: 0.4em;
+    }
+
+    h4 {
+        font-size: 1em;
+        font-style: italic;
+        margin-top: 1em;
+        margin-bottom: 0.3em;
+    }
+
+    h5 {
+        font-size: 0.95em;
+        margin-top: 0.8em;
+        margin-bottom: 0.3em;
+    }
+
+    h6 {
+        font-size: 0.9em;
+        font-style: italic;
+        margin-top: 0.8em;
+        margin-bottom: 0.3em;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        page-break-after: avoid;
+        break-after: avoid;
+    }
+
+    h1+h2 {
+        break-before: avoid;
+    }
+
+    section {
+        break-before: page;
+    }
+
+    strong,
+    b {
+        font-variant: small-caps;
+        font-weight: normal;
+    }
+
+    p {
+        orphans: var(--paragraph-orphans);
+        widows: var(--paragraph-widows);
+        text-align: justify;
+    }
+
+    /* Sangría */
+    main p {
+        margin: 0;
+        text-indent: 0;
+    }
+
+    main p+p {
+        text-indent: 1.5em;
+    }
+
+    hr,
+    .hr {
+        border: 0;
+        height: 1rem;
+    }
+
+    img {
+        max-width: 100%;
+    }
+
+    /* Ocultar elementos no listados */
+    .unlisted {
+        display: none;
+    }
+
+    /* Made With Page */
+    .made-with-page {
+        break-before: page;
+        height: 100%;
+        /* Changed from 100vh to 100% */
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        text-align: center;
+        padding-bottom: 4rem;
+        box-sizing: border-box;
+    }
+
+    .made-with-logo {
+        width: 24px;
+        /* Balanced for mobile */
+        height: auto;
+        margin-bottom: 0.8rem;
+        opacity: 0.8;
+    }
+
+    .made-with-text {
+        font-size: 0.75rem;
+        color: #888;
+        margin: 0;
+    }
+}
+
+
+/* ESTILOS INTERFAZ PAGED.JS (PREVIEW) */
+@media screen,
+pagedjs-ignore {
+    body {
+        background-color: gray;
+    }
+
+    .pagedjs_page {
+        background-color: white;
+        box-shadow: 0 0 0 1px #cfcfcf;
+        margin: 10mm auto;
+    }
+
+    .pagedjs_first_page {
+        margin-left: auto;
+        /* Centrado para single-page view */
+    }
+}

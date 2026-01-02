@@ -1,0 +1,73 @@
+/* =========================================
+   DESIGN TOKENS - Simplified
+   ========================================= */
+
+:root {
+    /* === COLORES === */
+    --color-primary: #66bb6a;
+    --color-secondary: #ffb74d;
+    --color-accent: #ff7043;
+    --color-danger: #d32f2f;
+
+    /* === FONDOS === */
+    --bg-app: #f7f6f3;
+    --bg-surface: #ffffff;
+    --bg-muted: rgba(0, 0, 0, 0.04);
+
+    /* === TEXTO === */
+    --text: #333;
+    --text-muted: #777;
+    --text-subtle: #aaa;
+
+    /* === TIPOGRAFÍA - TAMAÑOS === */
+    --text-xs: 0.75rem;
+    /* 12px */
+    --text-sm: 0.875rem;
+    /* 14px */
+    --text-base: 1rem;
+    /* 16px */
+    --text-lg: 1.25rem;
+    /* 20px */
+    --text-xl: 1.5rem;
+    /* 24px */
+
+    /* === TIPOGRAFÍA - PESOS === */
+    --weight-normal: 300;
+    --weight-medium: 400;
+    --weight-semibold: 500;
+    --weight-bold: 600;
+
+    /* === BORDES === */
+    --border: #e0e0e0;
+    --border-muted: rgba(0, 0, 0, 0.08);
+
+    /* === SOMBRA (solo 1) === */
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.05);
+
+    /* === TRANSICIONES === */
+    --transition: 0.15s ease;
+
+    /* === TIPOGRAFÍA - FUENTES === */
+    --font-main: 'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-title: 'Pally', sans-serif;
+    --font-editor: 'Zilla Slab', serif;
+
+    /* === RADII === */
+    --radius: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-full: 999px;
+
+    /* === SPACING === */
+    --space-xxs: 0.125rem;
+    /* 2px */
+    --space-xs: 0.25rem;
+    /* 4px */
+    --space-sm: 0.5rem;
+    /* 8px */
+    --space-md: 0.75rem;
+    /* 12px */
+    --space-lg: 1rem;
+    /* 16px */
+    --space-xl: 1.5rem;
+    /* 24px */
+}
