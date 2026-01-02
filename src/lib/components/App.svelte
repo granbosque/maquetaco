@@ -12,6 +12,7 @@
     import { resizeImage } from "$lib/utils/image-processing.js";
     import { docxToMarkdown } from "$lib/converters/docx-to-md.js";
     import { parseFrontmatter } from "$lib/utils/frontmatter.js";
+    import { saveDocument } from "$lib/utils/save-document.js";
     import ConfirmDialog from "$lib/components/ConfirmDialog.svelte";
     import WelcomeModal from "$lib/components/WelcomeModal.svelte";
     import { onMount } from "svelte";
@@ -158,13 +159,21 @@
                     appState.config.copyright = metadata.copyright;
                 if (metadata.date) appState.config.date = String(metadata.date);
                 if (metadata.lang) appState.config.lang = metadata.lang;
+                if (metadata.dedication)
+                    appState.config.dedication = metadata.dedication;
+                if (metadata.colophon)
+                    appState.config.colophon = metadata.colophon;
+                if (metadata.toc !== undefined)
+                    appState.config.enableTOC = metadata.toc;
 
                 // Guardar solo el contenido (sin frontmatter)
                 appState.config.content = content;
                 appState.config.fileName = file.name;
 
-                // Actualizar TOC automáticamente según número de capítulos
-                updateTOCFromContent(content);
+                // Actualizar TOC automáticamente según número de capítulos (solo si no estaba definido en frontmatter)
+                if (metadata.toc === undefined) {
+                    updateTOCFromContent(content);
+                }
             };
             reader.readAsText(file);
         } else {
@@ -193,6 +202,7 @@
             {activeView}
             onViewChange={handleViewChange}
             onImport={handleImport}
+            onSave={() => saveDocument(appState.config)}
             onClear={handleClear}
             onInfo={() => (isWelcomeModalOpen = true)}
         />

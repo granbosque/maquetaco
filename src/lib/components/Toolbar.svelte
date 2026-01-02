@@ -1,12 +1,21 @@
 <script>
     import { Toolbar, Separator, ToggleGroup } from "bits-ui";
-    import { Upload, Trash2, PenLine, Eye, Rocket, Info } from "lucide-svelte";
+    import {
+        Upload,
+        Download,
+        Trash2,
+        PenLine,
+        Eye,
+        Rocket,
+        Info,
+    } from "lucide-svelte";
     import logo from "$lib/assets/logo.svg";
 
     let {
         activeView = "editor",
         onViewChange = (view) => {},
         onImport = () => {},
+        onSave = () => {},
         onClear = () => {},
         onInfo = () => {},
     } = $props();
@@ -49,6 +58,10 @@
                 <Toolbar.Button onclick={onImport} class="toolbar-btn tertiary">
                     <Upload />
                     <span>Abrir</span>
+                </Toolbar.Button>
+                <Toolbar.Button onclick={onSave} class="toolbar-btn tertiary">
+                    <Download />
+                    <span>Guardar</span>
                 </Toolbar.Button>
                 <Toolbar.Button onclick={onClear} class="toolbar-btn tertiary">
                     <Trash2 />
