@@ -105,7 +105,7 @@ Maquetaco ya permite exportar a EPUB y PDF en varios formatos, editar en Markdow
 
 Algunas características están en desarrollo o pendientes de mejora:
 
-- **Tablas de contenido e índice**. Al exportar a epub se genera una tabla de contenidos, pero en PDF.
+- **Tablas de contenido e índice**. Al exportar a epub se genera una tabla de contenidos, pero en PDF no.
 
 - **Soporte para imágenes**: Actualmente no se pueden insertar imágenes en el contenido (en realidad, sí, usando la sintaxis markdown con una url o en base64) pero es muy usable.
 
