@@ -52,7 +52,7 @@
         --epigraph-font-style: normal;
 
         /* Portada (Title Page) */
-        --title-page-margin-top: 15%;
+        --title-page-margin-top: 25%;
         --title-page-margin-bottom: 5%;
         --title-page-max-width: 80%;
     }
@@ -180,11 +180,11 @@
     .dedication {
         page: dedication-page;
         min-height: 210mm;
-        padding: 12mm 8mm 12mm 8mm;
+        padding: 25% 8mm 12mm 8mm;
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
-        justify-content: var(--dedication-page-justify);
+        justify-content: flex-start;
         text-align: var(--dedication-page-text-align);
         font-style: var(--dedication-font-style);
     }
@@ -196,6 +196,9 @@
     .dedication p {
         text-align: var(--dedication-page-text-align);
         text-indent: 0;
+        max-width: 60%;
+        margin-left: auto;
+        margin-right: 15%;
     }
 
     /* Epígrafe */
@@ -232,26 +235,21 @@
     }
 
     /* Title Page - Modo compacto por defecto (sin publisher) */
+    /* Header: Siempre es página de título completa (controlado por template) */
     header {
-        padding-top: 2em;
-        padding-bottom: 2em;
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        /* Sin break-after: el texto fluye debajo si no hay section */
-    }
-
-    /* Portadilla completa: cuando hay publisher O cuando hay un H1 en el contenido */
-    header:has(.publisher),
-    body:has(.main-content h1) header {
         page: title-page;
         height: 100%;
         padding-top: var(--title-page-margin-top);
         padding-bottom: var(--title-page-margin-bottom);
         break-after: page;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
     }
+
+    /* Regla legacy eliminada: header:has(.publisher)... ya no es necesaria */
 
     header .title_and_authors {
         width: 100%;

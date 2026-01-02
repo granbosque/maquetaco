@@ -91,7 +91,7 @@ Maquetaco genera tu libro en varios formatos optimizados para diferentes usos. E
 
 **EPUB**: Formato estándar para libros electrónicos, compatible con la mayoría de lectores digitales (Kindle, Kobo, Apple Books). El texto se adapta automáticamente al tamaño de pantalla del dispositivo. Incluye portada, índice interactivo, metadatos completos, y formato adaptable según las preferencias del lector.
 
-**PDF Pantalla**: Optimizado para lectura en ordenadores, tablets o móviles. Tamaño de página A5. Aplica sangrías automáticas en los párrafos, encabezados de página con título de capítulo, numeración automática, márgenes equilibrados, y saltos de página apropiados antes de cada capítulo. Perfecto para distribuir versiones digitales o leer en dispositivos.
+**PDF Pantalla**: Optimizado para lectura en ordenadores, tablets o móviles. Tamaño de página A5. Si introduces una editorial o copyright, se generará una portadilla completa; si no, el título se integra al inicio para una lectura más directa. Aplica sangrías automáticas en los párrafos, encabezados de página con título de capítulo, numeración automática, márgenes equilibrados, y saltos de página apropiados antes de cada capítulo. Perfecto para distribuir versiones digitales o leer en dispositivos.
 
 **PDF Móvil**: Optimizado para lectura teléfonos móviles. Tamaño de página más pequeño y formato simplificado.
 

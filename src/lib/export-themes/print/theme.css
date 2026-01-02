@@ -543,12 +543,12 @@
 
     /* Dedicatoria */
     section.dedication {
-        height: 6.5in;
-        padding-top: 26mm;
+        min-height: 100%;
+        padding-top: 60mm;
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
-        justify-content: var(--dedication-page-justify);
+        justify-content: flex-start;
         text-align: var(--dedication-page-text-align);
         font-style: var(--dedication-font-style);
     }
@@ -560,6 +560,9 @@
     section.dedication p {
         text-align: var(--dedication-page-text-align);
         text-indent: 0;
+        max-width: 60%;
+        margin-left: auto;
+        margin-right: 15%;
     }
 
     /* Epígrafe */

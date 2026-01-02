@@ -19,6 +19,7 @@
 
 <body>
 
+
     <!-- Imagen de Portada -->
     {{#coverImage}}
     <div class="cover-image">
@@ -26,7 +27,8 @@
     </div>
     {{/coverImage}}
 
-    <!-- Página de Título -->
+    <!-- Página de Título (Solo si no es modo compacto) -->
+    {{^compactTitlePage}}
     {{#title}}
     <header>
         <div class="title_and_authors">
@@ -50,6 +52,7 @@
         {{/copyright}}
     </header>
     {{/title}}
+    {{/compactTitlePage}}
 
     <!-- Dedicatoria (si existe en metadatos) -->
     {{#dedication}}
@@ -67,6 +70,23 @@
 
     <!-- Contenido Principal -->
     <main class="main-content">
+        <!-- Título en línea (Modo Compacto) -->
+        {{#compactTitlePage}}
+        {{#title}}
+        <div class="inline-title" style="text-align: center; margin-bottom: 2rem;">
+            <div class="title" style="font-size: 1.4em; margin-bottom: 0.5em;">{{title}}</div>
+            <div class="authors">
+                {{#authorList}}
+                <div class="author" style="font-variant: small-caps;">{{.}}</div>
+                {{/authorList}}
+                {{^authorList}}
+                {{#author}}<div class="author" style="font-variant: small-caps;">{{author}}</div>{{/author}}
+                {{/authorList}}
+            </div>
+        </div>
+        {{/title}}
+        {{/compactTitlePage}}
+
         {{{body}}}
     </main>
 

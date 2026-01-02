@@ -83,11 +83,11 @@ Todos los encabezados evitan quedarse solos al final de una página.
 
 ## Página de título
 
-| Formato           | Comportamiento                                                 |
-| ----------------- | -------------------------------------------------------------- |
-| **PDF pantalla**  | Compacta si no hay publisher; página completa si hay publisher |
-| **PDF impresión** | Siempre página completa: portadilla + portada + copyright      |
-| **EPUB**          | Sin página visual (metadatos en archivo OPF)                   |
+| Formato           | Comportamiento                                                                                             |
+| ----------------- | ---------------------------------------------------------------------------------------------------------- |
+| **PDF pantalla**  | Compacta (inline) si solo hay título/autor; página completa si hay publisher, copyright, dedicatoria o TOC |
+| **PDF impresión** | Siempre página completa: portadilla + portada + copyright                                                  |
+| **EPUB**          | Sin página visual (metadatos en archivo OPF)                                                               |
 
 
 ## Secciones especiales

@@ -50,6 +50,7 @@ Por ahora hay dos:
 - PDF para imprmir: NO incluye la imagen de portada, inserta una página en blanco y una portadilla adicional, y una página de copyright. El resto de cosas referentes al diseño (diferencia de páginas pares e impares, saltos de página, secciones, recae sobre el css)
 
 - PDF digital: pensado para leer en pantalla. Incluye la imagen de portada como primera página.
+  * Portada compacta, si el documento solo tiene título y autor (sin editorial, copyright, dedicatoria ni TOC), el título se muestra inline al inicio del contenido para ahorrar espacio en pantallas móviles. Esto se calcula en template-engine.js compactTitlePage.
 
 La diferencia principal está en la portada y portadilla. Se podrían unificar en una pero creo que complicaría en exceso las reglas css.
 

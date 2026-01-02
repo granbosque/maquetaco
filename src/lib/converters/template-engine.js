@@ -101,6 +101,13 @@ export function prepareTemplateData(frontmatter, bodyHtml) {
     // Flag unificado: Hay dedicatoria si viene en metadatos o en el cuerpo
     data.hasDedication = !!data.dedication || bodyHasDedication;
 
+    // Detectar si hay H1 en el contenido (capítulos)
+    const hasH1 = bodyHtml.includes('<h1');
+
+    // Detectar si debemos usar una portada compacta (sin salto de página)
+    // Se usa cuando NO hay: publisher, copyright, dedicatoria, TOC ni H1 (capítulos)
+    data.compactTitlePage = !data.publisher && !data.copyright && !data.hasDedication && !data.toc && !hasH1;
+
     return data;
 }
 
