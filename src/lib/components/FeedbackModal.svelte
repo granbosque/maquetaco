@@ -88,7 +88,7 @@
                             id="message"
                             name="message"
                             required
-                            placeholder="Cuéntanos tus sugerencias o problemas..."
+                            placeholder="Escribe tu sugerencia o problema..."
                             rows="4"
                         ></textarea>
                     </div>

@@ -260,15 +260,15 @@
     }
 
     .step-icon.import {
-        color: #f97316;
+        color: #dc8a5b;
     }
 
     .step-icon.edit {
-        color: #14b8a6;
+        color: #5d9b93;
     }
 
     .step-icon.export {
-        color: #3b82f6;
+        color: #6b8fc9;
     }
 
     .step strong {
