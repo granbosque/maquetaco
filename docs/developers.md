@@ -51,6 +51,7 @@ Por ahora hay dos:
 
 - PDF digital: pensado para leer en pantalla. Incluye la imagen de portada como primera página.
   * Portada compacta, si el documento solo tiene título y autor (sin editorial, copyright, dedicatoria ni TOC), el título se muestra inline al inicio del contenido para ahorrar espacio en pantallas móviles. Esto se calcula en template-engine.js compactTitlePage.
+  * Tabla de Contenidos: Si está activada (`enableTOC`), se genera automáticamente una página con el índice de capítulos (h1), con leader dots y números de página usando target-counter()de paged.js. La página del TOC no tiene numeración visible.
 
 La diferencia principal está en la portada y portadilla. Se podrían unificar en una pero creo que complicaría en exceso las reglas css.
 

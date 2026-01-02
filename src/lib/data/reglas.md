@@ -90,6 +90,18 @@ Todos los encabezados evitan quedarse solos al final de una página.
 | **EPUB**          | Sin página visual (metadatos en archivo OPF)                                                               |
 
 
+## Tabla de Contenidos (TOC)
+
+Al importar un documento, si hay más de 2 encabezados h1, se activa el TOC automáticamente.
+Se crea a partir de los h1 del documento usando `generateTableOfContents()` en `md-to-html.js`.
+El TOC tiene su propia página (`@page toc-page`) sin numeración y con márgenes estándar.
+Estilo:
+  - Título "Índice" centrado en versalitas
+  - Lista de capítulos con puntos conductores (leader dots)
+  - Números de página usando `target-counter()` de paged.js
+  - Fondo blanco en texto y números para enmascarar los puntos
+
+
 ## Secciones especiales
 
 El título (h1) de estas secciones se oculta automáticamente:
