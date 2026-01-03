@@ -70,9 +70,17 @@ export function generateFileName(config) {
  * Descarga el documento markdown con frontmatter YAML
  * @param {Object} config - Configuración completa del documento
  */
-export function saveDocument(config) {
+/**
+ * Descarga el documento markdown con frontmatter YAML
+ * @param {Object} config - Configuración completa del documento
+ */
+export async function saveDocument(config) {
+    let content = config.content || '';
+
+    // Reintegrar imágenes (blob -> base64) para que el archivo sea portable
+    content = await inlineBlobImages(content);
+
     const frontmatter = generateFrontmatter(config);
-    const content = config.content || '';
     const fullDocument = frontmatter + content;
     const fileName = generateFileName(config);
 
@@ -86,4 +94,55 @@ export function saveDocument(config) {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+}
+
+/**
+ * Busca imágenes con URLs tipo blob:... y las convierte a base64
+ * para que el archivo guardado sea autónomo.
+ * 
+ * @param {string} markdown 
+ * @returns {Promise<string>}
+ */
+async function inlineBlobImages(markdown) {
+    // Regex para imágenes Markdown: ![alt](blob:url)
+    const regex = /!\[(.*?)\]\((blob:[^)]+)\)/g;
+    const matches = [...markdown.matchAll(regex)];
+
+    // Si no hay imágenes blob, devolver tal cual
+    if (matches.length === 0) return markdown;
+
+    // Procesar cada coincidencia (descargar blob y convertir a base64)
+    // Usamos un mapa para sustituciones para evitar descargas duplicadas
+    const replacements = new Map();
+
+    // Notificar al usuario si son muchas imágenes podría ser buena UX, 
+    // pero aquí lo hacemos silencioso excepto logs.
+
+    await Promise.all(matches.map(async (match) => {
+        const [fullMatch, alt, blobUrl] = match;
+        if (!replacements.has(blobUrl)) {
+            try {
+                const response = await fetch(blobUrl);
+                const blob = await response.blob();
+                const base64 = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+                replacements.set(blobUrl, base64);
+            } catch (e) {
+                console.warn(`No se pudo reintegrar la imagen ${blobUrl}:`, e);
+                // Si falla, dejamos la URL original
+                replacements.set(blobUrl, blobUrl);
+            }
+        }
+    }));
+
+    // Reemplazar en el texto
+    return markdown.replace(regex, (match, alt, blobUrl) => {
+        // Usamos el base64 si lo tenemos, o el original si falló
+        const replacement = replacements.get(blobUrl) || blobUrl;
+        return `![${alt}](${replacement})`;
+    });
 }

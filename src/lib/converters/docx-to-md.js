@@ -88,7 +88,15 @@ export async function docxToMarkdown(fileOrBuffer, config = {}) {
             "p[style-name='Heading 5'] => h5:fresh",
             "p[style-name='Heading 6'] => h6:fresh"
         ],
-        transformDocument: transformEmptyParagraphs
+        transformDocument: transformEmptyParagraphs,
+        // Usar Blob URLs para imágenes en lugar de base64 (para no bloquear el editor)
+        convertImage: mammoth.images.imgElement(function (image) {
+            return image.read().then(function (imageBuffer) {
+                const blob = new Blob([imageBuffer], { type: image.contentType });
+                const url = URL.createObjectURL(blob);
+                return { src: url };
+            });
+        })
     };
     const result = await mammoth.convertToHtml({ arrayBuffer }, mammothOptions);
     if (result.messages.length > 0) {

@@ -15,6 +15,10 @@ import defaultCss from '$lib/export-themes/epub/style.css?raw';
  * @returns {Promise<Blob>}
  */
 export async function createEpubBlob(metadata, htmlContent, coverImageDataUrl = null, css = '') {
+    // Asegurar que las imágenes blob se conviertan a base64 para que funcionen en el EPUB
+    // (Idealmente deberían extraerse a archivos internos, pero base64 restaura el comportamiento previo)
+    htmlContent = await inlineBlobImagesHtml(htmlContent);
+
     const zip = new JSZip();
 
     // 1. Mimetype (debe ser el primer archivo, sin comprimir)
@@ -57,6 +61,44 @@ export async function createEpubBlob(metadata, htmlContent, coverImageDataUrl = 
 
     // Generar el archivo ZIP
     return await zip.generateAsync({ type: 'blob' });
+}
+
+/**
+ * Busca imágenes con URLs tipo blob:... en el HTML y las convierte a base64
+ * @param {string} html 
+ * @returns {Promise<string>}
+ */
+async function inlineBlobImagesHtml(html) {
+    const regex = /src="(blob:[^"]+)"/g;
+    const matches = [...html.matchAll(regex)];
+
+    if (matches.length === 0) return html;
+
+    const replacements = new Map();
+
+    await Promise.all(matches.map(async (match) => {
+        const [fullMatch, blobUrl] = match;
+        if (!replacements.has(blobUrl)) {
+            try {
+                const response = await fetch(blobUrl);
+                const blob = await response.blob();
+                const base64 = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+                replacements.set(blobUrl, base64);
+            } catch (e) {
+                console.warn(`[EPUB] No se pudo reintegrar la imagen ${blobUrl}:`, e);
+            }
+        }
+    }));
+
+    return html.replace(regex, (match, blobUrl) => {
+        const replacement = replacements.get(blobUrl) || blobUrl;
+        return `src="${replacement}"`;
+    });
 }
 
 /**
