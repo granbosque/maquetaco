@@ -2,23 +2,40 @@
     import { Toolbar, ToggleGroup } from "bits-ui";
     import { PenLine, Eye, Rocket, Info } from "lucide-svelte";
     import logo from "$lib/assets/logo.svg";
+    import { getCurrentWindow } from "@tauri-apps/api/window";
+    import WindowControls from "./WindowControls.svelte";
 
     let {
         activeView = "editor",
         onViewChange = (view) => {},
         onInfo = () => {},
     } = $props();
+
+    // Detectar si estamos en Tauri
+    const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+
+    function handleDragStart(e) {
+        // Ignorar si el clic proviene de un botón o elemento interactivo
+        if (e.target.closest('button, [role="button"]')) {
+            return;
+        }
+
+        // Buscar el elemento draggable más cercano (para que funcione hijos como imgs o svgs)
+        if (e.target.closest('[data-tauri-drag-region]')) {
+            getCurrentWindow().startDragging();
+        }
+    }
 </script>
 
-<Toolbar.Root class="toolbar">
+<Toolbar.Root class="toolbar" data-tauri-drag-region onmousedown={handleDragStart}>
     <!-- IZQUIERDA: Logo -->
-    <div class="logo-title">
+    <div class="logo-title" data-tauri-drag-region>
         <img src={logo} alt="Maquetaco logo" class="logo" />
         <h1>Maquetaco</h1>
     </div>
 
     <!-- CENTRO: Toggle de vistas -->
-    <div class="toolbar-center">
+    <div class="toolbar-center" data-tauri-drag-region>
         <ToggleGroup.Root
             type="single"
             value={activeView}
@@ -51,6 +68,11 @@
                 <Info />
             </Toolbar.Button>
         </div>
+        
+        <!-- Botones de control de ventana (Solo en Tauri) -->
+        {#if isTauri}
+            <WindowControls />
+        {/if}
     </div>
 </Toolbar.Root>
 
@@ -60,6 +82,10 @@
         display: flex;
         align-items: center;
     }
+
+
+
+
 
     .logo-title {
         flex: 1;
@@ -76,13 +102,16 @@
         flex: 1;
         display: flex;
         justify-content: flex-end;
+        align-items: stretch; /* Estirar hijos para que WindowControls ocupe toda la altura */
         gap: var(--space-sm);
+        padding-right: 0; /* Asegurar que pegue al borde derecho */
     }
 
     /* Grupo visual de botones */
     .button-group {
         display: flex;
         align-items: center;
+        align-self: center; /* Centrarse verticalmente dentro del contenedor estirado */
         background-color: var(--bg-muted);
         border-radius: 99px;
     }

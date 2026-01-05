@@ -68,7 +68,7 @@
     /* === TIPOGRAFÍA - FUENTES === */
     /* Stack nativo: Segoe UI (Win), SF Pro (Mac), Roboto (Android) */
     --font-main: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    --font-title: var(--font-main);
+    --font-title: 'Pally', sans-serif;
     --font-editor: 'Zilla Slab', serif;
     --font-mono: 'JetBrains Mono', monospace;
 

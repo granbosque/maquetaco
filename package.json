@@ -7,19 +7,27 @@
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
-		"prepare": "svelte-kit sync || echo ''"
+		"prepare": "svelte-kit sync || echo ''",
+		"tauri": "tauri"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/kit": "^2.49.1",
 		"@sveltejs/vite-plugin-svelte": "^6.2.1",
+		"@tauri-apps/cli": "^2.9.6",
+		"autoprefixer": "^10.4.23",
+		"postcss": "^8.5.6",
 		"svelte": "^5.45.6",
+		"tailwindcss": "^4.1.18",
 		"vite": "^7.2.6"
 	},
 	"dependencies": {
 		"@codemirror/lang-markdown": "^6.5.0",
 		"@codemirror/lang-yaml": "^6.1.2",
 		"@rstacruz/rehype-sectionize": "^0.7.0",
+		"@tauri-apps/api": "^2.9.1",
+		"@tauri-apps/plugin-os": "^2.3.2",
+		"@tauri-apps/plugin-window": "^2.0.0-alpha.1",
 		"bits-ui": "^2.14.4",
 		"epubjs": "^0.3.93",
 		"js-yaml": "^4.1.1",
