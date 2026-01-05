@@ -82,7 +82,7 @@ export const maquetacoTheme = EditorView.theme({
     },
     ".cm-content": {
         caretColor: "#4b5563",
-        padding: "1.5rem 1rem"
+        padding: "0.75rem 0.5rem"
     },
     "&.cm-focused .cm-cursor": {
         borderLeftColor: "#4b5563",
@@ -99,13 +99,13 @@ export const maquetacoTheme = EditorView.theme({
         backgroundColor: "transparent",
         color: "#cbd5e1",
         border: "none",
-        paddingRight: "0.5rem",
-        paddingLeft: "1rem",
+        paddingRight: "0.25rem",
+        paddingLeft: "0.5rem",
         fontSize: "11px"
     },
     ".cm-gutter.cm-lineNumbers .cm-gutterElement": {
-        padding: "0 0.25rem 0 0.25rem",
-        minWidth: "1.5rem"
+        padding: "0 0.15rem",
+        minWidth: "1.25rem"
     },
     ".cm-activeLineGutter": {
         backgroundColor: "transparent",

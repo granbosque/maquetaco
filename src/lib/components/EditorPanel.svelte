@@ -39,6 +39,8 @@
         rightPanelOpen = true,
         toggleLeftPanel = () => {},
         toggleRightPanel = () => {},
+        leftInOverlay = false,
+        rightInOverlay = false,
     } = $props();
 
     // Create a markdown language with YAML frontmatter support
@@ -128,26 +130,27 @@
 <section class="panel surface">
     <!-- Toolbar integrada en el panel -->
     <div class="editor-toolbar">
-        <Tooltip.Provider>
-            <!-- Toggle panel izquierdo -->
-            <Tooltip.Root>
-                <Tooltip.Trigger
-                    class="toolbar-btn toggle-btn {!leftPanelOpen
-                        ? 'active'
-                        : ''}"
-                    onclick={toggleLeftPanel}
-                >
-                    <ListTree size="16" />
-                    <span class="btn-label">Estructura</span>
-                </Tooltip.Trigger>
-                <Tooltip.Content class="tooltip" sideOffset={8}>
-                    {leftPanelOpen
-                        ? "Ocultar estructura"
-                        : "Mostrar estructura"}
-                </Tooltip.Content>
-            </Tooltip.Root>
-
-            <div class="toolbar-separator"></div>
+        <Tooltip.Provider delayDuration={300}>
+            <!-- Toggle panel izquierdo (visible cuando cerrado O en overlay mode) -->
+            {#if !leftPanelOpen || leftInOverlay}
+                <Tooltip.Root>
+                    <Tooltip.Trigger
+                        class="toolbar-btn toggle-btn {!leftPanelOpen
+                            ? 'active'
+                            : ''}"
+                        onclick={toggleLeftPanel}
+                    >
+                        <ListTree size="16" />
+                        <span class="btn-label">Estructura</span>
+                    </Tooltip.Trigger>
+                    <Tooltip.Content class="tooltip" sideOffset={8}>
+                        {leftPanelOpen
+                            ? "Ocultar estructura"
+                            : "Mostrar estructura"}
+                    </Tooltip.Content>
+                </Tooltip.Root>
+                <div class="toolbar-separator"></div>
+            {/if}
 
             <!-- Grupo: Acciones de archivo -->
             <div class="toolbar-group">
@@ -163,7 +166,6 @@
                 <Tooltip.Root>
                     <Tooltip.Trigger class="toolbar-btn" onclick={onSave}>
                         <Download size="16" />
-                        <span class="btn-label">Guardar</span>
                     </Tooltip.Trigger>
                     <Tooltip.Content class="tooltip" sideOffset={8}>
                         Guardar como Markdown
@@ -172,7 +174,6 @@
                 <Tooltip.Root>
                     <Tooltip.Trigger class="toolbar-btn" onclick={onClear}>
                         <Trash2 size="16" />
-                        <span class="btn-label">Limpiar</span>
                     </Tooltip.Trigger>
                     <Tooltip.Content class="tooltip" sideOffset={8}>
                         Borrar todo
@@ -283,27 +284,28 @@
                 </Tooltip.Root>
             </div>
 
-            <div class="toolbar-separator"></div>
-
             <div class="toolbar-spacer"></div>
 
-            <!-- Toggle panel derecho -->
-            <Tooltip.Root>
-                <Tooltip.Trigger
-                    class="toolbar-btn toggle-btn {!rightPanelOpen
-                        ? 'active'
-                        : ''}"
-                    onclick={toggleRightPanel}
-                >
-                    <Settings2 size="16" />
-                    <span class="btn-label">Configuración</span>
-                </Tooltip.Trigger>
-                <Tooltip.Content class="tooltip" sideOffset={8}>
-                    {rightPanelOpen
-                        ? "Ocultar configuración"
-                        : "Mostrar configuración"}
-                </Tooltip.Content>
-            </Tooltip.Root>
+            <!-- Toggle panel derecho (visible cuando cerrado O en overlay mode) -->
+            {#if !rightPanelOpen || rightInOverlay}
+                <div class="toolbar-separator"></div>
+                <Tooltip.Root>
+                    <Tooltip.Trigger
+                        class="toolbar-btn toggle-btn {!rightPanelOpen
+                            ? 'active'
+                            : ''}"
+                        onclick={toggleRightPanel}
+                    >
+                        <Settings2 size="16" />
+                        <span class="btn-label">Configuración</span>
+                    </Tooltip.Trigger>
+                    <Tooltip.Content class="tooltip" sideOffset={8}>
+                        {rightPanelOpen
+                            ? "Ocultar configuración"
+                            : "Mostrar configuración"}
+                    </Tooltip.Content>
+                </Tooltip.Root>
+            {/if}
         </Tooltip.Provider>
     </div>
 
@@ -333,9 +335,17 @@
         display: flex;
         align-items: center;
         gap: 4px;
-        padding: 6px 10px;
+        padding: 4px 8px;
         border-bottom: 1px solid var(--border-muted);
         flex-shrink: 0;
+        overflow-x: auto;
+        /* Scrollbar oculta pero funcional */
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .editor-toolbar::-webkit-scrollbar {
+        display: none;
     }
 
     .toolbar-group {

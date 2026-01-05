@@ -280,8 +280,11 @@
     }
 
     /* PENDIENTE IMPORTANTE RESPONSIVE */
+    /* PENDIENTE IMPORTANTE RESPONSIVE */
     .app {
-        min-width: 600px;
-        overflow-x: auto;
+        width: 100%;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
     }
 </style>

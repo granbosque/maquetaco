@@ -102,8 +102,15 @@ header {
 /* Side panels (collapsible) */
 .panel.side-panel {
     transition: width 0.25s ease, opacity 0.2s ease, transform 0.25s ease;
-    border: 1px solid var(--border-muted);
-    /* Provisional border */
+}
+
+/* Separadores entre paneles */
+.panel.side-panel.left {
+    border-right: 1px solid var(--border-muted);
+}
+
+.panel.side-panel.right {
+    border-left: 1px solid var(--border-muted);
 }
 
 .panel.side-panel.collapsed {
@@ -115,58 +122,65 @@ header {
     pointer-events: none;
 }
 
-/* Overlay mode for small screens */
-@media (max-width: 900px) {
-    .panel.side-panel {
+/* Close button - visible en todos los tamaños de pantalla */
+.panel.side-panel .close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xs);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.panel.side-panel .close-btn:hover {
+    background-color: var(--bg-muted);
+    color: var(--text);
+}
+
+/* === PANEL IZQUIERDO: overlay en pantallas medianas (≤1160px) === */
+@media (max-width: 1160px) {
+    .panel.side-panel.left {
         position: absolute;
         top: 0;
         bottom: 0;
+        left: 0;
         z-index: 50;
         width: 280px;
         box-shadow: var(--shadow-lg);
         background-color: var(--bg-surface);
     }
 
-    .panel.side-panel.left {
-        left: 0;
-    }
-
-    .panel.side-panel.right {
-        right: 0;
-    }
-
-    .panel.side-panel.collapsed {
+    .panel.side-panel.left.collapsed {
         transform: translateX(-100%);
         opacity: 0;
+        width: 280px;
+        /* Mantener ancho para la transición */
+    }
+}
+
+/* === PANEL DERECHO: overlay en pantallas pequeñas (≤880px) === */
+@media (max-width: 880px) {
+    .panel.side-panel.right {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        z-index: 50;
+        width: 280px;
+        box-shadow: var(--shadow-lg);
+        background-color: var(--bg-surface);
     }
 
     .panel.side-panel.right.collapsed {
         transform: translateX(100%);
+        opacity: 0;
+        width: 280px;
+        /* Mantener ancho para la transición */
     }
-
-    /* Close button visible only in overlay mode */
-    .panel.side-panel .close-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: var(--space-xs);
-        background: transparent;
-        border: none;
-        border-radius: var(--radius);
-        color: var(--text-muted);
-        cursor: pointer;
-        transition: all var(--transition);
-    }
-
-    .panel.side-panel .close-btn:hover {
-        background-color: var(--bg-muted);
-        color: var(--text);
-    }
-}
-
-/* Close button hidden by default on large screens */
-.close-btn {
-    display: none;
 }
 
 .panel-header {
