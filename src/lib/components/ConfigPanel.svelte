@@ -1,8 +1,11 @@
 <script>
     import { Label, AspectRatio, Tooltip } from "bits-ui";
-    import { Info } from "lucide-svelte";
+    import { Info, X } from "lucide-svelte";
     import { appState } from "$lib/stores/appState.svelte.js";
     import { resizeImage } from "$lib/utils/image-processing.js";
+
+    // Props
+    let { open = true, onClose = () => {} } = $props();
 
     let fileInput;
     let isDragging = $state(false); // Estado local, solo afecta a este panel
@@ -55,10 +58,14 @@
     }
 </script>
 
-<section class="panel secondary">
+<section class="panel secondary side-panel right" class:collapsed={!open}>
     <div class="panel-header">
         <h2>Configuración</h2>
-        <div class="actions"></div>
+        <div class="actions">
+            <button class="close-btn" onclick={onClose} title="Cerrar panel">
+                <X size="16" />
+            </button>
+        </div>
     </div>
     <Tooltip.Provider>
         <div class="content">

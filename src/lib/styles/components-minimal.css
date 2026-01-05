@@ -572,7 +572,7 @@ textarea.expandable:focus {
     background-color: var(--bg-surface);
     border-radius: 99px;
     padding: 5px;
-    gap: 4px;
+    gap: 2px;
     box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.08);
 }
 
@@ -591,6 +591,18 @@ textarea.expandable:focus {
     gap: var(--space-sm);
     /* 8px */
     padding: 8px 24px;
+    background-color: white;
+    border-radius: 0;
+}
+
+.view-toggle-item:first-child {
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+}
+
+.view-toggle-item:last-child {
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
 }
 
 .view-toggle-item:hover {
@@ -601,6 +613,7 @@ textarea.expandable:focus {
     background-color: var(--color-primary);
     color: #1a1a1a;
     box-shadow: 0 3px 20px 1px rgba(255, 180, 0, 0.25);
+    border-radius: 99px;
 }
 
 

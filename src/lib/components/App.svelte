@@ -201,9 +201,6 @@
         <Toolbar
             {activeView}
             onViewChange={handleViewChange}
-            onImport={handleImport}
-            onSave={() => saveDocument(appState.config)}
-            onClear={handleClear}
             onInfo={() => (isWelcomeModalOpen = true)}
         />
     </header>
@@ -226,7 +223,11 @@
                 }}
             >
                 {#if activeView === "editor"}
-                    <EditorView />
+                    <EditorView
+                        onImport={handleImport}
+                        onSave={() => saveDocument(appState.config)}
+                        onClear={handleClear}
+                    />
                 {:else if activeView === "preview"}
                     <PreviewView />
                 {:else if activeView === "export"}

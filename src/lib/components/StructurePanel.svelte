@@ -11,7 +11,11 @@
         Heart,
         Info,
         Quote,
-    } from "lucide-svelte"; // Imported new icons
+        X,
+    } from "lucide-svelte";
+
+    // Props
+    let { open = true, onClose = () => {} } = $props();
 
     // TODO: Implementar navegación al editor
     function scrollToLine(lineNumber) {
@@ -90,10 +94,14 @@
     }
 </script>
 
-<section class="panel secondary">
+<section class="panel secondary side-panel left" class:collapsed={!open}>
     <div class="panel-header">
         <h2>Estructura</h2>
-        <div class="actions"></div>
+        <div class="actions">
+            <button class="close-btn" onclick={onClose} title="Cerrar panel">
+                <X size="16" />
+            </button>
+        </div>
     </div>
     {#if appState.config.toc && appState.config.toc.length}
         <div class="content">

@@ -1,22 +1,11 @@
 <script>
-    import { Toolbar, Separator, ToggleGroup } from "bits-ui";
-    import {
-        Upload,
-        Download,
-        Trash2,
-        PenLine,
-        Eye,
-        Rocket,
-        Info,
-    } from "lucide-svelte";
+    import { Toolbar, ToggleGroup } from "bits-ui";
+    import { PenLine, Eye, Rocket, Info } from "lucide-svelte";
     import logo from "$lib/assets/logo.svg";
 
     let {
         activeView = "editor",
         onViewChange = (view) => {},
-        onImport = () => {},
-        onSave = () => {},
-        onClear = () => {},
         onInfo = () => {},
     } = $props();
 </script>
@@ -28,7 +17,7 @@
         <h1>Maquetaco</h1>
     </div>
 
-    <!-- CENTRO: Toggle de vistas (con spacers para centrar) -->
+    <!-- CENTRO: Toggle de vistas -->
     <div class="toolbar-center">
         <ToggleGroup.Root
             type="single"
@@ -51,24 +40,8 @@
         </ToggleGroup.Root>
     </div>
 
-    <!-- DERECHA: Botones secundarios -->
+    <!-- DERECHA: Botón de info -->
     <div class="toolbar-right">
-        {#if activeView === "editor"}
-            <div class="button-group">
-                <Toolbar.Button onclick={onImport} class="toolbar-btn tertiary">
-                    <Upload />
-                    <span>Abrir</span>
-                </Toolbar.Button>
-                <Toolbar.Button onclick={onSave} class="toolbar-btn tertiary">
-                    <Download />
-                    <span>Guardar</span>
-                </Toolbar.Button>
-                <Toolbar.Button onclick={onClear} class="toolbar-btn tertiary">
-                    <Trash2 />
-                    <span>Limpiar</span>
-                </Toolbar.Button>
-            </div>
-        {/if}
         <div class="button-group">
             <Toolbar.Button
                 class="toolbar-btn icon-only"
@@ -106,13 +79,12 @@
         gap: var(--space-sm);
     }
 
-    /* Grupo visual de botones (secundario) */
+    /* Grupo visual de botones */
     .button-group {
         display: flex;
         align-items: center;
         background-color: var(--bg-muted);
         border-radius: 99px;
-        animation: slideInFade 0.3s ease-out;
     }
 
     /* Botones dentro del grupo */
@@ -120,23 +92,12 @@
         background-color: transparent;
         border-radius: 99px;
         padding: 8px 16px;
-        font-size: 0.8125rem; /* 13px */
+        font-size: 0.8125rem;
         font-weight: var(--weight-bold);
     }
 
     :global(.button-group .toolbar-btn:hover) {
         background-color: var(--bg-hover);
-    }
-
-    @keyframes slideInFade {
-        from {
-            opacity: 0;
-            transform: translateY(-8px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
     }
 
     /* Responsive: reducir tamaño del toggle de vistas */
@@ -148,7 +109,7 @@
         }
     }
 
-    /* Responsive: ocultar iconos del toggle de vistas (mantener texto) */
+    /* Responsive: ocultar iconos del toggle de vistas */
     @media (max-width: 640px) {
         :global(.view-toggle-item svg) {
             display: none;
@@ -156,13 +117,6 @@
 
         :global(.view-toggle-item) {
             padding: var(--space-xs) var(--space-sm);
-        }
-    }
-
-    /* Responsive: ocultar etiquetas de botones secundarios */
-    @media (max-width: 900px) {
-        :global(.button-group .toolbar-btn.tertiary span) {
-            display: none;
         }
     }
 
