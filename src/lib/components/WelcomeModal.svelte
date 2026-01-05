@@ -149,16 +149,49 @@
         left: 50%;
         top: 50%;
         transform: translate(-50%, -50%);
-        width: min(90vw, 540px);
+        width: min(90vw, 600px);
+        max-height: 90vh; /* Responsive height */
+        overflow-y: auto; /* Scroll if needed */
         background: linear-gradient(180deg, #fffdf5 0%, #fff 40%);
         border-radius: 24px;
-        padding: 2rem;
+        padding: 2.5rem;
         box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.15);
         z-index: 1001;
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
         animation: appear 0.3s ease-out;
+    }
+
+    /* Small screens */
+    @media (max-width: 600px) {
+        :global(.modal) {
+            padding: 1.5rem;
+            gap: 1rem;
+        }
+
+        :global(.title) {
+            font-size: 1.5rem;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+        }
+
+        .step strong {
+            font-size: 0.75rem;
+        }
+        
+        .step span {
+            display: none;
+        }
+        
+        .footer {
+            flex-direction: column-reverse;
+            gap: 1rem;
+            align-items: center;
+        }
     }
 
     @keyframes appear {
@@ -218,13 +251,13 @@
     .badge {
         display: inline-flex;
         align-items: center;
-        gap: 0.35rem; /* Better spacing for icon */
+        gap: 0.35rem;
         font-size: 0.75rem;
         color: var(--text-muted);
         background: var(--bg-muted);
         padding: 0.25rem 0.75rem;
         border-radius: 99px;
-        line-height: 1; /* Help vertical alignment */
+        line-height: 1;
     }
 
     /* Steps */
@@ -233,7 +266,10 @@
         align-items: center;
         justify-content: center;
         gap: 0.5rem;
-        padding: 1.5rem 1rem;
+        padding: 1rem;
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
         background: transparent;
         border-radius: 16px;
     }
@@ -291,7 +327,7 @@
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
-        padding-top: 1rem;
+        padding-top: 0.5rem;
     }
 
     .checkbox {
@@ -372,7 +408,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.75rem;
+        gap: 0.5rem;
     }
 
     .cta-hint {
@@ -403,21 +439,5 @@
     :global(.cta:hover) {
         transform: translateY(-2px);
         box-shadow: 0 8px 24px rgba(255, 200, 0, 0.4);
-    }
-
-    /* Responsive */
-    @media (max-width: 540px) {
-        .steps {
-            flex-direction: column;
-            gap: 1rem;
-        }
-        :global(.arrow) {
-            transform: rotate(90deg);
-        }
-        .footer {
-            flex-direction: column;
-            gap: 1rem;
-            align-items: flex-start;
-        }
     }
 </style>
