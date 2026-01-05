@@ -24,41 +24,24 @@
     $effect(() => {
         if (!browser) return;
 
-        // Estado inicial de overlay
-        let wasLeftOverlay = window.innerWidth <= 1160;
-        let wasRightOverlay = window.innerWidth <= 880;
-
-        // Actualizar estado reactivo inicial
-        leftInOverlay = wasLeftOverlay;
-        rightInOverlay = wasRightOverlay;
-
-        // Si iniciamos en pantalla pequeña, asegurar que empiecen cerrados
-        if (wasLeftOverlay) leftPanelOpen = false;
-        if (wasRightOverlay) rightPanelOpen = false;
-
         function updateOverlayState() {
             const isLeftOverlay = window.innerWidth <= 1160;
             const isRightOverlay = window.innerWidth <= 880;
 
-            // Detectar cruce hacia overlay (grande -> pequeño)
-            // Si pasamos de NO overlay a SÍ overlay, cerramos el panel
-            if (!wasLeftOverlay && isLeftOverlay) {
-                leftPanelOpen = false;
-            }
+            // Lógica smart de paneles al cruzar breakpoints
+            // Si pasamos de Desktop -> Overlay: CERRAR
+            if (isLeftOverlay && !leftInOverlay) leftPanelOpen = false;
+            if (isRightOverlay && !rightInOverlay) rightPanelOpen = false;
 
-            if (!wasRightOverlay && isRightOverlay) {
-                rightPanelOpen = false;
-            }
+            // Si pasamos de Overlay -> Desktop: ABRIR
+            if (!isLeftOverlay && leftInOverlay) leftPanelOpen = true;
+            if (!isRightOverlay && rightInOverlay) rightPanelOpen = true;
 
-            // Actualizar estado reactivo
             leftInOverlay = isLeftOverlay;
             rightInOverlay = isRightOverlay;
-
-            // Actualizar estado anterior para la próxima comparación
-            wasLeftOverlay = isLeftOverlay;
-            wasRightOverlay = isRightOverlay;
         }
 
+        updateOverlayState();
         window.addEventListener("resize", updateOverlayState);
 
         return () => window.removeEventListener("resize", updateOverlayState);

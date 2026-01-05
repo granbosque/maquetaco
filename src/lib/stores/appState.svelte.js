@@ -33,6 +33,9 @@ class AppState {
         console.log("[AppState] Default Content type:", typeof this.config.content);
         console.log("[AppState] Default Content length:", this.config.content?.length);
 
+        // Guardar referencia al contenido por defecto para comparaciones
+        this.defaultContent = defaultContent;
+
         // Inicializar TOC con el contenido por defecto
         this.config.toc = extractHeadings(this.config.content);
         console.log("[AppState] Initial TOC:", this.config.toc);

@@ -135,7 +135,7 @@
 </script>
 
 <div class="export-view">
-    <div class="export-panel panel surface">
+    <div class="export-panel panel surface floating">
         <div class="panel-header"><h2>Formato de salida</h2></div>
 
         <Accordion.Root

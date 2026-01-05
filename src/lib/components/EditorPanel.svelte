@@ -43,6 +43,15 @@
         rightInOverlay = false,
     } = $props();
 
+    // Estado derivado para resaltar botón Abrir
+    let isContentEmpty = $derived(
+        !appState.config.content ||
+            appState.config.content.trim().length === 0 ||
+            (appState.config.content.length ===
+                appState.defaultContent.length &&
+                appState.config.content === appState.defaultContent),
+    );
+
     // Create a markdown language with YAML frontmatter support
     const markdownWithFrontmatter = yamlFrontmatter({ content: markdown() });
 
@@ -155,9 +164,14 @@
             <!-- Grupo: Acciones de archivo -->
             <div class="toolbar-group">
                 <Tooltip.Root>
-                    <Tooltip.Trigger class="toolbar-btn" onclick={onImport}>
+                    <Tooltip.Trigger
+                        class="toolbar-btn {isContentEmpty ? 'highlight' : ''}"
+                        onclick={onImport}
+                    >
                         <Upload size="16" />
-                        <span class="btn-label">Abrir</span>
+                        {#if isContentEmpty}
+                            <span class="btn-label">Abrir</span>
+                        {/if}
                     </Tooltip.Trigger>
                     <Tooltip.Content class="tooltip" sideOffset={8}>
                         Importar archivo
@@ -390,7 +404,7 @@
     /* Botones toggle de paneles - estilo más suave cuando activos */
     :global(.editor-toolbar .toolbar-btn.toggle-btn.active) {
         background-color: rgba(102, 187, 106, 0.12);
-        color: var(--text-muted);
+        color: var(--color-secondary-hover);
     }
 
     :global(.editor-toolbar .toolbar-btn.toggle-btn.active:hover) {
