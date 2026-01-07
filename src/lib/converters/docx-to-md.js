@@ -1,5 +1,6 @@
 import mammoth from 'mammoth';
 import TurndownService from 'turndown';
+import { gfm } from 'turndown-plugin-gfm';
 
 /**
  * DOCX TO MARKDOWN CONVERTER
@@ -115,7 +116,7 @@ export async function docxToMarkdown(fileOrBuffer, config = {}) {
             metadata = extractMetadata(structure);
             html = removeMetadataHeadings(html, structure);
         } else {
-            // 4b. No hay headings, intentar heurística por párrafos
+            // 4b. No hay headings, intentar heurística por párrafos para Título/Autor
             const heuristicResult = tryExtractMetadataFromParagraphs(html);
             if (heuristicResult.metadata.title) {
                 metadata = heuristicResult.metadata;
@@ -125,7 +126,26 @@ export async function docxToMarkdown(fileOrBuffer, config = {}) {
         }
     }
 
+    // NUEVO PASO: Detección heurística de headings en el cuerpo del documento
+    // Se ejecuta después de extraer metadata para no confundir título/autor con nuevos headings
+    // Recalculamos si hay headings restantes después de la extracción de metadata
+    // (Para saber si usamos H1 o H6)
+    // (si no hay otros headings usamos h6 para que sea un título secundario o auxiliar, se podría buscar el nivel más bajo pero con esto creo que vale la mayoría de los casos)
+    const remainingHeadingsCount = structure.contentHeadings.length;
+    
+    const heuristicHeadingsResult = detectHeuristicHeadingsInBody(html, remainingHeadingsCount > 0);
+    if (heuristicHeadingsResult.modified) {
+        html = heuristicHeadingsResult.html;
+        structure.warnings.push(...heuristicHeadingsResult.warnings);
+    }
+
     // 5. Ajustar niveles de headings si está habilitado
+    // Nota: Si hemos inyectado H1 nuevos con la heurística (porque no había nada), 
+    // levelsToAdjust podría ser irrelevante o necesitar recálculo, pero 
+    // structure.levelsToAdjust se basó en el análisis estático inicial.
+    // Si structure.levelsToAdjust > 0, significa que HABÍA headings originales profundos.
+    // Si detectamos nuevos H1/H6, estos NO se verán afectados por adjustHeadingLevels 
+    // (a menos que rehagamos el análisis, pero simplificaremos asumiendo que conviven).
     if (options.adjustHeadings && structure.levelsToAdjust > 0) {
         html = adjustHeadingLevels(html, structure.levelsToAdjust);
     }
@@ -135,6 +155,9 @@ export async function docxToMarkdown(fileOrBuffer, config = {}) {
         headingStyle: 'atx',
         codeBlockStyle: 'fenced'
     });
+    
+    // Activar soporte para tablas y GFM
+    turndownService.use(gfm);
 
     let markdown = turndownService.turndown(html);
 
@@ -591,4 +614,70 @@ function tryExtractMetadataFromParagraphs(html) {
     }
 
     return { metadata, html };
+}
+
+/**
+ * Detecta headings heurísticos en el cuerpo del HTML (post-metadata).
+ * Busca párrafos cortos, sin punto final, en mayúsculas o negrita.
+ * 
+ * @param {string} html - El HTML del cuerpo
+ * @param {boolean} hasExistingHeadings - Si ya existen headings detectados previamente
+ * @returns {{html: string, warnings: string[], modified: boolean}}
+ */
+function detectHeuristicHeadingsInBody(html, hasExistingHeadings) {
+    if (!html) return { html, warnings: [], modified: false };
+
+    // Usamos DOMParser para manipular el DOM de forma segura
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const warnings = [];
+    let modified = false;
+
+    // Seleccionamos todos los párrafos directos
+    const paragraphs = Array.from(doc.body.querySelectorAll('p'));
+
+    // Determinamos el nivel objetivo: H6 si ya hay headings (subtítulos), H1 si no hay nada (estructura plana)
+    const targetTag = hasExistingHeadings ? 'h6' : 'h1';
+
+    for (const p of paragraphs) {
+        const text = p.textContent.trim();
+        
+        // Criterios de exclusión rápidos
+        if (text.length === 0 || text.includes('[[EMPTY_LINE]]')) continue;
+
+        // Criterio 1: Longitud (menos de 20 palabras aprox, usaremos 150 caracteres como proxy seguro)
+        if (text.length > 150) continue;
+
+        // Criterio 2: NO termina en punto (o : o ; o ,)
+        if (/[.,:;]$/.test(text)) continue;
+
+        // Criterio 3: Patrón de inicio (Mayúscula o Número)
+        // Regla relajada: Basta con que empiece por Mayúscula o Número (y cumpla lo anterior: sin punto, corto).
+        // Esto cubre tanto "Título" como "1. Título" como "TÍTULO"
+        const startsWithCapOrNum = /^[A-ZÁÉÍÓÚÑ0-9]/.test(text.toUpperCase()); 
+        // Nota: text.toUpperCase() en el test es redundante si la regex incluye minúsculas, 
+        // pero queremos saber si el ORIGINAL empieza por mayúscula.
+        const firstChar = text.charAt(0);
+        const isStartValid = /[A-ZÁÉÍÓÚÑ0-9]/.test(firstChar);
+
+        if (isStartValid) {
+            // ¡Es un heading!
+            const newHeading = doc.createElement(targetTag);
+            newHeading.innerHTML = p.innerHTML;
+            p.replaceWith(newHeading);
+            
+            warnings.push(`Heurística: Se convirtió párrafo a ${targetTag.toUpperCase()}: "${text.substring(0, 50)}..."`);
+            modified = true;
+        }
+    }
+
+    if (modified) {
+        return {
+            html: doc.body.innerHTML,
+            warnings,
+            modified: true
+        };
+    }
+
+    return { html, warnings: [], modified: false };
 }
