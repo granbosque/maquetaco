@@ -116,121 +116,130 @@ export function createCodeMirrorController(view) {
             if (!view) return;
             const { from, to } = view.state.selection.main;
             const doc = view.state.doc;
-            const selectedText = doc.sliceString(from, to);
+            const tree = syntaxTree(view.state);
 
-            // Use helper to find enclosing StrongEmphasis node
+            // Find all Strong nodes in or overlapping the range
+            const nodesToUnwrap = [];
+            
+            // 1. Check for node strictly containing selection (using updated helper logic internally or manual check)
+            // We use the existing helper logic for "inside" detection
             const { strongNode } = findFormattingNodes(from, to);
+            if (strongNode) nodesToUnwrap.push(strongNode);
 
-            let changes;
-            let newCursorPos = null;
-
-            if (strongNode) {
-                // We are inside bold. Remove the ** markers.
-                const nodeFrom = strongNode.from;
-                const nodeTo = strongNode.to;
-                const fullText = doc.sliceString(nodeFrom, nodeTo);
-                // Remove the markers (first 2 and last 2 chars)
-                const innerText = fullText.slice(2, -2);
-                changes = {
-                    from: nodeFrom,
-                    to: nodeTo,
-                    insert: innerText
-                };
-            } else {
-                // Fallback: Check if cursor is between empty markers ****
-                // (syntax tree won't recognize empty emphasis)
-                const before = doc.sliceString(Math.max(0, from - 2), from);
-                const after = doc.sliceString(to, Math.min(doc.length, to + 2));
-
-                if (from === to && before === '**' && after === '**') {
-                    // We're inside empty bold markers, remove them
-                    changes = {
-                        from: from - 2,
-                        to: to + 2,
-                        insert: ''
-                    };
-                } else {
-                    // Not inside bold. Add ** around selection.
-                    changes = {
-                        from: from,
-                        to: to,
-                        insert: `**${selectedText}**`
-                    };
-                    // If no text selected, place cursor in the middle
-                    if (from === to) {
-                        newCursorPos = from + 2; // After the opening **
+            // 2. Iterate to find nodes fully inside or overlapping
+            tree.iterate({
+                from, to,
+                enter: (node) => {
+                    if (node.name === 'StrongEmphasis' || node.name === 'Strong') {
+                        // Avoid duplicates
+                        if (!nodesToUnwrap.some(n => n.from === node.from && n.to === node.to)) {
+                            nodesToUnwrap.push(node.node);
+                        }
                     }
                 }
-            }
+            });
 
-            const transaction = { changes, userEvent: "input.format.bold", scrollIntoView: true };
-            if (newCursorPos !== null) {
-                transaction.selection = EditorSelection.cursor(newCursorPos);
+            if (nodesToUnwrap.length > 0) {
+                // Remove formatting from all found nodes
+                // We create changes in reverse order to avoid offset issues? 
+                // CodeMirror handles multiple changes nicely if we pass them in one dispatch.
+                const changes = nodesToUnwrap.map(node => {
+                    const nodeText = doc.sliceString(node.from, node.to);
+                    // Detect marker length (2 for ** or __)
+                    let markerLen = 2;
+                    if (nodeText.startsWith('**') || nodeText.startsWith('__')) {
+                        return [
+                            { from: node.from, to: node.from + markerLen, insert: '' },
+                            { from: node.to - markerLen, to: node.to, insert: '' }
+                        ];
+                    }
+                    return [];
+                }).flat();
+
+                view.dispatch({ changes, userEvent: "input.format.bold.remove", scrollIntoView: true });
+            } else {
+                // Apply formatting
+                // Check edge case: selection around empty markers **** (not parsed as Strong)
+                const expandedSel = doc.sliceString(Math.max(0, from - 2), Math.min(doc.length, to + 2));
+                const surroundedByEmpty = from === to && expandedSel === '****';
+                
+                if (surroundedByEmpty) {
+                     view.dispatch({
+                        changes: { from: from - 2, to: to + 2, insert: '' },
+                        userEvent: "input.format.bold.remove", 
+                        scrollIntoView: true 
+                    });
+                } else {
+                    const selectedText = doc.sliceString(from, to);
+                    view.dispatch({
+                        changes: { from, to, insert: `**${selectedText}**` },
+                        selection: from === to ? EditorSelection.cursor(from + 2) : undefined,
+                        userEvent: "input.format.bold.add",
+                        scrollIntoView: true
+                    });
+                }
             }
-            view.dispatch(transaction);
             view.focus();
         },
         toggleItalic() {
             if (!view) return;
             const { from, to } = view.state.selection.main;
             const doc = view.state.doc;
-            const selectedText = doc.sliceString(from, to);
+            const tree = syntaxTree(view.state);
 
-            // Use helper to find enclosing Emphasis node
+            const nodesToUnwrap = [];
+            
             const { emphasisNode } = findFormattingNodes(from, to);
+            if (emphasisNode) nodesToUnwrap.push(emphasisNode);
 
-            let changes;
-            let newCursorPos = null;
-
-            if (emphasisNode) {
-                // We are inside italic. Remove the * markers.
-                const nodeFrom = emphasisNode.from;
-                const nodeTo = emphasisNode.to;
-                const fullText = doc.sliceString(nodeFrom, nodeTo);
-                // Remove the markers (first 1 and last 1 char)
-                const innerText = fullText.slice(1, -1);
-                changes = {
-                    from: nodeFrom,
-                    to: nodeTo,
-                    insert: innerText
-                };
-            } else {
-                // Fallback: Check if cursor is between empty markers **
-                // (syntax tree won't recognize empty emphasis)
-                const before = doc.sliceString(Math.max(0, from - 1), from);
-                const after = doc.sliceString(to, Math.min(doc.length, to + 1));
-
-                // Make sure we're not inside bold markers (** before and after)
-                const before2 = doc.sliceString(Math.max(0, from - 2), from);
-                const after2 = doc.sliceString(to, Math.min(doc.length, to + 2));
-                const isInsideBoldMarkers = before2 === '**' && after2 === '**';
-
-                if (from === to && before === '*' && after === '*' && !isInsideBoldMarkers) {
-                    // We're inside empty italic markers, remove them
-                    changes = {
-                        from: from - 1,
-                        to: to + 1,
-                        insert: ''
-                    };
-                } else {
-                    // Not inside italic. Add * around selection.
-                    changes = {
-                        from: from,
-                        to: to,
-                        insert: `*${selectedText}*`
-                    };
-                    // If no text selected, place cursor in the middle
-                    if (from === to) {
-                        newCursorPos = from + 1; // After the opening *
+            tree.iterate({
+                from, to,
+                enter: (node) => {
+                    if (node.name === 'Emphasis') {
+                        if (!nodesToUnwrap.some(n => n.from === node.from && n.to === node.to)) {
+                            nodesToUnwrap.push(node.node);
+                        }
                     }
                 }
-            }
+            });
 
-            const transaction = { changes, userEvent: "input.format.italic", scrollIntoView: true };
-            if (newCursorPos !== null) {
-                transaction.selection = EditorSelection.cursor(newCursorPos);
+            if (nodesToUnwrap.length > 0) {
+                const changes = nodesToUnwrap.map(node => {
+                    const nodeText = doc.sliceString(node.from, node.to);
+                    let markerLen = 1;
+                     // Detect if it is actually bold markers being misinterpreted? 
+                     // CodeMirror markdown parser distinguishes Strong (** or __) vs Emphasis (* or _).
+                     // However, we should check we aren't breaking anything.
+                    return [
+                        { from: node.from, to: node.from + markerLen, insert: '' },
+                        { from: node.to - markerLen, to: node.to, insert: '' }
+                    ];
+                }).flat();
+
+                view.dispatch({ changes, userEvent: "input.format.italic.remove", scrollIntoView: true });
+            } else {
+                 const expandedSel = doc.sliceString(Math.max(0, from - 1), Math.min(doc.length, to + 1));
+                 // Check we are not inside **** from bold
+                 const expandedSel2 = doc.sliceString(Math.max(0, from - 2), Math.min(doc.length, to + 2));
+                 
+                 const surroundedByEmpty = from === to && expandedSel === '**' && expandedSel2 !== '****';
+
+                 if (surroundedByEmpty) {
+                     view.dispatch({
+                        changes: { from: from - 1, to: to + 1, insert: '' },
+                        userEvent: "input.format.italic.remove", 
+                        scrollIntoView: true 
+                    });
+                 } else {
+                    const selectedText = doc.sliceString(from, to);
+                    view.dispatch({
+                        changes: { from, to, insert: `*${selectedText}*` },
+                        selection: from === to ? EditorSelection.cursor(from + 1) : undefined,
+                        userEvent: "input.format.italic.add",
+                        scrollIntoView: true
+                    });
+                 }
             }
-            view.dispatch(transaction);
             view.focus();
         },
         setBlockType(type) {

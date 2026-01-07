@@ -12,6 +12,9 @@
         Heading1,
         Heading2,
         Heading3,
+        Heading4,
+        Heading5,
+        Heading6,
         Pilcrow,
         Quote,
         ListTree,
@@ -236,6 +239,45 @@
                     </Tooltip.Trigger>
                     <Tooltip.Content class="tooltip" sideOffset={8}>
                         Encabezado 3
+                    </Tooltip.Content>
+                </Tooltip.Root>
+                <Tooltip.Root>
+                    <Tooltip.Trigger
+                        class="toolbar-btn {currentFormat.blockType === 'h4'
+                            ? 'active'
+                            : ''}"
+                        onclick={() => setBlock("h4")}
+                    >
+                        <Heading4 size="16" />
+                    </Tooltip.Trigger>
+                    <Tooltip.Content class="tooltip" sideOffset={8}>
+                        Encabezado 4
+                    </Tooltip.Content>
+                </Tooltip.Root>
+                <Tooltip.Root>
+                    <Tooltip.Trigger
+                        class="toolbar-btn {currentFormat.blockType === 'h5'
+                            ? 'active'
+                            : ''}"
+                        onclick={() => setBlock("h5")}
+                    >
+                        <Heading5 size="16" />
+                    </Tooltip.Trigger>
+                    <Tooltip.Content class="tooltip" sideOffset={8}>
+                        Encabezado 5
+                    </Tooltip.Content>
+                </Tooltip.Root>
+                <Tooltip.Root>
+                    <Tooltip.Trigger
+                        class="toolbar-btn {currentFormat.blockType === 'h6'
+                            ? 'active'
+                            : ''}"
+                        onclick={() => setBlock("h6")}
+                    >
+                        <Heading6 size="16" />
+                    </Tooltip.Trigger>
+                    <Tooltip.Content class="tooltip" sideOffset={8}>
+                        Encabezado 6
                     </Tooltip.Content>
                 </Tooltip.Root>
             </div>
