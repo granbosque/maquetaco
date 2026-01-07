@@ -394,12 +394,15 @@
     }
 
     h3 {
+        text-align: left;
         font-size: 1.05em;
+        font-weight: bold;
         margin-top: 1.2em;
         margin-bottom: 0.4em;
     }
 
     h4 {
+        text-align: left;
         font-size: 1em;
         font-style: italic;
         margin-top: 1em;
@@ -407,14 +410,18 @@
     }
 
     h5 {
-        font-size: 0.95em;
+        text-align: left;
+        font-size: 1em;
+        font-weight: bold;
         margin-top: 0.8em;
         margin-bottom: 0.3em;
     }
 
     h6 {
-        font-size: 0.9em;
-        font-style: italic;
+        text-align: left;
+        font-size: 1em;
+        font-variant: small-caps;
+        font-weight: normal;
         margin-top: 0.8em;
         margin-bottom: 0.3em;
     }
@@ -444,10 +451,32 @@
         font-weight: normal;
     }
 
+    /* =========================================
+       CONTROL DE PAGINACIÓN (VIUDAS Y HUÉRFANAS)
+       ========================================= */
+
+    /* Caso C: Párrafos intermedios (Regla general balanceada) */
     p {
-        orphans: var(--paragraph-orphans);
-        widows: var(--paragraph-widows);
+        orphans: 2 !important;
+        widows: 2 !important;
         text-align: justify;
+    }
+
+    /* Caso B: Último párrafo de bloque (antes de separador o cambio de sección)
+       Prioridad: Evitar pocas líneas sueltas al INICIO de la nueva página.
+       Efecto: Párrafos cortos (< 4 líneas) saltarán enteros a la siguiente página. */
+    p:not(:has(+ p)) {
+        orphans: 2 !important;
+        widows: 4 !important;
+    }
+
+    /* Caso A: Primer párrafo de bloque (después de título o separador) 
+       Prioridad: Evitar dejar pocas líneas sueltas al FINAL de la página anterior. */
+    hr + p,
+    h1 + p,
+    h2 + p {
+        orphans: 4 !important;
+        widows: 2 !important;
     }
 
     /* Sangría */

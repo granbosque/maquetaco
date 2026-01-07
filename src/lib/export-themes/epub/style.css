@@ -31,25 +31,33 @@ section {
 }
 
 h2 {
+    text-align: center;
     font-size: 1.4em;
 }
 
 h3 {
+    text-align: left;
     font-size: 1.2em;
+    font-weight: bold;
 }
 
 h4 {
+    text-align: left;
     font-size: 1.1em;
     font-style: italic;
 }
 
 h5 {
+    text-align: left;
     font-size: 1em;
+    font-weight: bold;
 }
 
 h6 {
-    font-size: 0.95em;
-    font-style: italic;
+    text-align: left;
+    font-size: 1em;
+    font-variant: small-caps;
+    font-weight: normal;
 }
 
 p {

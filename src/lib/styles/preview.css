@@ -30,9 +30,17 @@
     order: 1;
 }
 
+/* CSS counter to simulate page numbers in preview */
+.toc-list {
+    counter-reset: toc-page;
+}
+
 .toc-list a::after {
-    content: "";
+    counter-increment: toc-page;
+    content: counter(toc-page);
     order: 2;
+    opacity: 0.4;
+    font-size: 0.9em;
 }
 
 /* TOC level indentation */
@@ -101,7 +109,7 @@
 
 /* Sangría en párrafos consecutivos */
 .preview-content p+p {
-    text-indent: 2em;
+    text-indent: 1.5em;
 }
 
 /* === TÍTULOS === */
@@ -121,27 +129,36 @@
 }
 
 .preview-content h3 {
+    text-align: left;
     font-size: 1.15rem;
+    font-weight: bold;
     margin-top: 1.5rem;
     margin-bottom: 0.75rem;
 }
 
 .preview-content h4 {
-    font-size: 1.15rem;
-    margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
+    text-align: left;
+    font-size: 1.05rem;
+    font-style: italic;
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
 }
 
 .preview-content h5 {
-    font-size: 1.15rem;
-    margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
+    text-align: left;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
 }
 
 .preview-content h6 {
-    font-size: 1.15rem;
-    margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
+    text-align: left;
+    font-size: 1rem;
+    font-variant: small-caps;
+    font-weight: normal;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
 }
 
 /* === LISTAS === */

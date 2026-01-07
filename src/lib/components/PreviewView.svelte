@@ -116,7 +116,7 @@
     }
 
     .preview-content :global(p + p) {
-        text-indent: 2em;
+        text-indent: 1.5em;
     }
 
     /* Estilo alternativo: párrafos separados */
