@@ -47,6 +47,22 @@ html.pagedjs-ready { overflow: auto; }
 ${css}
     </style>
     <script src="https://unpkg.com/pagedjs/dist/paged.polyfill.js"></script>
+    <script>
+/* Handle internal anchor links within the iframe */
+document.addEventListener('click', function(e) {
+    const link = e.target.closest('a[href^="#"]');
+    if (link) {
+        e.preventDefault();
+        const targetId = link.getAttribute('href').slice(1);
+        // Use getElementById instead of querySelector('#id') because
+        // IDs starting with digits are valid HTML but invalid CSS selectors
+        const target = document.getElementById(targetId);
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+});
+    </script>
 </head>
 <body>
 ${bodyHtml}

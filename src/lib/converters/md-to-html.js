@@ -46,6 +46,10 @@ function extractPandocAttributes(markdown) {
         const idMatch = attrString.match(/#([a-zA-Z0-9_-]+)/);
         if (idMatch) {
             id = idMatch[1];
+            // Fix: CSS selectors cannot start with a digit (causes Paged.js to crash)
+            if (/^\d/.test(id)) {
+                id = 's-' + id;
+            }
         }
 
         // Guardar atributos indexados por el título limpio
@@ -57,6 +61,28 @@ function extractPandocAttributes(markdown) {
     });
 
     return { markdown: processedMarkdown, attributes };
+}
+
+/**
+ * Plugin to ensure IDs don't start with a number (invalid in CSS selectors)
+ */
+function rehypeSafeIds() {
+    return (tree) => {
+        const visit = (node) => {
+            if (node.type === 'element' && /^h[1-6]$/.test(node.tagName)) {
+                if (node.properties && node.properties.id) {
+                    // Prefix if it starts with a digit
+                    if (/^\d/.test(node.properties.id)) {
+                        node.properties.id = 's-' + node.properties.id;
+                    }
+                }
+            }
+            if (node.children && node.children.length > 0) {
+                node.children.forEach(visit);
+            }
+        };
+        visit(tree);
+    };
 }
 
 /**
@@ -134,6 +160,7 @@ const processor = unified()
         allowDangerousHtml: true  // Permitir HTML en Markdown
     })
     .use(rehypeSlug)            // Genera IDs para headings
+    .use(rehypeSafeIds)         // Ensure valid CSS IDs
     .use(rehypeSectionize, {    // Envuelve solo h1 en <section>
         level: 'h1'             // Solo seccionar h1, dejar h2-h6 como hermanos
     })
