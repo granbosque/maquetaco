@@ -28,6 +28,7 @@
         } else {
             metadata.toc = appState.config.enableTOC;
         }
+        metadata.tocDepth = appState.config.tocDepth || 1;
 
         return renderTemplate("preview", metadata, html);
     });

@@ -208,16 +208,20 @@ export function convertDocument(content, lang) {
 
 /**
  * Genera una tabla de contenidos HTML a partir del contenido HTML
- * Busca los h1, extrae su texto y ID, y crea una lista de enlaces.
+ * Busca los headings hasta el nivel especificado, extrae su texto y ID, y crea una lista de enlaces.
  * @param {string} html - Contenido HTML del cuerpo
+ * @param {number} [depth=1] - Nivel máximo de headings a incluir (1=solo h1, 2=h1+h2, etc.)
  * @returns {string} HTML de la tabla de contenidos (ul.toc-list)
  */
-export function generateTableOfContents(html) {
+export function generateTableOfContents(html, depth = 1) {
     if (!html) return '';
+
+    // Construir selector dinámico: 'h1' para depth=1, 'h1, h2' para depth=2, etc.
+    const selector = Array.from({ length: depth }, (_, i) => `h${i + 1}`).join(', ');
 
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
-    const headings = doc.querySelectorAll('h1');
+    const headings = doc.querySelectorAll(selector);
 
     if (headings.length === 0) return '';
 
@@ -226,8 +230,10 @@ export function generateTableOfContents(html) {
     headings.forEach(heading => {
         const text = heading.textContent;
         const id = heading.id;
+        const level = parseInt(heading.tagName.substring(1), 10);
         if (text && id) {
-            tocHtml += `  <li><a href="#${id}"><span class="toc-text">${text}</span></a></li>\n`;
+            // Añadir clase de nivel para posible indentación CSS
+            tocHtml += `  <li class="toc-level-${level}"><a href="#${id}"><span class="toc-text">${text}</span></a></li>\n`;
         }
     });
 

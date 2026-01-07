@@ -336,6 +336,15 @@
         z-index: 1;
     }
 
+    /* TOC level indentation */
+    nav#TOC ul.toc-list li.toc-level-2 {
+        padding-left: 1.5em;
+    }
+
+    nav#TOC ul.toc-list li.toc-level-3 {
+        padding-left: 3em;
+    }
+
     section.epigraph {
         page: epigraph-page;
     }

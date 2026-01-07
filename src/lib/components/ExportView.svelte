@@ -87,6 +87,7 @@
             // Manual: lo que diga el usuario
             meta.toc = appState.config.enableTOC;
         }
+        meta.tocDepth = appState.config.tocDepth || 1;
 
         // Inyectar imagen de portada
         if (appState.config.imagePreview) {

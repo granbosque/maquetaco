@@ -168,9 +168,10 @@ function createPackageDocument(metadata, hasCover, coverMime = 'image/jpeg', cov
  */
 function createNavDocument(metadata, htmlContent) {
     const title = escapeXml(metadata.title || 'Sin título');
+    const tocDepth = metadata.tocDepth || 2;
 
     // Extraer encabezados para la tabla de contenidos
-    const toc = extractTableOfContents(htmlContent);
+    const toc = extractTableOfContents(htmlContent, tocDepth);
 
     return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
@@ -222,11 +223,16 @@ function createContentDocument(metadata, htmlContent) {
 
 /**
  * Extrae encabezados del HTML para crear tabla de contenidos
+ * @param {string} html - Contenido HTML
+ * @param {number} [depth=2] - Nivel máximo de headings a incluir
  */
-function extractTableOfContents(html) {
+function extractTableOfContents(html, depth = 2) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
-    const headings = doc.querySelectorAll('h1, h2');
+    
+    // Construir selector dinámico
+    const selector = Array.from({ length: depth }, (_, i) => `h${i + 1}`).join(', ');
+    const headings = doc.querySelectorAll(selector);
 
     if (headings.length === 0) {
         return '<li><a href="content.xhtml">Contenido</a></li>';

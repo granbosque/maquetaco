@@ -47,10 +47,23 @@
 
     <!-- Options -->
     <div class="style-selector options-section">
-        <label class="checkbox-inline">
-            <input type="checkbox" bind:checked={appState.config.enableTOC} />
-            <span>Generar índice</span>
-        </label>
+        <div class="toc-option">
+            <label class="checkbox-inline">
+                <input type="checkbox" bind:checked={appState.config.enableTOC} />
+                <span>Índice</span>
+            </label>
+            {#if appState.config.enableTOC}
+                <select 
+                    bind:value={appState.config.tocDepth} 
+                    class="toc-depth-select"
+                    title="Profundidad del índice: cuántos niveles de títulos incluir"
+                >
+                    <option value={1}>1 nivel</option>
+                    <option value={2}>2 niveles</option>
+                    <option value={3}>3 niveles</option>
+                </select>
+            {/if}
+        </div>
 
         <label class="checkbox-inline">
             <input type="checkbox" bind:checked={appState.config.includeBranding} />
@@ -79,6 +92,38 @@
     /* Override global checkbox-inline margin for compact layout */
     .options-section .checkbox-inline {
         margin-top: 0;
+    }
+
+    /* TOC option - inline checkbox + dropdown */
+    .toc-option {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .toc-option .checkbox-inline {
+        flex-shrink: 0;
+    }
+
+    .toc-depth-select {
+        padding: 0.1875rem 0.5rem;
+        font-size: 0.6875rem;
+        border-radius: var(--radius);
+        border: 1px solid var(--border-muted);
+        background: var(--bg-surface);
+        color: var(--text-muted);
+        cursor: pointer;
+        min-width: 5.5rem;
+    }
+
+    .toc-depth-select:hover {
+        border-color: var(--border);
+        color: var(--text);
+    }
+
+    .toc-depth-select:focus {
+        outline: none;
+        border-color: var(--accent);
     }
 
     @media (max-width: 300px) {

@@ -19,6 +19,8 @@ class AppState {
 
         // === OTROS ===
         toc: [],
+        enableTOC: undefined,  // undefined = automático, true/false = manual
+        tocDepth: 1,           // Nivel máximo de encabezados en TOC (1=solo H1, 2=H1+H2, etc.)
         imagePreview: '',  // Portada del documento (base64)
 
         content: defaultContent

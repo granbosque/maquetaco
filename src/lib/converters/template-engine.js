@@ -113,7 +113,8 @@ export function prepareTemplateData(frontmatter, bodyHtml) {
 
     // Generar TOC si se solicita
     if (data.toc) {
-        data.tableOfContents = generateTableOfContents(bodyHtml);
+        const tocDepth = frontmatter.tocDepth || 1;
+        data.tableOfContents = generateTableOfContents(bodyHtml, tocDepth);
     }
 
     return data;
