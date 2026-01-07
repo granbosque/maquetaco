@@ -16,10 +16,10 @@
         --body-line-height: 1.15;
 
         /* Control de composición */
-        --paragraph-orphans: 2;
-        --paragraph-widows: 2;
+        --paragraph-orphans: 3;
+        --paragraph-widows: 3;
         --first-paragraph-widows: 4;
-        --section-last-paragraph-orphans: 2;
+        --section-last-paragraph-orphans: 3;
         --section-last-paragraph-widows: 4;
 
         /* Alineaciones */
@@ -457,8 +457,9 @@
             margin-bottom: 1em;
         }
         
-        main p+p {
-            text-indent: 0;
+        /* no solo p+p, porque entonces no se aplicaría tras un salto de página */
+        main p {
+            text-indent: 0 !important;
         }
     }
 

@@ -586,8 +586,9 @@
             margin-bottom: 1em;
         }
         
-        main p+p {
-            text-indent: 0;
+        /* no solo p+p, porque entonces no se aplicaría tras un salto de página */
+        main p {
+            text-indent: 0 !important;
         }
     }
 
