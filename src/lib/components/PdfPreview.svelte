@@ -8,6 +8,8 @@
     let {
         documentHtml = "",
         css = "",
+        scale = 1,
+        preserveScroll = true,
         isLoading = $bindable(false),
         error = $bindable(null),
     } = $props();
@@ -37,10 +39,9 @@
             iframe = await renderInIframe(fullHtml, iframeContainer);
             isLoading = false;
 
-            // Restaurar posición de scroll después de renderizar
-            // Usar requestAnimationFrame para asegurar que el contenido se haya renderizado
+            // Restaurar posición de scroll después de renderizar (solo si preserveScroll)
             requestAnimationFrame(() => {
-                if (iframeContainer) {
+                if (iframeContainer && preserveScroll) {
                     iframeContainer.scrollTop = scrollPosition;
                 }
             });
@@ -60,7 +61,7 @@
     }
 </script>
 
-<div class="preview-container" bind:this={iframeContainer}></div>
+<div class="preview-container" bind:this={iframeContainer} style="--preview-scale: {scale}"></div>
 
 <style>
     .preview-container {
@@ -68,8 +69,13 @@
         position: relative;
         background: var(--bg-app);
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: center;
         overflow: auto;
+        padding: 1rem;
+    }
+
+    .preview-container :global(iframe) {
+        zoom: var(--preview-scale, 1);
     }
 </style>

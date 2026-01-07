@@ -33,19 +33,5 @@
 <FeedbackModal bind:open={showFeedback} />
 
 <style>
-    .icon-btn {
-        background: none;
-        border: none;
-        padding: 0;
-        margin: 0;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        color: inherit;
-        font: inherit;
-    }
-
-    .icon-btn:hover {
-        opacity: 0.8;
-    }
+    /* icon-btn styles are now in components-minimal.css */
 </style>

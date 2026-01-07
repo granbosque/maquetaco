@@ -345,77 +345,6 @@
         overflow: hidden;
     }
 
-    .editor-toolbar {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        padding: 4px 8px;
-        border-bottom: 1px solid var(--border-muted);
-        flex-shrink: 0;
-        overflow-x: auto;
-        /* Scrollbar oculta pero funcional */
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-    }
-
-    .editor-toolbar::-webkit-scrollbar {
-        display: none;
-    }
-
-    .toolbar-group {
-        display: flex;
-        align-items: center;
-        gap: 2px;
-    }
-
-    .toolbar-separator {
-        width: 1px;
-        height: 18px;
-        background-color: var(--border-muted);
-        margin: 0 6px;
-    }
-
-    /* Botones de la toolbar */
-    :global(.editor-toolbar .toolbar-btn) {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        padding: 5px 8px;
-        border-radius: var(--radius-full);
-        background: transparent;
-        border: none;
-        color: var(--text-muted);
-        cursor: pointer;
-        transition: all 0.15s ease;
-        font-size: var(--text-sm);
-        font-weight: var(--weight-medium);
-    }
-
-    :global(.editor-toolbar .toolbar-btn:hover) {
-        background-color: var(--bg-muted);
-        color: var(--text);
-    }
-
-    :global(.editor-toolbar .toolbar-btn.active) {
-        background-color: var(--color-secondary);
-        color: var(--text);
-    }
-
-    /* Botones toggle de paneles - estilo más suave cuando activos */
-    :global(.editor-toolbar .toolbar-btn.toggle-btn.active) {
-        background-color: rgba(102, 187, 106, 0.12);
-        color: var(--color-secondary-hover);
-    }
-
-    :global(.editor-toolbar .toolbar-btn.toggle-btn.active:hover) {
-        background-color: rgba(102, 187, 106, 0.2);
-        color: var(--text);
-    }
-
-    .toolbar-spacer {
-        flex: 1;
-    }
-
     .content {
         flex: 1;
         opacity: 0;
@@ -427,22 +356,5 @@
 
     .content.ready {
         opacity: 1;
-    }
-
-    /* Responsive: ocultar etiquetas */
-    @media (max-width: 900px) {
-        :global(.editor-toolbar .btn-label) {
-            display: none;
-        }
-    }
-
-    @media (max-width: 640px) {
-        .toolbar-separator {
-            margin: 0 4px;
-        }
-
-        :global(.editor-toolbar .toolbar-btn) {
-            padding: 5px 6px;
-        }
     }
 </style>

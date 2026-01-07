@@ -1,38 +1,47 @@
 <script>
     import { appState } from "$lib/stores/appState.svelte.js";
+    import { styleSettings } from "$lib/stores/styleSettings.svelte.js";
     import { convertDocument } from "$lib/converters/md-to-html.js";
     import { renderCustomTemplate } from "$lib/converters/template-engine.js";
     import { generateEpub } from "$lib/converters/epub-generator.js";
     import { exportFormats } from "$lib/config/export-formats.js";
-    import { exportFonts } from "$lib/config/export-fonts.js";
     import { generateDefaultCover } from "$lib/utils/cover-generator.js";
     import PdfPreview from "$lib/components/PdfPreview.svelte";
     import EpubPreview from "$lib/components/EpubPreview.svelte";
+    import StyleSelectors from "$lib/components/StyleSelectors.svelte";
     import {
         Printer,
         Monitor,
         FileText,
-        ChevronDown,
         Smartphone,
         BookOpen,
         Download,
         Loader2,
     } from "lucide-svelte";
-    import { Accordion } from "bits-ui";
 
     // Mapeo de iconos
     const icons = { Monitor, FileText, Printer, Smartphone, BookOpen };
 
     let selectedTheme = $state(exportFormats[1]);
     let selectedThemeId = $state(exportFormats[1].id);
+    let lastFormatId = $state(exportFormats[1].id); // Track format changes
+    let preserveScroll = $state(true); // Reset scroll only on format change
     let pdfPreviewRef = $state(null);
     let isLoading = $state(false);
     let error = $state(null);
-    let selectedFont = $state(exportFonts[0].id);
 
     $effect(() => {
         const theme = exportFormats.find((t) => t.id === selectedThemeId);
-        if (theme) selectedTheme = theme;
+        if (theme) {
+            // Detect if format changed (not just style)
+            if (selectedThemeId !== lastFormatId) {
+                preserveScroll = false;
+                lastFormatId = selectedThemeId;
+            } else {
+                preserveScroll = true;
+            }
+            selectedTheme = theme;
+        }
     });
 
     // Determinar si el formato actual es EPUB
@@ -44,6 +53,9 @@
 
     // Effect para generar HTML y metadatos cuando cambian dependencias
     $effect(() => {
+        // Leer valores del store para que el effect sea reactivo a sus cambios
+        const _paragraphStyle = styleSettings.paragraphStyleId;
+        const _font = styleSettings.fontId;
         generateMetadata();
     });
 
@@ -82,7 +94,7 @@
             meta["cover-image"] = appState.config.imagePreview;
         } else {
             // Prioridad 2: Generar portada con fuente seleccionada
-            const font = exportFonts.find((f) => f.id === selectedFont);
+            const font = styleSettings.font;
             const fontFamily = font ? font.family : "Georgia, serif";
             const fontId = font ? font.id : null;
             meta["cover-image"] = await generateDefaultCover(
@@ -92,6 +104,9 @@
                 fontId,
             );
         }
+
+        // Añadir clase de estilo de párrafo
+        meta.paragraphStyleClass = styleSettings.paragraphStyleClass;
 
         metadata = meta;
     }
@@ -126,71 +141,63 @@
     }
 
     function getFontOverrideCSS() {
-        const font = exportFonts.find((f) => f.id === selectedFont);
-        if (!font || font.id === "georgia") return "";
-        const override = `\n:root { --body-font-family: ${font.family} !important; }\n`;
-        console.log("[Font Override]", selectedFont, override);
-        return override;
+        return styleSettings.fontOverrideCSS;
     }
 </script>
 
 <div class="export-view">
-    <div class="export-panel panel surface floating">
-        <div class="panel-header"><h2>Formato de salida</h2></div>
-
-        <Accordion.Root
-            type="single"
-            value={selectedThemeId}
-            onValueChange={(v) => v && (selectedThemeId = v)}
-            class="format-list"
-        >
-            {#each exportFormats as theme}
-                <Accordion.Item value={theme.id} class="format-item">
-                    <Accordion.Trigger class="format-trigger">
-                        <svelte:component this={icons[theme.icon]} size={18} />
-                        <span>{theme.name}</span>
-                        <ChevronDown size={14} class="chevron" />
-                    </Accordion.Trigger>
-                    <Accordion.Content class="format-content">
-                        <p>{theme.description}</p>
+    <!-- Side Panel -->
+    <aside class="export-sidebar panel">
+        <!-- Scrollable content area -->
+        <div class="sidebar-content">
+            <!-- Format Selector -->
+            <section>
+                <div class="panel-header"><h2>Formato de salida</h2></div>
+                <div class="format-list">
+                    {#each exportFormats as theme}
                         <button
-                            class="toolbar-btn primary"
-                            onclick={theme.type === "epub"
-                                ? handleEpubExport
-                                : handlePrint}
-                            disabled={theme.type !== "epub" && isLoading}
+                            class="format-item"
+                            class:selected={selectedThemeId === theme.id}
+                            onclick={() => selectedThemeId = theme.id}
                         >
-                            {#if theme.type === "epub"}
-                                <Download size={14} />
-                            {:else}
-                                <Printer size={14} />
-                            {/if}
-                            {theme.buttonText}
+                            <svelte:component this={icons[theme.icon]} size={18} />
+                            <span>{theme.name}</span>
                         </button>
-                        {#if theme.type === "pdf"}
-                            <p class="hint">
-                                Se abrirá el diálogo de impresión. Selecciona
-                                "Guardar como PDF" en el desplegable de
-                                impresora.
-                            </p>
-                        {/if}
-                    </Accordion.Content>
-                </Accordion.Item>
-            {/each}
-        </Accordion.Root>
+                    {/each}
+                </div>
+            </section>
 
-        <!-- Font Selector -->
-        <div class="font-selector">
-            <label for="font-select">Tipografía:</label>
-            <select id="font-select" bind:value={selectedFont}>
-                {#each exportFonts as font}
-                    <option value={font.id} style="font-family: {font.family}">
-                        {font.name}
-                    </option>
-                {/each}
-            </select>
+            <!-- Style Options -->
+            <section>
+                <div class="panel-header"><h2>Opciones de estilo</h2></div>
+                <StyleSelectors />
+            </section>
         </div>
-    </div>
+
+        <!-- Fixed footer with description and button -->
+        <div class="sidebar-footer">
+            <p class="format-description">{selectedTheme.description}</p>
+            {#if selectedTheme.type === "pdf"}
+                <p class="format-hint">
+                    Se abrirá el diálogo de impresión. Selecciona "Guardar como PDF".
+                </p>
+            {/if}
+            <button
+                class="toolbar-btn primary export-btn"
+                onclick={selectedTheme.type === "epub"
+                    ? handleEpubExport
+                    : handlePrint}
+                disabled={selectedTheme.type !== "epub" && isLoading}
+            >
+                {#if selectedTheme.type === "epub"}
+                    <Download size={16} />
+                {:else}
+                    <Printer size={16} />
+                {/if}
+                {selectedTheme.buttonText}
+            </button>
+        </div>
+    </aside>
 
     <!-- Preview Area -->
     <div class="preview-area">
@@ -214,6 +221,8 @@
                 bind:this={pdfPreviewRef}
                 {documentHtml}
                 css={selectedTheme.css + getFontOverrideCSS()}
+                scale={selectedTheme.previewScale ?? 1}
+                {preserveScroll}
                 bind:isLoading
                 bind:error
             />
@@ -223,47 +232,64 @@
 
 <style>
     .export-view {
-        position: relative;
         display: flex;
         height: 100%;
         width: 100%;
         background: var(--bg-app);
     }
 
-    .export-panel {
+    .export-sidebar {
         position: absolute;
         left: 1rem;
         top: 1rem;
-        width: 16rem;
-        z-index: 20;
-        padding: 0;
-        scrollbar-gutter: stable;
-    }
-
-    /* Accordion */
-    :global(.format-list) {
+        bottom: 1rem;
+        width: 280px;
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
-        padding: 0.5rem;
-    }
-
-    :global(.format-item) {
-        border-radius: var(--radius);
-        transition: background-color var(--transition);
+        background: var(--bg-surface);
+        border: 1px solid var(--border-muted);
+        border-radius: var(--radius-lg);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        z-index: 20;
         overflow: hidden;
     }
 
-    :global(.format-item[data-state="open"]) {
-        background-color: rgba(102, 187, 106, 0.1);
+    .sidebar-content {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-gutter: stable;
     }
 
-    :global(.format-trigger) {
+    .sidebar-content section {
+        border-bottom: 1px solid var(--border-muted);
+    }
+
+    .sidebar-content section:last-child {
+        border-bottom: none;
+    }
+
+    .sidebar-content .panel-header {
+        padding-bottom: 0;
+    }
+
+    /* Format List */
+    .format-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+        padding: 0.375rem;
+        background: #f4f4f469;
+        border-radius: var(--radius);
+        margin: 0.25rem 0.5rem 0.5rem;
+    }
+
+    .format-item {
         display: flex;
         align-items: center;
         gap: 0.625rem;
         width: 100%;
-        padding: 0.625rem 0.75rem;
+        padding: 0.5rem 0.75rem;
         background: transparent;
         border: none;
         cursor: pointer;
@@ -271,80 +297,46 @@
         font-weight: 500;
         color: var(--text-muted);
         border-radius: var(--radius);
-        transition:
-            background var(--transition),
-            color var(--transition);
+        transition: background var(--transition), color var(--transition);
+        text-align: left;
     }
 
-    :global(.format-trigger:hover) {
+    .format-item:hover {
         background: var(--bg-muted);
     }
 
-    :global(.format-item[data-state="open"] .format-trigger) {
-        color: var(--color-primary);
-        background: transparent;
+    .format-item.selected {
+        color: var(--text);
+        background: rgba(102, 187, 106, 0.2);
     }
 
-    :global(.chevron) {
-        margin-left: auto;
-        color: var(--text-subtle);
-        transition: transform var(--transition);
+    /* Sidebar Footer */
+    .sidebar-footer {
+        flex-shrink: 0;
+        padding: 0.75rem;
+        border-top: 1px solid var(--border-muted);
+        background: var(--bg-surface);
     }
 
-    :global(.format-item[data-state="open"] .chevron) {
-        transform: rotate(180deg);
-        color: var(--color-primary);
-    }
-
-    :global(.format-content) {
-        padding: 0 0.75rem 0.75rem;
+    .format-description {
+        margin: 0 0 0.5rem;
         font-size: 0.75rem;
         color: var(--text-muted);
         line-height: 1.5;
-        overflow: hidden;
     }
 
-    :global(.format-content[data-state="open"]) {
-        animation: accordion-open var(--transition) forwards;
-    }
-
-    :global(.format-content[data-state="closed"]) {
-        animation: accordion-close var(--transition) forwards;
-    }
-
-    :global(.format-content p) {
-        margin: 0 0 0.625rem;
-    }
-
-    :global(.format-content .toolbar-btn) {
-        width: 100%;
-        justify-content: center;
-        font-size: 0.8125rem;
-        padding: 0.5rem;
-    }
-
-    :global(.format-content .hint) {
-        font-size: 0.6rem;
+    .format-hint {
+        margin: 0 0 0.5rem;
+        font-size: 0.65rem;
         color: var(--text-subtle);
-        margin-top: 0.5rem;
         line-height: 1.4;
     }
 
-    .font-selector {
-        padding: 0.75rem;
-        border-top: 1px solid var(--border-muted);
-    }
-
-    .font-selector label {
-        display: block;
-        font-size: 0.75rem;
-        font-weight: 500;
-        color: var(--text-muted);
-        margin-bottom: 0.375rem;
-    }
-
-    .font-selector select {
+    .export-btn {
         width: 100%;
+        justify-content: center;
+        font-size: 0.8125rem;
+        padding: 0.625rem;
     }
 
     .preview-area {
@@ -353,38 +345,5 @@
         display: flex;
     }
 
-    .loading-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--bg-app);
-        z-index: 10;
-    }
-
-    .status-msg {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: var(--text-muted);
-        font-size: 0.875rem;
-        background: var(--bg-panel);
-        padding: 0.75rem 1.25rem;
-        border-radius: var(--radius);
-        box-shadow: var(--shadow-sm);
-    }
-
-    :global(.spin) {
-        animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-        to {
-            transform: rotate(360deg);
-        }
-    }
+    /* loading-overlay, status-msg, and spin animation are now in components-minimal.css */
 </style>

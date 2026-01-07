@@ -451,6 +451,17 @@
         text-indent: 2em;
     }
 
+    /* Estilo alternativo: párrafos separados sin sangría */
+    body.paragraph-spaced {
+        main p {
+            margin-bottom: 1em;
+        }
+        
+        main p+p {
+            text-indent: 0;
+        }
+    }
+
     hr,
     .hr {
         border: 0;

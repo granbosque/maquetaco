@@ -18,9 +18,10 @@ export const exportFormats = [
         name: 'PDF Impresión',
         description: 'Listo para imprimir o subir a KDP. Página en blanco al inicio, márgenes simétricos, encabezados y pies, capítulos comienzan en página derecha.',
         icon: 'Printer',
-        buttonText: 'Imprimir / PDF',
+        buttonText: 'Guardar PDF',
         template: pdfPrintTemplate,
         css: printCss,
+        previewScale: 0.8,
         nota: 'Al pulsar el botón Generar PDF se abrirá la ventana de impresión. Asegúrate de elegir "Guardar como PDF".'
     },
     {
@@ -32,6 +33,7 @@ export const exportFormats = [
         buttonText: 'Guardar PDF',
         template: pdfScreenTemplate,
         css: screenCss,
+        previewScale: 1,
         nota: 'Al pulsar el botón Generar PDF se abrirá la ventana de impresión. Asegúrate de elegir "Guardar como PDF".'
     },
     {
@@ -43,6 +45,7 @@ export const exportFormats = [
         buttonText: 'Guardar PDF',
         template: pdfScreenTemplate,
         css: mobileCss,
+        previewScale: 1,
         nota: 'Al pulsar el botón Generar PDF se abrirá la ventana de impresión. Asegúrate de elegir "Guardar como PDF".'
     },
     {

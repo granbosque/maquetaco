@@ -64,6 +64,12 @@ h3+p {
     text-indent: 0;
 }
 
+/* Estilo alternativo: párrafos separados sin sangría */
+body.paragraph-spaced p {
+    margin-bottom: 1em;
+    text-indent: 0;
+}
+
 img {
     max-width: 100%;
     height: auto;

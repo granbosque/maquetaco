@@ -196,6 +196,8 @@ function createNavDocument(metadata, htmlContent) {
 function createContentDocument(metadata, htmlContent) {
     const title = escapeXml(metadata.title || 'Sin título');
 
+    const paragraphClass = metadata.paragraphStyleClass || '';
+
     return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -204,7 +206,7 @@ function createContentDocument(metadata, htmlContent) {
     <meta charset="UTF-8"/>
     <link rel="stylesheet" type="text/css" href="styles.css"/>
 </head>
-<body>
+<body class="${paragraphClass}">
     ${metadata.dedication ? `<div class="dedication"><p>${escapeXml(metadata.dedication)}</p></div>` : ''}
     ${htmlContent}
     ${metadata.colophon ? `<section class="colophon"><p>${escapeXml(metadata.colophon)}</p></section>` : ''}

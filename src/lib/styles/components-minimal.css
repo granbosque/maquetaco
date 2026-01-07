@@ -201,6 +201,112 @@ header h1 {
     transform: scale(0.98);
 }
 
+/* === EDITOR TOOLBAR SPECIFIC === */
+.editor-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--border-muted);
+    flex-shrink: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.editor-toolbar::-webkit-scrollbar {
+    display: none;
+}
+
+.editor-toolbar .toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+/* Editor button variant (pill shaped, smaller padding) */
+.editor-toolbar .toolbar-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 8px;
+    border-radius: var(--radius-full);
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    min-height: unset; /* Override generic toolbar-btn min-height */
+    line-height: normal; /* Reset line-height */
+}
+
+.editor-toolbar .toolbar-btn:hover {
+    background-color: var(--bg-muted);
+    color: var(--text);
+}
+
+.editor-toolbar .toolbar-btn.active {
+    background-color: var(--color-secondary);
+    color: var(--text);
+}
+
+/* Toggle Panel Buttons (Estructura, Configuración) */
+.editor-toolbar .toolbar-btn.toggle-btn {
+    flex: 0 0 auto;
+    flex-direction: row;
+    width: auto;
+}
+
+.editor-toolbar .toolbar-btn.toggle-btn.active {
+    background-color: rgba(102, 187, 106, 0.12);
+    color: var(--color-secondary-hover);
+}
+
+.editor-toolbar .toolbar-btn.toggle-btn.active:hover {
+    background-color: rgba(102, 187, 106, 0.2);
+    color: var(--text);
+}
+
+/* Highlight Button (Abrir - cuando vacío) */
+.editor-toolbar .toolbar-btn.highlight {
+    background-color: rgba(255, 200, 0, 0.25);
+    color: var(--text);
+}
+
+.editor-toolbar .toolbar-btn.highlight:hover {
+    background-color: rgba(255, 200, 0, 0.4);
+}
+
+.editor-toolbar .toolbar-separator {
+    width: 1px;
+    height: 18px;
+    background-color: var(--border-muted);
+    margin: 0 6px;
+}
+
+.editor-toolbar .toolbar-spacer {
+    flex: 1;
+}
+
+/* Responsive styles for Editor Toolbar */
+@media (max-width: 900px) {
+    .editor-toolbar .btn-label {
+        display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .editor-toolbar .toolbar-separator {
+        margin: 0 4px;
+    }
+
+    .editor-toolbar .toolbar-btn {
+        padding: 5px 6px;
+    }
+}
+
 /* === TOOLTIP === */
 .tooltip {
     background-color: var(--text);
@@ -399,6 +505,49 @@ textarea.expandable:focus {
     height: 1.1em;
     margin: 0;
     display: inline-block;
+}
+
+/* Toggle button group (radio-like selection) */
+.style-toggle {
+    display: flex;
+    gap: var(--space-xs);
+}
+
+.toggle-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: var(--space-xs);
+    border: none;
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--text-subtle);
+    cursor: pointer;
+    font-size: var(--text-xs);
+    font-weight: var(--weight-normal);
+    transition: all var(--transition);
+}
+
+.toggle-btn:hover {
+    color: var(--text-muted);
+}
+
+.toggle-btn.active {
+    color: var(--text);
+    font-weight: var(--weight-medium);
+}
+
+.toggle-btn.active .toggle-label {
+    background: var(--bg-muted);
+    padding: 2px var(--space-xs);
+    border-radius: 3px;
+}
+
+.toggle-label {
+    white-space: nowrap;
 }
 
 .hint-icon {
@@ -633,7 +782,6 @@ textarea.expandable:focus {
 
 
 /* === ACCORDION FORMAT ITEMS === */
-/* === ACCORDION FORMAT ITEMS === */
 
 .format-content .toolbar-btn.primary {
     background-color: var(--color-secondary);
@@ -691,6 +839,54 @@ textarea.expandable:focus {
 }
 
 
-.panel.surface {
-    background-color: var(--bg-surface);
+/* === ICON BUTTON === */
+.icon-btn {
+    background: transparent;
+    border: none;
+    padding: var(--space-xs);
+    margin: 0;
+    border-radius: var(--radius);
+    cursor: pointer;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-btn:hover {
+    background: var(--bg-muted);
+}
+
+/* === LOADING OVERLAY === */
+.loading-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-app);
+    z-index: 10;
+}
+
+.status-msg {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    background: var(--bg-surface);
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+}
+
+/* === SPIN ANIMATION === */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
