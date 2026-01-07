@@ -1,0 +1,111 @@
+/* JetBrains Mono (Variable) */
+@font-face {
+    font-family: 'JetBrains Mono';
+    src: url('/fonts/ui/JetBrainsMono-VariableFont_wght.ttf') format('truetype');
+    font-weight: 100 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'JetBrains Mono';
+    src: url('/fonts/ui/JetBrainsMono-Italic-VariableFont_wght.ttf') format('truetype');
+    font-weight: 100 800;
+    font-style: italic;
+    font-display: swap;
+}
+
+/* Zilla Slab */
+@font-face {
+    font-family: 'Zilla Slab';
+    src: url('/fonts/ui/ZillaSlab-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Zilla Slab';
+    src: url('/fonts/ui/ZillaSlab-LightItalic.ttf') format('truetype');
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Zilla Slab';
+    src: url('/fonts/ui/ZillaSlab-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Zilla Slab';
+    src: url('/fonts/ui/ZillaSlab-Italic.ttf') format('truetype');
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Zilla Slab';
+    src: url('/fonts/ui/ZillaSlab-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Zilla Slab';
+    src: url('/fonts/ui/ZillaSlab-MediumItalic.ttf') format('truetype');
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Zilla Slab';
+    src: url('/fonts/ui/ZillaSlab-SemiBold.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Zilla Slab';
+    src: url('/fonts/ui/ZillaSlab-SemiBoldItalic.ttf') format('truetype');
+    font-weight: 600;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Zilla Slab';
+    src: url('/fonts/ui/ZillaSlab-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Zilla Slab';
+    src: url('/fonts/ui/ZillaSlab-BoldItalic.ttf') format('truetype');
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+}
+
+/* Pally */
+@font-face {
+    font-family: 'Pally';
+    src: url('/fonts/ui/Pally-Regular.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Pally';
+    src: url('/fonts/ui/Pally-Medium.otf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Pally';
+    src: url('/fonts/ui/Pally-Bold.otf') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}

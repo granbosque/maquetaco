@@ -202,7 +202,7 @@ export const clickableLinksTheme = EditorView.theme({
         color: "#333", // --text
         borderRadius: "8px", // --radius
         fontSize: "14px", // --text-sm
-        fontFamily: "'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", // --font-main
+        fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", // --font-main
         boxShadow: "0 1px 3px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.05)", // --shadow
         border: "1px solid #e0e0e0" // --border
     },
