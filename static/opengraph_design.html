@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Maquetaco OpenGraph</title>
+    <style>
+        @font-face {
+            font-family: 'Pally';
+            src: url('./fonts/ui/Pally-Bold.otf') format('opentype');
+            font-weight: 700;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            height: 100%;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* OpenGraph canvas: 1200x630 exact */
+        .og-canvas {
+            width: 1200px;
+            height: 630px;
+            background: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 24px solid #84CC16; /* Solid Lime Bottom Strip */
+        }
+        
+        /* Optional: Very subtle yellow detail top right corner */
+        .accent-corner {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 120px 120px 0;
+            border-color: transparent #FDE047 transparent transparent; /* Yellow corner */
+        }
+
+        .container {
+            display: flex;
+            align-items: center;
+            gap: 80px;
+            padding: 0 100px;
+            z-index: 1;
+            /* Adjust slightly up because of bottom border */
+            transform: translateY(-12px); 
+        }
+
+        .logo {
+            width: 250px;
+            height: 250px;
+            flex-shrink: 0;
+            /* Very minimal clean shadow */
+            filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.05)); 
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        h1 {
+            font-family: 'Pally', sans-serif;
+            font-size: 80px;
+            font-weight: 700;
+            color: #111827;
+            letter-spacing: -1.5px;
+            line-height: 1;
+        }
+
+        .tagline {
+            font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+            font-size: 28px;
+            font-weight: 400;
+            color: #4B5563;
+            line-height: 1.4;
+            max-width: 580px;
+        }
+
+        .features {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-top: 28px;
+        }
+
+        .feature {
+            font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            color: #65A30D; /* Lime 600 */
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .separator {
+            width: 5px;
+            height: 5px;
+            background: #D9F99D; /* Lime 200 */
+            border-radius: 50%;
+            margin: 0 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="og-canvas">
+        <div class="accent-corner"></div>
+        <div class="container">
+            <img src="./icon.svg" alt="Maquetaco" class="logo">
+            
+            <div class="content">
+                <h1>Maquetaco</h1>
+                <p class="tagline">Crea PDFs y EPUBs listos para publicar <br/>sin complicarte.</p>
+                
+                <div class="features">
+                    <span class="feature">100% Local</span>
+                    <span class="separator"></span>
+                    <span class="feature">Sin Registro</span>
+                    <span class="separator"></span>
+                    <span class="feature">Open Source</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
