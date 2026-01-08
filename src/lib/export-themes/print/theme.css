@@ -91,6 +91,7 @@
     }
 
     /* textos para mostrar en encabezado o pie */
+    /* Definición de datos para cabeceras */
     header .title {
         string-set: book-title content(text);
     }
@@ -102,100 +103,37 @@
     h1 {
         string-set: book-h1 content(text);
     }
+    
+    h2 {
+        string-set: book-h2 content(text);
+    }
 
 
+    /* =========================================
+       REGLAS DE PÁGINA (LAYOUTS / PRESETS)
+       ========================================= */
 
-    /* Reglas para disposición de páginas.
-       Resumen de esta plantilla con los valores por defecto
-       - Página general en tamaño A5 con márgenes simétricos
-       - No hay diferencia entre páginas izquierdas y derechas
-       - Página de portada con seudoclase cover-page, sin márgenes ni numeración 
-       - Página de título, sin numeración, con seudoclase title con dos bloques:
-         - Título y autor en la parte superior (campos title y author de los metadatos del archivo markdown)
-         - Fecha y copyright en la parte inferior (campos date, editor y rights de los metadatos del archivo markdown)
-       - Pagias de contenido, con seudoclase content, numeración en la parte inferior centrada
-       - Página final, con clase .colophon
-       */
+    /* Configuración base para Paged.js */
     @page {
-        /* Este tamaño se aplica a todas las páginas */
-        size: 6in 9in;
-        margin: 0;
-        /* IMPORTANTE poner aquí margin:0 para que no se añada márgenes adicionales,
-           los márgenes se pueden poner estilos de páginas (por ejemplo @page content-pages o @page header) y ahí no afectan al tamaño de página de impresión. */
-    }
-
-    @page blank-page {
-        /* Mismo tamaño que @page general, sin márgenes ni encabezados */
         size: 6in 9in;
         margin: 0;
     }
 
-
-    @page title-page {
-        margin: 0;
-        box-sizing: border-box;
-    }
-
-    @page half-title-page {
-        margin: 0;
-        box-sizing: border-box;
-    }
-
-    @page copyright-page {
-        margin: 0;
-        box-sizing: border-box;
-    }
-
-    /* Páginas de contenido, márgenes diferentes en izquierda y derecha, numeración en el exterior */
-    @page content-pages {
-        margin-top: 26mm;
-        margin-bottom: 26mm;
-    }
-
-    @page content-pages:left {
-        margin-left: 14mm;
-        margin-right: 32mm;
-
-        @top-left {
-            content: counter(page);
-            font-size: 8pt;
-        }
-
-        @top-right {
-            content: string(book-title);
-            /* puedes usar book-title, book-author o book-h1, que sería el nombre del capítulo actual */
-            font-size: 8pt;
-            font-variant: small-caps;
-        }
-    }
-
-    @page content-pages:right {
-        margin-left: 32mm;
-        margin-right: 14mm;
-
-        @top-right {
-            content: counter(page);
-            font-size: 8pt;
-        }
-
-        @top-left {
-            content: string(book-author);
-            font-size: 8pt;
-            font-variant: small-caps;
-        }
-    }
-
-    /*  primera página de cada sección/capítulo con estilo diferente, sin numeración */
-    @page content-pages:first {
-        @top-left {
-            content: none;
-        }
-
-        @top-right {
-            content: none;
-        }
-    }
-
+    /* Páginas especiales (siempre igual) */
+    @page blank-page { size: 6in 9in; margin: 0; }
+    @page title-page { margin: 0; }
+    @page half-title-page { margin: 0; }
+    @page copyright-page { margin: 0; }
+    @page final-page { margin: 0; padding: 0; }
+    @page dedication-page { margin: 0; padding: 0; }
+    @page epigraph-page { margin: 0; padding: 0; }
+    
+    /* Los estilos de cabecera/pie (@page content-pages) están en archivos separados:
+       - header-footer--title-author.css
+       - header-footer--title-h1.css
+       - header-footer--h1-h2.css
+       - header-footer--footer-only.css
+    */
 
     /* Página final sin numeración */
     @page final-page {
@@ -353,13 +291,8 @@
         page: made-with-page;
     }
 
-    .made-with-page {
-        page: made-with-page;
-    }
-
-    section {
-        page: content-pages;
-    }
+    /* La asignación de page:content-pages para .main-content y section 
+       se hace ahora en los archivos header-footer--*.css modulares */
 
     strong,
     b {

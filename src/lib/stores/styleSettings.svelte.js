@@ -4,27 +4,23 @@
  */
 import { exportFonts } from '$lib/config/export-fonts.js';
 import { paragraphStyles } from '$lib/config/export-paragraph-styles.js';
+import { headerStyles } from '$lib/config/export-header-styles.js';
 
 // Estado reactivo compartido
 let selectedFontId = $state(exportFonts[0].id);
 let selectedParagraphStyleId = $state(paragraphStyles[0].id);
+let selectedHeaderStyleId = $state(headerStyles[0].id);
 
 export const styleSettings = {
     // Getters
-    get fontId() {
-        return selectedFontId;
-    },
-    get paragraphStyleId() {
-        return selectedParagraphStyleId;
-    },
+    get fontId() { return selectedFontId; },
+    get paragraphStyleId() { return selectedParagraphStyleId; },
+    get headerStyleId() { return selectedHeaderStyleId; },
 
     // Setters
-    set fontId(value) {
-        selectedFontId = value;
-    },
-    set paragraphStyleId(value) {
-        selectedParagraphStyleId = value;
-    },
+    set fontId(value) { selectedFontId = value; },
+    set paragraphStyleId(value) { selectedParagraphStyleId = value; },
+    set headerStyleId(value) { selectedHeaderStyleId = value; },
 
     // Computed: objeto de fuente completo
     get font() {
@@ -40,6 +36,12 @@ export const styleSettings = {
     get paragraphStyleClass() {
         const style = paragraphStyles.find(s => s.id === selectedParagraphStyleId);
         return style ? style.class : '';
+    },
+
+    // Computed: CSS para cabecera/pie seleccionado
+    get headerStyleCss() {
+        const style = headerStyles.find(s => s.id === selectedHeaderStyleId);
+        return style ? style.css : '';
     },
 
     // Computed: CSS override para fuente

@@ -26,7 +26,10 @@
     onMount(() => renderDocument());
 
     $effect(() => {
-        if (documentHtml && iframeContainer) renderDocument();
+        // Ejecutar cuando cambie el HTML, CSS o contenedor
+        if (iframeContainer && (documentHtml || css)) {
+            renderDocument();
+        }
     });
 
     // Actualizar zoom cuando cambia el scale de las props (cambio de formato)
@@ -57,7 +60,7 @@
         try {
             // Simular delay de 5 segundos para probar UI
             // await new Promise((resolve) => setTimeout(resolve, 5000));
-
+            
             const fullHtml = generateFullDocument(documentHtml, css);
             iframe = await renderInIframe(fullHtml, iframeContainer);
             isLoading = false;

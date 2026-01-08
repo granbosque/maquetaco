@@ -171,7 +171,7 @@
             <!-- Style Options -->
             <section>
                 <div class="panel-header"><h2>Opciones de estilo</h2></div>
-                <StyleSelectors />
+                <StyleSelectors availableHeaderPresets={selectedTheme.headerPresets} />
             </section>
         </div>
 
@@ -221,7 +221,7 @@
             <PdfPreview
                 bind:this={pdfPreviewRef}
                 {documentHtml}
-                css={selectedTheme.css + getFontOverrideCSS()}
+                css={selectedTheme.css + (selectedTheme.headerPresets ? styleSettings.headerStyleCss : '') + getFontOverrideCSS()}
                 scale={selectedTheme.previewScale ?? 1}
                 {preserveScroll}
                 bind:isLoading

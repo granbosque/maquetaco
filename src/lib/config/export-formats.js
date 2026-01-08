@@ -3,8 +3,8 @@
  * Define los formatos disponibles para generar PDFs y eBooks.
  */
 
-// Importar plantillas y estilos raw
-// Importar plantillas y estilos raw
+// Importar plantillas y estilos
+import { headerStyles } from '$lib/config/export-header-styles.js';
 import pdfPrintTemplate from '$lib/export-themes/print/template.html?raw';
 import printCss from '$lib/export-themes/print/theme.css?raw';
 import pdfScreenTemplate from '$lib/export-themes/screen/template.html?raw';
@@ -21,6 +21,7 @@ export const exportFormats = [
         buttonText: 'Guardar PDF',
         template: pdfPrintTemplate,
         css: printCss,
+        headerPresets: headerStyles, // Define explícitamente qué estilos soporta
         previewScale: 0.8,
         nota: 'Al pulsar el botón Generar PDF se abrirá la ventana de impresión. Asegúrate de elegir "Guardar como PDF".'
     },

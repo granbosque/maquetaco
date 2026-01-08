@@ -6,6 +6,8 @@
     import ParagraphIndent from "$lib/icons/ParagraphIndent.svelte";
     import ParagraphSpaced from "$lib/icons/ParagraphSpaced.svelte";
 
+    let { availableHeaderPresets = null } = $props();
+
     // Mapeo de iconos
     const icons = {
         ParagraphIndent,
@@ -26,11 +28,26 @@
         </select>
     </div>
 
+    <!-- Header Style Selector (Dynamic based on capability) -->
+    {#if availableHeaderPresets && availableHeaderPresets.length > 0}
+    <div class="style-selector">
+        <label for="header-select">Cabecera y Pie</label>
+        <select id="header-select" bind:value={styleSettings.headerStyleId}>
+            {#each availableHeaderPresets as style}
+                <option value={style.id} title={style.description}>
+                    {style.name}
+                </option>
+            {/each}
+        </select>
+    </div>
+    {/if}
+
     <!-- Paragraph Style Toggle -->
     <div class="style-selector">
         <label id="paragraph-style-label">Estilo de párrafo</label>
         <div class="style-toggle" role="radiogroup" aria-labelledby="paragraph-style-label">
             {#each paragraphStyles as style}
+                {@const IconComponent = icons[style.icon]}
                 <button
                     class="toggle-btn"
                     class:active={styleSettings.paragraphStyleId === style.id}
@@ -38,7 +55,7 @@
                     title={style.description}
                     aria-pressed={styleSettings.paragraphStyleId === style.id}
                 >
-                    <svelte:component this={icons[style.icon]} size={20} />
+                    <IconComponent size={20} />
                     <span class="toggle-label">{style.name}</span>
                 </button>
             {/each}

@@ -110,6 +110,45 @@ El sistema incluye varias plantillas para generar PDFs con diferentes estilos y 
 - Aplica estilos a tipografía, márgenes, interlineado, separación silábica, líneas viudas y huérfanas, etc. Todo exclusivamente a través de css.
 
 
+### Arquitectura CSS modular para exportación
+
+Los estilos CSS para las plantillas de exportación usan **dos sistemas de composición**, esto es un parche y finalmente se unificará, pero para resolver problemas he ido improvisando técnicas:
+
+#### 1. CSS modular (archivos separados)
+
+Se usa para características que Paged.js no soporta con selectores de clase (como las reglas `@page`).
+
+
+- theme.css: CSS base: tamaño página, tipografía, márgenes, estructura |
+- header-footer--title-author.css: Cabecera: Número de página y Título/Autor en páginas pares/impares.
+- header-footer--title-h1.css: Cabecera: Número de página y título/H1 en páginas pares/impares.
+- header-footer--h1-h2.css: Cabecera: Número de página y H1/H2 en páginas pares/impares.
+- header-footer--footer-only.css: Sin cabecera, solo número de página en el pie
+
+**Nomenclatura:** caracteristica--opcion.css (doble guión para variantes)
+
+#### 2. Clases en <body>
+
+Se usa para características que sí funcionan con selectores CSS normales.
+
+Por ahora:
+
+- body.paragraph-spaced: Párrafos separados sin sangría
+
+Las reglas para estas clases están definidas dentro del theme.css de cada plantilla.
+
+#### Limitaciones de Paged.js
+
+En principio me hubiera gustado tenerlo todo en un único CSS con variables o clases, pero resultaba demasiado ilegible. Además, con Paged.js (al menos en la versión actual) hay varias limitaciones:
+
+- Para el contenido de cabeceras/pies (función string() de Paged Media) no funcionan las clases aplicadas al elemento html ni al body. Las reglas @page no heredan selectores de clase.
+- Tampoco funciona calc() dentro de @page, por lo que los márgenes están hardcodeados en mm.
+
+**Mejoras pendientes:**
+- Añadir más modularidad para el tamaño de página
+
+
+
 # Estructura del proyecto
 
 El flujo de trabajo se divide en tareas muy diferenciadas:

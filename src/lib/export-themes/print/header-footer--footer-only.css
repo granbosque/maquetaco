@@ -1,0 +1,38 @@
+/* header-footer--footer-only.css
+   Sin cabecera. Solo pie de página con número exterior.
+   En este modo, la primera página de capítulo SÍ lleva número (a diferencia de los modos con cabecera).
+*/
+@media print {
+
+    /* Páginas de contenido */
+    @page content-pages {
+        margin-top: 26mm;
+        margin-bottom: 26mm;
+    }
+    
+    @page content-pages:left {
+        margin-left: 14mm;
+        margin-right: 32mm;
+        @bottom-left { 
+            content: counter(page); 
+            font-size: 9pt; 
+        }
+    }
+    
+    @page content-pages:right {
+        margin-left: 32mm;
+        margin-right: 14mm;
+        @bottom-right { 
+            content: counter(page); 
+            font-size: 9pt; 
+        }
+    }
+    
+    /* En este modo NO ocultamos el pie en :first porque no hay cabecera.
+       El número de página debe aparecer siempre, incluso en primera página de capítulo. */
+
+    /* Asignación a elementos */
+    .main-content, section {
+        page: content-pages;
+    }
+}
