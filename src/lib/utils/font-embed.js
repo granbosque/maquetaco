@@ -9,7 +9,7 @@ export const fontFiles = {
     'crimson-pro': '/fonts/Crimson_Pro/CrimsonPro-VariableFont_wght.ttf',
     'spectral': '/fonts/Spectral/Spectral-Regular.ttf',
     'alegreya': '/fonts/Alegreya/Alegreya-VariableFont_wght.ttf',
-    'libre-baskerville': '/fonts/Libre_Baskerville/LibreBaskerville-Regular.ttf',
+    'libre-baskerville': '/fonts/Libre_Baskerville/LibreBaskerville-VariableFont_wght.ttf',
     'vollkorn': '/fonts/Vollkorn/Vollkorn-VariableFont_wght.ttf',
     'cardo': '/fonts/Cardo/Cardo-Regular.ttf',
     'gentium-plus': '/fonts/Gentium_Plus/GentiumPlus-Regular.ttf',
