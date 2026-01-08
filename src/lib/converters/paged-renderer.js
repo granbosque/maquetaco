@@ -46,7 +46,7 @@ html, body { background-color: ${bgApp} !important;}
 html.pagedjs-ready { overflow: auto; }
 ${css}
     </style>
-    <script src="https://unpkg.com/pagedjs/dist/paged.polyfill.js"></script>
+    <script src="/paged.polyfill.js"></script>
     <script>
 /* Handle internal anchor links within the iframe */
 document.addEventListener('click', function(e) {
