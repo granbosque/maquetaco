@@ -1096,6 +1096,9 @@
 	}
 
 	function findElement(node, doc, forceQuery) {
+		if (!node || typeof node.getAttribute !== "function") {
+			return undefined;
+		}
 		const ref = node.getAttribute("data-ref");
 		return findRef(ref, doc, forceQuery);
 	}
@@ -2083,6 +2086,10 @@
 			}
 
 			let original = findElement(lastChild, source);
+
+			if (!original) {
+				return;
+			}
 
 			if (lastNodeIndex) {
 				original = original.childNodes[lastNodeIndex];
