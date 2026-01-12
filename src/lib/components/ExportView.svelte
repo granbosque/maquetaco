@@ -3,7 +3,7 @@
     import { styleSettings } from "$lib/stores/styleSettings.svelte.js";
     import { convertDocument } from "$lib/converters/md-to-html.js";
     import { renderCustomTemplate } from "$lib/converters/template-engine.js";
-    import { generateEpub } from "$lib/converters/epub-generator.js";
+    import { downloadEpub } from "$lib/converters/md-to-epub.js";
     import { exportFormats } from "$lib/config/export-formats.js";
     import { generateDefaultCover } from "$lib/utils/cover-generator.js";
     import PdfPreview from "$lib/components/PdfPreview.svelte";
@@ -132,12 +132,18 @@
 
     async function handleEpubExport() {
         try {
-            const coverImage =
-                appState.config.imagePreview || metadata["cover-image"] || null;
-            await generateEpub(metadata, contentHtml, coverImage);
+            isLoading = true;
+            // Usar portada generada si no hay una cargada
+            const config = {
+                ...appState.config,
+                imagePreview: appState.config.imagePreview || metadata["cover-image"] || null
+            };
+            await downloadEpub(config);
         } catch (e) {
             error = e.message;
             console.error("Error generando EPUB:", e);
+        } finally {
+            isLoading = false;
         }
     }
 

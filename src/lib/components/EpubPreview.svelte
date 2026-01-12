@@ -8,7 +8,7 @@
     } from "lucide-svelte";
     import { fade, slide } from "svelte/transition";
     import ePub from "epubjs";
-    import { createEpubBlob } from "$lib/converters/epub-generator.js";
+    import { createEpubBlob } from "$lib/converters/md-to-epub.js";
 
     let {
         documentHtml = "",
