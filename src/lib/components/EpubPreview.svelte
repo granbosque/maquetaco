@@ -299,15 +299,6 @@
             
             <div class="progress-bar"><div class="fill" style="width: {progress}%"></div></div>
             <span class="progress-text">{progress}%</span>
-            
-            <div class="nav-buttons">
-                <button class="toolbar-btn icon-only" onclick={prevPage} disabled={!canGoPrev} title="← PageUp">
-                    <ChevronLeft size={16} />
-                </button>
-                <button class="toolbar-btn icon-only" onclick={nextPage} disabled={!canGoNext} title="→ PageDown">
-                    <ChevronRight size={16} />
-                </button>
-            </div>
         </div>
         
         <div class="epub-container" bind:this={container}>
@@ -318,6 +309,26 @@
                 </div>
             {/if}
         </div>
+        
+        <!-- Botones flotantes de navegación -->
+        <button 
+            class="nav-btn nav-btn-prev" 
+            onclick={prevPage} 
+            disabled={!canGoPrev} 
+            title="← Página anterior"
+            aria-label="Página anterior"
+        >
+            <ChevronLeft size={20} />
+        </button>
+        <button 
+            class="nav-btn nav-btn-next" 
+            onclick={nextPage} 
+            disabled={!canGoNext} 
+            title="→ Página siguiente"
+            aria-label="Página siguiente"
+        >
+            <ChevronRight size={20} />
+        </button>
     </div>
     
     {#if showToc}
@@ -347,6 +358,7 @@
         border-radius: var(--radius-lg);
         box-shadow: var(--shadow);
         overflow: hidden;
+        position: relative;
     }
 
     .top-bar {
@@ -390,11 +402,6 @@
         text-align: right;
     }
 
-    .nav-buttons {
-        display: flex;
-        gap: var(--space-xxs);
-    }
-
     .epub-container {
         flex: 1;
         overflow: hidden;
@@ -405,6 +412,49 @@
         display: block;
         width: 100%;
         height: 100%;
+    }
+
+    /* Botones flotantes de navegación */
+    .nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        z-index: 10;
+        color: var(--text);
+    }
+
+    .nav-btn:hover:not(:disabled) {
+        background: white;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+        transform: translateY(-50%) scale(1.08);
+    }
+
+    .nav-btn:active:not(:disabled) {
+        transform: translateY(-50%) scale(0.95);
+    }
+
+    .nav-btn:disabled {
+        opacity: 0.25;
+        cursor: not-allowed;
+    }
+
+    .nav-btn-prev {
+        left: 12px;
+    }
+
+    .nav-btn-next {
+        right: 12px;
     }
 
     .loading-overlay {
