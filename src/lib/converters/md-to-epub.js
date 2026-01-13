@@ -52,14 +52,22 @@ export async function exportToEpub(config, options = {}) {
         epub.setBodyClass(options.bodyClass);
     }
 
-    // 5. Convertir MD → HTML
+    // 5. Página de índice visible (si está habilitada)
+    if (config.enableTOC) {
+        epub.enableTocPage({
+            title: 'Índice',
+            depth: config.tocDepth || 1
+        });
+    }
+
+    // 6. Convertir MD → HTML
     const { body: markdownBody } = separateFrontmatter(config.content || '');
     const html = markdownToHtml(markdownBody, config.lang);
 
-    // 6. Extraer secciones del HTML
+    // 7. Extraer secciones del HTML
     const sections = extractSections(html);
 
-    // 7. Dedicatoria (si existe en metadatos)
+    // 8. Dedicatoria (si existe en metadatos)
     if (config.dedication?.trim()) {
         epub.addChapter({
             id: 'dedication',
@@ -70,7 +78,7 @@ export async function exportToEpub(config, options = {}) {
         });
     }
 
-    // 8. Capítulos (cada <section>)
+    // 9. Capítulos (cada <section>)
     if (sections.length > 0) {
         sections.forEach((section, i) => {
             epub.addChapter({
@@ -88,7 +96,7 @@ export async function exportToEpub(config, options = {}) {
         });
     }
 
-    // 9. Colofón (si existe)
+    // 10. Colofón (si existe)
     if (config.colophon?.trim()) {
         epub.addChapter({
             id: 'colophon',
@@ -99,7 +107,7 @@ export async function exportToEpub(config, options = {}) {
         });
     }
 
-    // 10. Branding (si está habilitado)
+    // 11. Branding (si está habilitado)
     if (config.includeBranding !== false) {
         epub.addChapter({
             id: 'made-with',
@@ -336,6 +344,14 @@ export async function createEpubBlob(metadata, htmlContent, coverImageDataUrl = 
     // Clase del body
     if (bodyClass) {
         epub.setBodyClass(bodyClass);
+    }
+
+    // Página de índice visible (si está habilitada)
+    if (metadata.toc) {
+        epub.enableTocPage({
+            title: 'Índice',
+            depth: metadata.tocDepth || 1
+        });
     }
 
     // Extraer secciones del HTML

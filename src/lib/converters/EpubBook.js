@@ -75,6 +75,9 @@ export class EpubBook {
     /** @type {string} */
     #uuid = '';
 
+    /** @type {{enabled: boolean, title: string, depth: number}} */
+    #tocPage = { enabled: false, title: 'Índice', depth: 1 };
+
     constructor() {
         this.#uuid = this.#generateUUID();
     }
@@ -183,6 +186,27 @@ export class EpubBook {
     }
 
     /**
+     * Habilita la generación de una página de índice visible
+     * @param {Object} [options] - Opciones de configuración
+     * @param {string} [options.title='Índice'] - Título de la página de índice
+     * @param {number} [options.depth=1] - Profundidad de encabezados a incluir (1-3)
+     */
+    enableTocPage(options = {}) {
+        this.#tocPage = {
+            enabled: true,
+            title: options.title || 'Índice',
+            depth: Math.min(Math.max(options.depth || 1, 1), 3)
+        };
+    }
+
+    /**
+     * Deshabilita la página de índice visible
+     */
+    disableTocPage() {
+        this.#tocPage.enabled = false;
+    }
+
+    /**
      * Añade un capítulo al libro
      * @param {EpubChapter} chapter - Datos del capítulo
      * @param {string} chapter.id - Identificador único (se usa para el nombre del archivo)
@@ -276,7 +300,12 @@ export class EpubBook {
             zip.file('OEBPS/cover.xhtml', this.#createCoverPage(coverInfo));
         }
 
-        // 8. Capítulos
+        // 8. Página de índice visible (si está habilitada)
+        if (this.#tocPage.enabled) {
+            zip.file('OEBPS/toc-page.xhtml', this.#createTocPage());
+        }
+
+        // 9. Capítulos
         for (const chapter of this.#chapters) {
             zip.file(`OEBPS/${chapter.id}.xhtml`, this.#createChapterDocument(chapter));
         }
@@ -328,12 +357,25 @@ export class EpubBook {
         <item id="cover-page" href="cover.xhtml" media-type="application/xhtml+xml"/>`;
         }
 
+        // Página de índice visible
+        if (this.#tocPage.enabled) {
+            manifestItems += `
+        <item id="toc-page" href="toc-page.xhtml" media-type="application/xhtml+xml"/>`;
+        }
+
         // Chapters en manifest y spine
         // Si hay portada, añadirla primero en el spine
         let spineItems = coverInfo 
             ? `
         <itemref idref="cover-page"/>`
             : '';
+        
+        // Añadir página de índice al spine (después de portada, antes de capítulos)
+        if (this.#tocPage.enabled) {
+            spineItems += `
+        <itemref idref="toc-page"/>`;
+        }
+
         for (const chapter of this.#chapters) {
             // Detectar si el contenido tiene SVG para añadir la propiedad
             const hasSvg = /<svg[\s>]/i.test(chapter.content);
@@ -387,11 +429,11 @@ export class EpubBook {
     #createNavDocument() {
         const lang = this.#metadata.language || 'es';
         
-        // Generar TOC solo con capítulos que tienen showInToc = true
-        const tocItems = this.#chapters
-            .filter(ch => ch.showInToc)
-            .map(ch => `            <li><a href="${ch.id}.xhtml">${this.#escapeXml(ch.title)}</a></li>`)
-            .join('\n');
+        // Usar la profundidad configurada (o 1 por defecto)
+        const depth = this.#tocPage.enabled ? this.#tocPage.depth : 1;
+        
+        // Generar TOC jerárquico con profundidad (indentación para nav.xhtml: 12 espacios)
+        const tocItems = this.#extractTocFromChapters(depth, '            ');
 
         // Generar landmarks
         const landmarks = this.#chapters
@@ -475,6 +517,75 @@ ${landmarks}
     }
 
     /**
+     * Crea la página visible de índice/tabla de contenidos
+     * @returns {string}
+     */
+    #createTocPage() {
+        const lang = this.#metadata.language || 'es';
+        const title = this.#escapeXml(this.#tocPage.title);
+        const bodyClassAttr = this.#bodyClass ? ` class="${this.#bodyClass}"` : '';
+        const depth = this.#tocPage.depth || 1;
+
+        // Generar TOC jerárquico con profundidad
+        const tocItems = this.#extractTocFromChapters(depth);
+
+        const cssLink = this.#stylesheet 
+            ? '<link rel="stylesheet" type="text/css" href="styles.css"/>'
+            : '';
+
+        return `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="${lang}">
+<head>
+    <meta charset="UTF-8"/>
+    <title>${title}</title>
+    ${cssLink}
+</head>
+<body${bodyClassAttr} epub:type="toc">
+    <section>
+        <h1>${title}</h1>
+        <nav>
+            <ol class="toc-list">
+${tocItems}
+            </ol>
+        </nav>
+    </section>
+</body>
+</html>`;
+    }
+
+    /**
+     * Añade IDs a los encabezados H2 y H3 en el contenido HTML para permitir enlaces de ancla
+     * @param {string} html - Contenido HTML
+     * @param {string} chapterId - ID del capítulo para generar IDs únicos
+     * @returns {string} HTML con IDs añadidos a los encabezados
+     */
+    #addHeadingIds(html, chapterId) {
+        if (!html) return html;
+
+        try {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
+            const headings = doc.querySelectorAll('h2, h3');
+
+            for (const heading of headings) {
+                if (!heading.id) {
+                    const headingText = heading.textContent.trim();
+                    const anchorId = `${chapterId}-${headingText.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`;
+                    heading.id = anchorId;
+                }
+            }
+
+            // Extraer el contenido del div wrapper
+            const wrapper = doc.querySelector('div');
+            return wrapper ? wrapper.innerHTML : html;
+        } catch (e) {
+            console.warn(`Error añadiendo IDs a encabezados:`, e);
+            return html;
+        }
+    }
+
+    /**
      * Crea el documento XHTML de un capítulo
      * @param {EpubChapter} chapter
      * @returns {string}
@@ -489,8 +600,11 @@ ${landmarks}
             ? '<link rel="stylesheet" type="text/css" href="styles.css"/>'
             : '';
 
+        // Añadir IDs a los encabezados para permitir enlaces de ancla en el TOC
+        const contentWithIds = this.#addHeadingIds(chapter.content, chapter.id);
+        
         // Convertir el contenido HTML a XHTML válido
-        const xhtmlContent = this.#htmlToXhtml(chapter.content);
+        const xhtmlContent = this.#htmlToXhtml(contentWithIds);
 
         return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
@@ -606,6 +720,93 @@ ${landmarks}
             extension,
             data: new Blob([bytes], { type: mime })
         };
+    }
+
+    /**
+     * Extrae los encabezados del contenido HTML y genera una estructura TOC jerárquica
+     * @param {number} maxDepth - Profundidad máxima (1-3)
+     * @param {string} indent - Indentación base para cada línea (por defecto 16 espacios)
+     * @returns {string} HTML de la lista TOC jerárquica
+     */
+    #extractTocFromChapters(maxDepth = 1, indent = '                ') {
+        const tocChapters = this.#chapters.filter(ch => ch.showInToc);
+        const items = [];
+
+        for (const chapter of tocChapters) {
+            // Añadir el capítulo principal (siempre nivel 1)
+            items.push({
+                level: 1,
+                title: chapter.title,
+                href: `${chapter.id}.xhtml`,
+                id: chapter.id
+            });
+
+            // Extraer encabezados del contenido HTML si la profundidad lo permite
+            if (maxDepth > 1 && chapter.content) {
+                try {
+                    // Añadir IDs a los encabezados primero (misma lógica que en #addHeadingIds)
+                    const contentWithIds = this.#addHeadingIds(chapter.content, chapter.id);
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(`<div>${contentWithIds}</div>`, 'text/html');
+                    const headings = doc.querySelectorAll('h2, h3');
+                    
+                    for (const heading of headings) {
+                        const level = parseInt(heading.tagName.charAt(1));
+                        if (level <= maxDepth) {
+                            const headingText = heading.textContent.trim();
+                            // Usar el ID que ya existe o generar uno
+                            const anchorId = heading.id || `${chapter.id}-${headingText.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`;
+                            
+                            items.push({
+                                level,
+                                title: headingText,
+                                href: `${chapter.id}.xhtml#${anchorId}`,
+                                id: anchorId,
+                                parentId: chapter.id
+                            });
+                        }
+                    }
+                } catch (e) {
+                    // Si falla el parsing, continuar sin subniveles
+                    console.warn(`Error extrayendo encabezados de ${chapter.id}:`, e);
+                }
+            }
+        }
+
+        // Generar HTML jerárquico de forma recursiva
+        const generateList = (startIndex, currentLevel) => {
+            let html = '';
+            let i = startIndex;
+
+            while (i < items.length) {
+                const item = items[i];
+                
+                // Si el nivel es menor que el actual, terminamos este nivel
+                if (item.level < currentLevel) {
+                    break;
+                }
+                
+                // Si el nivel es mayor, abrimos una sublista
+                if (item.level > currentLevel) {
+                    html += '<ol class="toc-list">';
+                    const subList = generateList(i, item.level);
+                    html += subList.html;
+                    html += '</ol>';
+                    i = subList.nextIndex;
+                    continue;
+                }
+                
+                // Mismo nivel: añadir item
+                const indentClass = item.level > 1 ? ` class="toc-level-${item.level}"` : '';
+                html += `\n${indent}<li${indentClass}><a href="${this.#escapeXml(item.href)}">${this.#escapeXml(item.title)}</a></li>`;
+                i++;
+            }
+
+            return { html, nextIndex: i };
+        };
+
+        const result = generateList(0, 1);
+        return result.html;
     }
 
     /**
