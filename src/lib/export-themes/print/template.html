@@ -75,7 +75,7 @@
     <!-- Renderizar Dedicatoria (si existe en metadatos, tiene prioridad visual propia aquí) -->
     {{#dedication}}
     <section class="dedication">
-        <p>{{dedication}}</p>
+        {{{dedicationHtml}}}
     </section>
     {{/dedication}}
     {{/hasDedication}}
@@ -103,7 +103,7 @@
     <!-- Colofón (si existe en metadatos) -->
     {{#colophon}}
     <section class="colophon">
-        <p>{{colophon}}</p>
+        {{{colophonHtml}}}
     </section>
     {{/colophon}}
 

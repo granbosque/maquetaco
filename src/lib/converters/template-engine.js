@@ -11,8 +11,8 @@ import previewTemplate from '$lib/templates/preview.html?raw';
 import pdfScreenTemplate from '$lib/export-themes/screen/template.html?raw';
 import pdfPrintTemplate from '$lib/export-themes/print/template.html?raw';
 
-// Importar generador de TOC
-import { generateTableOfContents } from './md-to-html.js';
+// Importar generador de TOC y conversor de Markdown
+import { generateTableOfContents, markdownToHtmlInline } from './md-to-html.js';
 
 /**
  * Plantillas disponibles
@@ -96,9 +96,16 @@ export function prepareTemplateData(frontmatter, bodyHtml) {
     const bodyHasDedication = bodyHtml.includes('class="dedication"') || bodyHtml.includes("class='dedication'");
     data.hasEpigraph = bodyHtml.includes('class="epigraph"') || bodyHtml.includes("class='epigraph'");
 
-    // Dedicatoria desde metadatos
+    // Dedicatoria desde metadatos (con Markdown convertido a HTML inline)
     if (frontmatter.dedication && frontmatter.dedication.trim()) {
         data.dedication = frontmatter.dedication.trim();
+        data.dedicationHtml = markdownToHtmlInline(data.dedication, data.lang);
+    }
+
+    // Colofón desde metadatos (con Markdown convertido a HTML inline)
+    if (frontmatter.colophon && frontmatter.colophon.trim()) {
+        data.colophon = frontmatter.colophon.trim();
+        data.colophonHtml = markdownToHtmlInline(data.colophon, data.lang);
     }
 
     // Flag unificado: Hay dedicatoria si viene en metadatos o en el cuerpo

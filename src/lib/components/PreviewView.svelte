@@ -19,6 +19,8 @@
             copyright: appState.config.copyright || "",
             date: appState.config.date || "",
             lang: appState.config.lang || "es",
+            dedication: appState.config.dedication || "",
+            colophon: appState.config.colophon || "",
         };
 
         // Lógica de TOC (igual que en ExportView)

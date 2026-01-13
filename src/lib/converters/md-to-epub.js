@@ -6,7 +6,7 @@
  */
 
 import { EpubBook } from './EpubBook.js';
-import { markdownToHtml, separateFrontmatter } from './md-to-html.js';
+import { markdownToHtml, markdownToHtmlInline, separateFrontmatter } from './md-to-html.js';
 import defaultEpubCss from '$lib/export-themes/epub/style.css?raw';
 
 // Re-exportar EpubBook para uso directo si se necesita
@@ -58,7 +58,7 @@ export async function exportToEpub(config, options = {}) {
         epub.addChapter({
             id: 'dedication',
             title: 'Dedicatoria',
-            content: `<div class="dedication"><p>${escapeHtml(config.dedication)}</p></div>`,
+            content: `<div class="dedication">${markdownToHtmlInline(config.dedication, config.lang)}</div>`,
             role: 'dedication',
             showInToc: false
         });
@@ -87,7 +87,7 @@ export async function exportToEpub(config, options = {}) {
         epub.addChapter({
             id: 'colophon',
             title: 'Colofón',
-            content: `<div class="colophon"><p>${escapeHtml(config.colophon)}</p></div>`,
+            content: `<div class="colophon">${markdownToHtmlInline(config.colophon, config.lang)}</div>`,
             role: 'colophon',
             showInToc: false
         });
@@ -136,19 +136,6 @@ function extractSections(html) {
     });
 }
 
-/**
- * Escapa caracteres HTML especiales
- * @param {string} text
- * @returns {string}
- */
-function escapeHtml(text) {
-    if (!text) return '';
-    return String(text)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-}
 
 /**
  * Genera el HTML del branding de Maquetaco
@@ -347,7 +334,7 @@ export async function createEpubBlob(metadata, htmlContent, coverImageDataUrl = 
         epub.addChapter({
             id: 'dedication',
             title: 'Dedicatoria',
-            content: `<div class="dedication"><p>${escapeHtml(metadata.dedication)}</p></div>`,
+            content: `<div class="dedication">${markdownToHtmlInline(metadata.dedication, metadata.lang)}</div>`,
             role: 'dedication',
             showInToc: false
         });
@@ -376,7 +363,7 @@ export async function createEpubBlob(metadata, htmlContent, coverImageDataUrl = 
         epub.addChapter({
             id: 'colophon',
             title: 'Colofón',
-            content: `<div class="colophon"><p>${escapeHtml(metadata.colophon)}</p></div>`,
+            content: `<div class="colophon">${markdownToHtmlInline(metadata.colophon, metadata.lang)}</div>`,
             role: 'colophon',
             showInToc: false
         });

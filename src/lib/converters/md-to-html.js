@@ -222,6 +222,32 @@ export function markdownToHtml(markdown, lang) {
 }
 
 /**
+ * Convierte Markdown a HTML sin envolver en <section>
+ * Útil para campos cortos como dedicatoria, colofón, etc.
+ * @param {string} markdown - Texto en Markdown
+ * @param {string} [lang] - Código de idioma para ajustar tipografía
+ * @returns {string} HTML sin envolver en section
+ */
+export function markdownToHtmlInline(markdown, lang) {
+    if (!markdown) return '';
+
+    // 1. Extraer atributos Pandoc
+    const { markdown: cleanMarkdown, attributes } = extractPandocAttributes(markdown);
+
+    // 2. Procesar con Unified
+    const result = processor.processSync(cleanMarkdown);
+    let html = String(result);
+
+    // 3. Aplicar atributos Pandoc al HTML
+    html = applyPandocAttributes(html, attributes);
+
+    // 4. Convertir comillas a angulares si el idioma lo requiere
+    html = convertToAngularQuotes(html, lang);
+
+    return html;
+}
+
+/**
  * Convierte un documento completo (con frontmatter) a HTML
  * @param {string} content - Contenido completo con frontmatter
  * @param {string} [lang] - Código de idioma para ajustar tipografía

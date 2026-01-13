@@ -213,9 +213,6 @@
 .preview-content section.dedication,
 .preview-content section.epigraph {
     padding-top: 25%;
-    max-width: 60%;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 .preview-content .colophon p,
@@ -250,9 +247,9 @@
     border-radius: 0.5rem;
 }
 
-.preview-content .colophon::after,
-.preview-content .dedication::after,
-.preview-content .epigraph::after {
+.preview-content h1.colophon::after,
+.preview-content h1.dedication::after,
+.preview-content h1.epigraph::after {
     content: "(Este título no se mostrará)";
     font-size: 0.6rem;
     color: darkgray;

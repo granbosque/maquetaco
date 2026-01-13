@@ -6,6 +6,8 @@
   - title: Título del documento
   - author: Autor(es)
   - date: Fecha
+  - dedication: Dedicatoria (Markdown)
+  - colophon: Colofón (Markdown)
   - body: Contenido HTML del documento
 -->
 <article class="preview-document">
@@ -19,6 +21,12 @@
     </div>
     {{/title}}
 
+    {{#dedication}}
+    <section class="dedication">
+        {{{dedicationHtml}}}
+    </section>
+    {{/dedication}}
+
     {{#toc}}
     <nav class="toc-preview">
         <h2>Índice</h2>
@@ -29,4 +37,10 @@
     <main class="main-content">
         {{{body}}}
     </main>
+
+    {{#colophon}}
+    <section class="colophon">
+        {{{colophonHtml}}}
+    </section>
+    {{/colophon}}
 </article>
