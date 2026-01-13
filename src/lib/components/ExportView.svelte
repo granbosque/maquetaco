@@ -124,10 +124,15 @@
         return contentHtml;
     });
 
+    // CSS completo para preview (derivado para que se actualice junto con documentHtml)
+    let previewCss = $derived(
+        selectedTheme.css + 
+        (selectedTheme.headerPresets ? styleSettings.headerStyleCss : '') + 
+        styleSettings.fontOverrideCSS
+    );
+
     function handlePrint() {
-        if (pdfPreviewRef) {
-            pdfPreviewRef.print();
-        }
+        pdfPreviewRef?.print();
     }
 
     async function handleEpubExport() {
@@ -145,10 +150,6 @@
         } finally {
             isLoading = false;
         }
-    }
-
-    function getFontOverrideCSS() {
-        return styleSettings.fontOverrideCSS;
     }
 </script>
 
@@ -227,7 +228,7 @@
             <PdfPreview
                 bind:this={pdfPreviewRef}
                 {documentHtml}
-                css={selectedTheme.css + (selectedTheme.headerPresets ? styleSettings.headerStyleCss : '') + getFontOverrideCSS()}
+                css={previewCss}
                 scale={selectedTheme.previewScale ?? 1}
                 {preserveScroll}
                 bind:isLoading

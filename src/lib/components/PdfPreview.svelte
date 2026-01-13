@@ -16,9 +16,10 @@
     } = $props();
 
     let iframeContainer = $state(null);
-    let iframe = $state(null);
+    let iframe = null; // No reactivo - solo se usa internamente
     let currentZoom = $state(1);
     let baseScale = $derived(scale); // Scale base que viene de las props
+    let renderTimeout = null;
     const zoomStep = 0.1;
     const minZoom = 0.3;
     const maxZoom = 2;
@@ -27,8 +28,10 @@
 
     $effect(() => {
         // Ejecutar cuando cambie el HTML, CSS o contenedor
+        // Pequeño debounce para agrupar cambios rápidos (ej: fuente cambia CSS y regenera metadata)
         if (iframeContainer && (documentHtml || css)) {
-            renderDocument();
+            clearTimeout(renderTimeout);
+            renderTimeout = setTimeout(renderDocument, 50);
         }
     });
 
@@ -52,25 +55,27 @@
     async function renderDocument() {
         if (!iframeContainer) return;
 
-        // Guardar posición de scroll antes de regenerar
-        const scrollPosition = iframeContainer.scrollTop;
+        // Guardar scroll del iframe actual antes de destruirlo
+        let scrollPosition = 0;
+        if (iframe?.contentWindow?.document) {
+            const doc = iframe.contentWindow.document;
+            scrollPosition = doc.documentElement.scrollTop || doc.body?.scrollTop || 0;
+        }
 
         isLoading = true;
         error = null;
         try {
-            // Simular delay de 5 segundos para probar UI
-            // await new Promise((resolve) => setTimeout(resolve, 5000));
-            
             const fullHtml = generateFullDocument(documentHtml, css);
             iframe = await renderInIframe(fullHtml, iframeContainer);
             isLoading = false;
 
-            // Restaurar posición de scroll después de renderizar (solo si preserveScroll)
-            requestAnimationFrame(() => {
-                if (iframeContainer && preserveScroll) {
-                    iframeContainer.scrollTop = scrollPosition;
-                }
-            });
+            // Restaurar scroll en el nuevo iframe
+            if (preserveScroll && scrollPosition > 0) {
+                requestAnimationFrame(() => {
+                    iframe?.contentWindow?.document?.documentElement &&
+                        (iframe.contentWindow.document.documentElement.scrollTop = scrollPosition);
+                });
+            }
         } catch (e) {
             error = e.message;
             isLoading = false;
