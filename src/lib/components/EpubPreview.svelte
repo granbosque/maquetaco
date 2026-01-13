@@ -1,14 +1,7 @@
 <script>
-    import {
-        BookOpen,
-        ChevronLeft,
-        ChevronRight,
-        List,
-        X,
-    } from "lucide-svelte";
-    import { fade, slide } from "svelte/transition";
-    import ePub from "epubjs";
+    import { onMount } from "svelte";
     import { createEpubBlob } from "$lib/converters/md-to-epub.js";
+    import { ChevronLeft, ChevronRight, Book, List } from "lucide-svelte";
 
     let {
         documentHtml = "",
@@ -17,33 +10,43 @@
         isLoading = $bindable(false),
     } = $props();
 
-    let previewContainer = $state(null);
-    let book = $state(null);
-    let rendition = $state(null);
-
-    // Estado de navegación y UI
+    let container = $state(null);
+    let view = $state(null);
+    let progress = $state(0);
+    let canGoPrev = $state(false);
+    let canGoNext = $state(true);
+    let currentSection = $state(0);
+    let totalSections = $state(0);
+    let sectionTitle = $state("");
     let toc = $state([]);
     let showToc = $state(false);
-    let currentChapterLabel = $state("");
-    let progress = $state(0);
-    let hasNext = $state(false);
-    let hasPrev = $state(false);
+
+    onMount(async () => {
+        // Registrar el custom element de foliate-js
+        await import("foliate-js/view.js");
+        
+        // Atajos de teclado
+        window.addEventListener("keydown", handleKeydown);
+        return () => {
+            window.removeEventListener("keydown", handleKeydown);
+            if (view) {
+                view.close?.();
+            }
+        };
+    });
 
     $effect(() => {
         const _deps = [documentHtml, css, metadata];
-        loadEpubPreview();
+        loadEpub();
     });
 
-    async function loadEpubPreview() {
-        if (!previewContainer || !documentHtml) return;
+    async function loadEpub() {
+        if (!container || !documentHtml) return;
 
         try {
             isLoading = true;
-            // Reset states
-            toc = [];
-            currentChapterLabel = "";
-            progress = 0;
 
+            // Generar el blob EPUB
             const blob = await createEpubBlob(
                 metadata,
                 documentHtml,
@@ -51,59 +54,50 @@
                 css,
             );
 
-            if (book) book.destroy();
-            previewContainer.innerHTML = "";
+            // Limpiar vista anterior si existe
+            if (view) {
+                view.removeEventListener("relocate", handleRelocate);
+                view.removeEventListener("load", handleLoad);
+                view.close?.();
+                view.remove();
+            }
+            container.innerHTML = "";
 
-            const arrayBuffer = await blob.arrayBuffer();
-            book = ePub(arrayBuffer);
-
-            rendition = book.renderTo(previewContainer, {
-                width: "100%",
-                height: "100%",
-                flow: "paginated",
-                manager: "default",
-                allowScriptedContent: true,
+            // Crear un File con extensión .epub
+            const file = new File([blob], "preview.epub", {
+                type: "application/epub+zip",
             });
 
-            await rendition.display();
+            // Crear y montar el visor foliate
+            view = document.createElement("foliate-view");
+            view.style.width = "100%";
+            view.style.height = "100%";
+            container.appendChild(view);
 
-            // Cargar TOC
-            const navigation = await book.loaded.navigation;
-            toc = navigation.toc;
+            // Escuchar eventos de navegación
+            view.addEventListener("relocate", handleRelocate);
+            view.addEventListener("load", handleLoad);
 
-            // Generar localizaciones para barra de progreso (async)
-            // Dividimos por 1000 chars para no bloquear
-            book.ready.then(() => book.locations.generate(1000));
-
-            rendition.on("relocated", (location) => {
-                hasNext = !location.atEnd;
-                hasPrev = !location.atStart;
-
-                // Calcular progreso
-                if (book.locations.length() > 0) {
-                    // location.start.cfi es el identificador de posición
-                    const percentage = book.locations.percentageFromCfi(
-                        location.start.cfi,
-                    );
-                    progress = Math.round(percentage * 100);
-                }
-
-                // Obtener nombre del capítulo actual
-                const chapter = toc.find((item) =>
-                    location.start.href.includes(item.href),
-                );
-                if (chapter) {
-                    currentChapterLabel = chapter.label.trim();
-                } else if (location.atStart) {
-                    currentChapterLabel = "Portada";
-                }
+            // Abrir el EPUB
+            await view.open(file);
+            
+            // Obtener información del libro
+            if (view.book) {
+                totalSections = view.book.sections?.length ?? 0;
+                toc = view.book.toc ?? [];
+            }
+            
+            // Inicializar el visor
+            await view.init({
+                defaultStyles: true
             });
 
-            const keyListener = (e) => {
-                if (e.key === "ArrowLeft") prevPage();
-                if (e.key === "ArrowRight") nextPage();
-            };
-            rendition.on("keyup", keyListener);
+            // Inicializar sección actual
+            currentSection = 0;
+
+            // Actualizar estado inicial
+            updateNavigationState();
+
         } catch (err) {
             console.error("Error previewing EPUB:", err);
         } finally {
@@ -111,376 +105,390 @@
         }
     }
 
-    function prevPage() {
-        if (rendition) rendition.prev();
+    function handleRelocate(e) {
+        const { fraction, index } = e.detail;
+
+        // Actualizar progreso
+        if (fraction !== undefined && fraction !== null) {
+            progress = Math.round(fraction * 100);
+        }
+
+        // Actualizar sección actual
+        if (typeof index === 'number') {
+            currentSection = index;
+
+            // Obtener título de la sección desde el libro
+            if (view?.book?.sections?.[index]) {
+                const section = view.book.sections[index];
+                sectionTitle = section.label || `Capítulo ${index + 1}`;
+            }
+        }
+
+        // Actualizar estado de navegación
+        updateNavigationState();
     }
 
-    function nextPage() {
-        if (rendition) rendition.next();
+    function handleLoad(e) {
+        const { index } = e.detail;
+
+        // Actualizar sección actual cuando se carga una nueva sección
+        if (typeof index === 'number') {
+            currentSection = index;
+
+            // Obtener título de la sección desde el libro
+            if (view?.book?.sections?.[index]) {
+                const section = view.book.sections[index];
+                sectionTitle = section.label || `Capítulo ${index + 1}`;
+            }
+        }
+
+        // Actualizar estado de navegación
+        updateNavigationState();
     }
 
-    function goToChapter(href) {
-        if (rendition) {
-            rendition.display(href);
-            showToc = false;
+    function updateNavigationState() {
+        if (!view) {
+            canGoPrev = false;
+            canGoNext = false;
+            return;
+        }
+
+        // Determinar si podemos navegar
+        // No podemos retroceder si estamos al inicio
+        canGoPrev = !(currentSection === 0 && progress <= 5);
+        
+        // No podemos avanzar si estamos al final
+        canGoNext = !(currentSection >= totalSections - 1 && progress >= 95);
+    }
+
+    async function prevPage() {
+        if (!view || !canGoPrev) return;
+
+        try {
+            // Si estamos cerca del inicio de la sección actual y hay una anterior, ir a la sección anterior
+            if (progress <= 5 && currentSection > 0) {
+                await view.goTo(currentSection - 1);
+            } else {
+                // Navegar dentro de la sección actual
+                await view.prev();
+            }
+        } catch (err) {
+            console.error("Error navegando hacia atrás:", err);
         }
     }
 
-    $effect(() => {
-        return () => {
-            if (book) book.destroy();
-        };
-    });
+    async function nextPage() {
+        if (!view || !canGoNext) return;
+
+        try {
+            // Si estamos cerca del final de la sección actual y hay una siguiente, ir a la siguiente sección
+            if (progress >= 95 && currentSection < totalSections - 1) {
+                await view.goTo(currentSection + 1);
+            } else {
+                // Navegar dentro de la sección actual
+                await view.next();
+            }
+        } catch (err) {
+            console.error("Error navegando hacia adelante:", err);
+        }
+    }
+
+    async function goToStart() {
+        if (!view) return;
+        try {
+            // Ir a la primera sección
+            await view.goTo({ index: 0 });
+        } catch (err) {
+            console.error("Error yendo al inicio:", err);
+        }
+    }
+
+    async function goToEnd() {
+        if (!view || totalSections === 0) return;
+        try {
+            await view.goTo({ index: totalSections - 1 });
+        } catch (err) {
+            console.error("Error yendo al final:", err);
+        }
+    }
+
+    async function goToTocItem(href) {
+        if (!view || !href) return;
+        try {
+            await view.goTo(href);
+            showToc = false;
+        } catch (err) {
+            console.error("Error navegando al TOC:", err);
+        }
+    }
+
+    function toggleToc() {
+        showToc = !showToc;
+    }
+
+    // Atajos de teclado
+    function handleKeydown(e) {
+        if (!view || e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
+            return;
+        }
+        
+        switch(e.key) {
+            case "ArrowLeft":
+            case "PageUp":
+                e.preventDefault();
+                prevPage();
+                break;
+            case "ArrowRight":
+            case "PageDown":
+            case " ": // Espacio
+                e.preventDefault();
+                nextPage();
+                break;
+            case "Home":
+                e.preventDefault();
+                goToStart();
+                break;
+            case "End":
+                e.preventDefault();
+                goToEnd();
+                break;
+        }
+    }
 </script>
 
 <div class="epub-preview-wrapper">
-    <div class="epub-device">
-        <!-- Header: Título y Menú -->
-        <div class="device-header">
-            <button
-                class="icon-btn"
-                onclick={() => (showToc = !showToc)}
-                aria-label="Índice"
-            >
-                <List size={18} />
-            </button>
-            <span class="chapter-title"
-                >{currentChapterLabel || metadata.title || "Libro"}</span
-            >
-            <div style="width: 24px;"></div>
-            <!-- Spacer -->
-        </div>
-
-        <div class="screen-container">
-            <!-- TOC Drawer -->
-            {#if showToc}
-                <div
-                    class="toc-drawer"
-                    transition:slide={{ axis: "x", duration: 200 }}
-                >
-                    <div class="toc-header">
-                        <h3>Índice</h3>
-                        <button
-                            class="icon-btn"
-                            onclick={() => (showToc = false)}
-                        >
-                            <X size={16} />
-                        </button>
+    <div class="epub-panel">
+        <div class="top-bar">
+            <div class="toc-wrapper">
+                <button class="toolbar-btn icon-only" onclick={toggleToc} title="Tabla de contenidos" disabled={toc.length === 0}>
+                    <List size={16} />
+                </button>
+                {#if showToc && toc.length > 0}
+                    <div class="toc-popover">
+                        <div class="toc-header">Contenidos</div>
+                        <ul class="toc-list">
+                            {#each toc as item}
+                                <li>
+                                    <button class="toc-item" onclick={() => goToTocItem(item.href)}>
+                                        {item.label}
+                                    </button>
+                                    {#if item.subitems?.length || item.children?.length}
+                                        <ul class="toc-sublist">
+                                            {#each (item.subitems || item.children) as subitem}
+                                                <li>
+                                                    <button class="toc-item sub" onclick={() => goToTocItem(subitem.href)}>
+                                                        {subitem.label}
+                                                    </button>
+                                                </li>
+                                            {/each}
+                                        </ul>
+                                    {/if}
+                                </li>
+                            {/each}
+                        </ul>
                     </div>
-                    <ul class="toc-list">
-                        {#each toc as item}
-                            <li>
-                                <button
-                                    class="toc-item"
-                                    onclick={() => goToChapter(item.href)}
-                                >
-                                    {item.label}
-                                </button>
-                            </li>
-                        {/each}
-                        {#if toc.length === 0}
-                            <li class="empty-toc">Sin índice</li>
-                        {/if}
-                    </ul>
-                </div>
-                <!-- Overlay para cerrar al hacer click fuera -->
-                <div
-                    class="toc-overlay"
-                    onclick={() => (showToc = false)}
-                    transition:fade={{ duration: 150 }}
-                    aria-hidden="true"
-                ></div>
-            {/if}
-
-            <div class="screen" bind:this={previewContainer}></div>
-        </div>
-
-        <!-- Footer: Progreso -->
-        <div class="device-footer">
-            <span class="progress-text">{progress}% leído</span>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: {progress}%"></div>
+                {/if}
+            </div>
+            
+            <span class="section-info">
+                {currentSection + 1}/{totalSections}
+                {#if sectionTitle}<span class="separator">·</span>{sectionTitle}{/if}
+            </span>
+            
+            <div class="progress-bar"><div class="fill" style="width: {progress}%"></div></div>
+            <span class="progress-text">{progress}%</span>
+            
+            <div class="nav-buttons">
+                <button class="toolbar-btn icon-only" onclick={prevPage} disabled={!canGoPrev} title="← PageUp">
+                    <ChevronLeft size={16} />
+                </button>
+                <button class="toolbar-btn icon-only" onclick={nextPage} disabled={!canGoNext} title="→ PageDown">
+                    <ChevronRight size={16} />
+                </button>
             </div>
         </div>
-
-        <!-- Controles Flotantes (ahora más sutiles) -->
-        <div class="controls-overlay">
-            <button
-                class="nav-zone prev"
-                onclick={prevPage}
-                disabled={!hasPrev}
-                aria-label="Anterior"
-            >
-                <div class="nav-indicator"><ChevronLeft size={24} /></div>
-            </button>
-            <button
-                class="nav-zone next"
-                onclick={nextPage}
-                disabled={!hasNext}
-                aria-label="Siguiente"
-            >
-                <div class="nav-indicator"><ChevronRight size={24} /></div>
-            </button>
+        
+        <div class="epub-container" bind:this={container}>
+            {#if isLoading}
+                <div class="loading-overlay">
+                    <Book size={48} class="loading-icon" />
+                    <p>Cargando vista previa...</p>
+                </div>
+            {/if}
         </div>
     </div>
-
-    <p class="preview-warning">
-        Nota: Esta vista previa es aproximada. Verifica el EPUB en un lector
-        real.
-    </p>
+    
+    {#if showToc}
+        <button class="toc-backdrop" onclick={() => showToc = false}></button>
+    {/if}
 </div>
 
 <style>
     .epub-preview-wrapper {
-        flex: 1;
         width: 100%;
         height: 100%;
-        background: var(--bg-app);
-        display: flex;
-        flex-direction: column; /* Stack device and warning */
-        justify-content: center;
-        align-items: center;
-        overflow: hidden;
-        /* Padding layout:
-           - left: 17rem (16rem sidebar + 1rem gap)
-           - others: 1rem (reduced vertical space)
-        */
-        padding: 0.5rem;
-        padding-left: 17rem;
-        box-sizing: border-box;
-    }
-
-    .epub-device {
-        position: relative;
-        width: 100%;
-        max-width: 600px;
-        /* Increased max-height from 90% to allow more vertical space */
-        max-height: 98%;
-        aspect-ratio: 3/4;
-        background: white;
-        border-radius: var(--radius-lg, 8px);
-        box-shadow: var(--shadow);
-        overflow: hidden;
-        margin: 0; /* Reset margins */
         display: flex;
         flex-direction: column;
+        align-items: center;
+        padding: var(--space-lg);
+        padding-left: 17rem;
     }
 
-    /* Responsiveness for smaller screens */
-    @media (max-width: 768px) {
-        .epub-preview-wrapper {
-            padding-left: 1rem; /* Remove sidebar clearing on small screens */
-        }
+    .epub-panel {
+        width: 100%;
+        max-width: 600px;
+        height: 100%;
+        max-height: 850px;
+        display: flex;
+        flex-direction: column;
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow);
+        overflow: hidden;
     }
 
-    /* Header */
-    .device-header {
-        height: 40px;
+    .top-bar {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        padding: 0 0.5rem;
-        border-bottom: 1px solid var(--border);
-        background: #f9f9f9;
-        font-size: 0.75rem;
-        color: var(--text-muted);
-        z-index: 10;
-        flex-shrink: 0;
+        gap: var(--space-sm);
+        padding: var(--space-sm) var(--space-md);
+        border-bottom: 1px solid var(--border-muted);
     }
 
-    .chapter-title {
-        font-weight: 500;
+    .section-info {
+        flex: 1;
+        font-size: var(--text-xs);
+        font-weight: var(--weight-medium);
+        color: var(--text-muted);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        max-width: 60%;
     }
 
-    .icon-btn {
-        background: transparent;
-        border: none;
-        padding: 4px;
-        border-radius: 4px;
-        cursor: pointer;
-        color: inherit;
-        display: flex;
-        align-items: center;
-    }
-
-    .icon-btn:hover {
-        background: rgba(0, 0, 0, 0.05);
-    }
-
-    /* Screen Area */
-    .screen-container {
-        flex: 1;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .screen {
-        width: 100%;
-        height: 100%;
-    }
-
-    /* TOC Drawer */
-    .toc-drawer {
-        position: absolute;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        width: 200px; /* Ancho fijo simple */
-        background: white;
-        border-right: 1px solid var(--border);
-        z-index: 20;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .toc-header {
-        padding: 0.5rem 1rem;
-        border-bottom: 1px solid var(--border);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .toc-header h3 {
-        margin: 0;
-        font-size: 0.875rem;
-        font-weight: 600;
-    }
-
-    .toc-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        overflow-y: auto;
-        flex: 1;
-    }
-
-    .toc-item {
-        display: block;
-        width: 100%;
-        text-align: left;
-        padding: 0.75rem 1rem;
-        border: none;
-        background: transparent;
-        font-size: 0.8125rem;
-        color: var(--text-color);
-        cursor: pointer;
-        border-bottom: 1px solid var(--bg-muted);
-    }
-
-    .toc-item:hover {
-        background: var(--bg-muted);
-    }
-
-    .empty-toc {
-        padding: 1rem;
-        color: var(--text-subtle);
-        font-size: 0.8rem;
-        text-align: center;
-    }
-
-    .toc-overlay {
-        position: absolute;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.2);
-        z-index: 15;
-    }
-
-    /* Footer */
-    .device-footer {
-        height: 24px;
-        background: #f9f9f9;
-        border-top: 1px solid var(--border);
-        display: flex;
-        align-items: center;
-        padding: 0 1rem;
-        gap: 0.5rem;
-        font-size: 0.7rem;
-        color: var(--text-subtle);
-        flex-shrink: 0;
-    }
+    .separator { opacity: 0.5; margin: 0 var(--space-xs); }
 
     .progress-bar {
-        flex: 1;
+        width: 50px;
         height: 3px;
-        background: var(--border);
+        background: var(--border-muted);
         border-radius: 2px;
         overflow: hidden;
     }
 
-    .progress-fill {
+    .progress-bar .fill {
         height: 100%;
         background: var(--color-primary);
-        transition: width 0.3s ease;
+        transition: width var(--transition);
     }
 
     .progress-text {
-        min-width: 3ch;
+        font-size: var(--text-xs);
+        color: var(--text-subtle);
+        min-width: 2rem;
+        text-align: right;
     }
 
-    /* Controls Overlay */
-    .controls-overlay {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
+    .nav-buttons {
         display: flex;
-        pointer-events: none;
+        gap: var(--space-xxs);
     }
 
-    .nav-zone {
+    .epub-container {
         flex: 1;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    :global(.epub-container foliate-view) {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    .loading-overlay {
+        position: absolute;
+        inset: 0;
+        background: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-lg);
+        color: var(--text-muted);
+    }
+
+    :global(.loading-icon) { animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+    /* TOC */
+    .toc-wrapper { position: relative; }
+    
+    .toc-popover {
+        position: absolute;
+        top: calc(100% + var(--space-xs));
+        left: 0;
+        width: 280px;
+        max-height: 400px;
+        overflow-y: auto;
+        background: var(--bg-surface);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+        z-index: 100;
+        animation: scale-in 0.15s ease;
+    }
+
+    .toc-header {
+        padding: var(--space-sm) var(--space-md);
+        font-size: var(--text-xs);
+        font-weight: var(--weight-semibold);
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid var(--border-muted);
+    }
+
+    .toc-list, .toc-sublist {
+        list-style: none;
+        margin: 0;
+        padding: var(--space-xs) 0;
+    }
+
+    .toc-sublist { padding-left: var(--space-md); }
+
+    .toc-item {
+        display: block;
+        width: 100%;
+        padding: var(--space-sm) var(--space-md);
+        background: none;
+        border: none;
+        text-align: left;
+        font-size: var(--text-sm);
+        color: var(--text);
+        cursor: pointer;
+        transition: background var(--transition);
+    }
+
+    .toc-item:hover { background: var(--bg-muted); }
+    .toc-item.sub { font-size: var(--text-xs); color: var(--text-muted); }
+
+    .toc-backdrop {
+        position: fixed;
+        inset: 0;
         background: transparent;
         border: none;
-        pointer-events: auto;
-        display: flex;
-        align-items: center;
-        opacity: 0;
-        transition: opacity 0.2s;
-        cursor: pointer;
-        /* No interferir con clicks en el centro */
-        max-width: 15%;
+        cursor: default;
+        z-index: 50;
     }
 
-    /* Espacio crentral libre para tocar elementos interactivos del libro */
-    .controls-overlay::before {
-        content: "";
-        flex: 1;
-        pointer-events: none;
+    @keyframes scale-in {
+        from { opacity: 0; transform: scale(0.95) translateY(-4px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
     }
 
-    .nav-zone.prev {
-        justify-content: flex-start;
-        padding-left: 10px;
-        order: -1;
-    }
-    .nav-zone.next {
-        justify-content: flex-end;
-        padding-right: 10px;
-    }
-
-    .nav-zone:hover:not(:disabled) {
-        opacity: 1;
-    }
-
-    .nav-indicator {
-        background: rgba(0, 0, 0, 0.5);
-        color: white;
-        padding: 8px;
-        border-radius: 50%;
-        display: flex;
-    }
-
-    .preview-warning {
-        font-size: 0.75rem;
-        color: var(--text-muted);
-        margin-top: 1rem;
-        text-align: center;
-        opacity: 0.8;
+    @media (max-width: 768px) {
+        .epub-preview-wrapper { padding-left: var(--space-lg); }
+        .epub-panel { max-height: none; }
+        .toc-popover { width: 240px; max-height: 300px; }
     }
 </style>

@@ -156,7 +156,7 @@ Esta aplicación es posible gracias a un ecosistema de herramientas de código a
 
 - [Paged.js](https://pagedjs.org/) para maquetación profesional de PDFs con CSS
 - [JSZip](https://stuk.github.io/jszip/) para generar archivos EPUB
-- [epub.js](https://github.com/futurepress/epub.js) para previsualizar EPUBs
+- [foliate.js](https://github.com/johnfactotum/foliate-js) para previsualizar EPUBs
 
 El código fuente está disponible en [GitHub](https://github.com/granbosque/maquetaco). Si tienes cualquier sugerencia o encuentras algún problema, no dudes en [contactar](mailto:hola@granbosque.es).
 
