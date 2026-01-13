@@ -66,6 +66,9 @@ export class EpubBook {
     /** @type {string} */
     #stylesheet = '';
 
+    /** @type {string} */
+    #bodyClass = '';
+
     /** @type {EpubChapter[]} */
     #chapters = [];
 
@@ -158,6 +161,25 @@ export class EpubBook {
      */
     getStylesheet() {
         return this.#stylesheet;
+    }
+
+    /**
+     * Establece la clase CSS para el body de los capítulos
+     * @param {string} className - Clase(s) CSS a aplicar al body
+     */
+    setBodyClass(className) {
+        if (typeof className !== 'string') {
+            throw new Error('setBodyClass: se esperaba un string con la clase CSS');
+        }
+        this.#bodyClass = className;
+    }
+
+    /**
+     * Obtiene la clase CSS del body
+     * @returns {string}
+     */
+    getBodyClass() {
+        return this.#bodyClass;
     }
 
     /**
@@ -461,6 +483,7 @@ ${landmarks}
         const lang = this.#metadata.language || 'es';
         const epubType = this.#roleToEpubType(chapter.role);
         const epubTypeAttr = epubType ? ` epub:type="${epubType}"` : '';
+        const bodyClassAttr = this.#bodyClass ? ` class="${this.#bodyClass}"` : '';
 
         const cssLink = this.#stylesheet 
             ? '<link rel="stylesheet" type="text/css" href="styles.css"/>'
@@ -477,7 +500,7 @@ ${landmarks}
     <title>${this.#escapeXml(chapter.title)}</title>
     ${cssLink}
 </head>
-<body>
+<body${bodyClassAttr}>
     <section${epubTypeAttr}>
         ${xhtmlContent}
     </section>

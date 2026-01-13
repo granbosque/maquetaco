@@ -21,6 +21,7 @@ const COVER_HEIGHT = 2400;
  * @param {Object} config - appState.config
  * @param {Object} [options] - Opciones adicionales
  * @param {string} [options.css] - CSS personalizado (usa el por defecto si no se proporciona)
+ * @param {string} [options.bodyClass] - Clase CSS para el body de los capítulos
  * @returns {Promise<Blob>} Blob del archivo EPUB
  */
 export async function exportToEpub(config, options = {}) {
@@ -46,14 +47,19 @@ export async function exportToEpub(config, options = {}) {
     const css = options.css || defaultEpubCss;
     epub.setStylesheet(css);
 
-    // 4. Convertir MD → HTML
+    // 4. Clase del body (para estilos como paragraph-spaced)
+    if (options.bodyClass) {
+        epub.setBodyClass(options.bodyClass);
+    }
+
+    // 5. Convertir MD → HTML
     const { body: markdownBody } = separateFrontmatter(config.content || '');
     const html = markdownToHtml(markdownBody, config.lang);
 
-    // 5. Extraer secciones del HTML
+    // 6. Extraer secciones del HTML
     const sections = extractSections(html);
 
-    // 6. Dedicatoria (si existe en metadatos)
+    // 7. Dedicatoria (si existe en metadatos)
     if (config.dedication?.trim()) {
         epub.addChapter({
             id: 'dedication',
@@ -64,7 +70,7 @@ export async function exportToEpub(config, options = {}) {
         });
     }
 
-    // 7. Capítulos (cada <section>)
+    // 8. Capítulos (cada <section>)
     if (sections.length > 0) {
         sections.forEach((section, i) => {
             epub.addChapter({
@@ -82,7 +88,7 @@ export async function exportToEpub(config, options = {}) {
         });
     }
 
-    // 8. Colofón (si existe)
+    // 9. Colofón (si existe)
     if (config.colophon?.trim()) {
         epub.addChapter({
             id: 'colophon',
@@ -93,7 +99,7 @@ export async function exportToEpub(config, options = {}) {
         });
     }
 
-    // 9. Branding (si está habilitado)
+    // 10. Branding (si está habilitado)
     if (config.includeBranding !== false) {
         epub.addChapter({
             id: 'made-with',
@@ -302,9 +308,10 @@ async function prepareCoverImage(imageDataUrl) {
  * @param {string} htmlContent - HTML del contenido (ya convertido)
  * @param {string} [coverImageDataUrl] - Imagen de portada en data URL
  * @param {string} [css] - CSS personalizado
+ * @param {string} [bodyClass] - Clase CSS para el body
  * @returns {Promise<Blob>}
  */
-export async function createEpubBlob(metadata, htmlContent, coverImageDataUrl = null, css = '') {
+export async function createEpubBlob(metadata, htmlContent, coverImageDataUrl = null, css = '', bodyClass = '') {
     const epub = new EpubBook();
 
     // Metadatos
@@ -325,6 +332,11 @@ export async function createEpubBlob(metadata, htmlContent, coverImageDataUrl = 
 
     // Stylesheet
     epub.setStylesheet(css || defaultEpubCss);
+
+    // Clase del body
+    if (bodyClass) {
+        epub.setBodyClass(bodyClass);
+    }
 
     // Extraer secciones del HTML
     const sections = extractSections(htmlContent);

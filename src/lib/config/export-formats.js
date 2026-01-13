@@ -10,6 +10,7 @@ import printCss from '$lib/export-themes/print/theme.css?raw';
 import pdfScreenTemplate from '$lib/export-themes/screen/template.html?raw';
 import screenCss from '$lib/export-themes/screen/theme.css?raw';
 import mobileCss from '$lib/export-themes/screen/mobile.css?raw';
+import epubCss from '$lib/export-themes/epub/style.css?raw';
 
 export const exportFormats = [
     {
@@ -56,8 +57,7 @@ export const exportFormats = [
         description: 'Formato estándar de eBook compatible con la mayoría de lectores electrónicos (Kindle, Kobo, Apple Books, etc.).',
         icon: 'BookOpen',
         buttonText: 'Guardar EPUB',
-        template: null, // TODO: Implementar plantilla EPUB
-        css: null,
-        nota: 'Funcionalidad en desarrollo. Próximamente podrás exportar directamente a formato EPUB.'
+        template: null,
+        css: epubCss
     }
 ];

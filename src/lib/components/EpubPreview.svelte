@@ -6,6 +6,7 @@
     let {
         documentHtml = "",
         css = "",
+        bodyClass = "",
         metadata = {},
         isLoading = $bindable(false),
     } = $props();
@@ -36,7 +37,7 @@
     });
 
     $effect(() => {
-        const _deps = [documentHtml, css, metadata];
+        const _deps = [documentHtml, css, bodyClass, metadata];
         loadEpub();
     });
 
@@ -52,6 +53,7 @@
                 documentHtml,
                 metadata["cover-image"],
                 css,
+                bodyClass,
             );
 
             // Limpiar vista anterior si existe

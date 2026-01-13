@@ -143,7 +143,10 @@
                 ...appState.config,
                 imagePreview: appState.config.imagePreview || metadata["cover-image"] || null
             };
-            await downloadEpub(config);
+            await downloadEpub(config, {
+                css: selectedTheme.css,
+                bodyClass: styleSettings.paragraphStyleClass
+            });
         } catch (e) {
             error = e.message;
             console.error("Error generando EPUB:", e);
@@ -221,6 +224,7 @@
             <EpubPreview
                 documentHtml={contentHtml}
                 css={selectedTheme.css}
+                bodyClass={styleSettings.paragraphStyleClass}
                 {metadata}
                 bind:isLoading
             />
