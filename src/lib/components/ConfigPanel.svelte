@@ -245,7 +245,7 @@
                             <Info size={14} />
                         </Tooltip.Trigger>
                         <Tooltip.Content class="tooltip">
-                            Código de idioma. Afecta a la separación silábica y
+                            Código de idioma. Afecta a la división silábica y
                             accesibilidad.
                         </Tooltip.Content>
                     </Tooltip.Root>

@@ -15,6 +15,7 @@
     import { saveDocument } from "$lib/utils/save-document.js";
     import ConfirmDialog from "$lib/components/ConfirmDialog.svelte";
     import WelcomeModal from "$lib/components/WelcomeModal.svelte";
+    import CompatibilityToast from "$lib/components/CompatibilityToast.svelte";
     import { onMount } from "svelte";
 
     // Trigger HMR
@@ -252,6 +253,8 @@
     />
 
     <WelcomeModal bind:open={isWelcomeModalOpen} />
+
+    <CompatibilityToast />
 </div>
 
 <style>

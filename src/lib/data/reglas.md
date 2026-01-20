@@ -19,10 +19,10 @@ Este documento describe las reglas aplicadas durante la conversión de textos en
 
 ## Estilos generales (todas las plantillas)
 
-1. Texto justificado con separación silábica
+1. Texto justificado con división silábica
 2. Sangría de primera línea (excepto primer párrafo de sección)
-3. Títulos sin separación silábica
-4. Párrafos especiales (citas, dedicatoria, colofón) sin separación silábica
+3. Títulos sin división silábica
+4. Párrafos especiales (citas, dedicatoria, colofón) sin división silábica
 5. Negritas se muestran como versalitas en lugar de negrita
 
 
@@ -33,7 +33,7 @@ Este documento describe las reglas aplicadas durante la conversión de textos en
 - **Fin de sección**: Los últimos párrafos de un capítulo deben tener al menos 4 líneas.
 
 
-## Separación silábica
+## División silábica
 
 - **Cuerpo de texto**: Activada automáticamante (`auto`).
 - **Títulos**: Desactivada.
