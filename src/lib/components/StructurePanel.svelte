@@ -124,7 +124,8 @@
                             {/if}
                         </button>
 
-                        <!-- Menú de desborde (visible en hover) -->
+                        <!-- Menú contextual-->
+                        <!-- Desactivado temporalmente, no lo elimino pero cambiará el comportamiento, en lugar de elegir un estilo, tener varis opciones activables independientemente
                         <div class="overflow-menu" role="none">
                             <DropdownMenu.Root>
                                 <DropdownMenu.Trigger class="overflow-btn">
@@ -181,6 +182,7 @@
                                 </DropdownMenu.Content>
                             </DropdownMenu.Root>
                         </div>
+                        -->
                     </div>
                 {/each}
             </nav>
