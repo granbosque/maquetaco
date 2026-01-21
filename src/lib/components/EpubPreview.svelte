@@ -8,51 +8,56 @@
         css = "",
         bodyClass = "",
         metadata = {},
-        isLoading = $bindable(false),
+        isLoading = $bindable(),
     } = $props();
 
     let epubUrl = $state(null);
-    let lastEpubHash = $state('');
 
+    // Effect unificado: reactividad automática + cleanup
     $effect(() => {
-        // Crear hash de todas las dependencias para detectar cambios relevantes
-        const hash = JSON.stringify({
-            html: documentHtml?.substring(0, 100),
-            css: css?.substring(0, 100),
-            bodyClass,
-            title: metadata?.title,
-            author: metadata?.author
-        });
+        // Svelte rastrea automáticamente estos valores
+        const _html = documentHtml;
+        const _css = css;
+        const _bodyClass = bodyClass;
+        const _metadata = metadata;
 
-        // Solo regenerar si realmente cambió algo
-        if (hash !== lastEpubHash && documentHtml) {
-            lastEpubHash = hash;
+        // Solo generar si hay contenido
+        if (documentHtml?.trim()) {
             generateEpub();
         }
+
+        // Cleanup al desmontar
+        return () => {
+            if (epubUrl) {
+                URL.revokeObjectURL(epubUrl);
+            }
+        };
     });
 
     async function generateEpub() {
-        if (!documentHtml) return;
-
         try {
             isLoading = true;
 
-            // Generar el blob EPUB
+            // Generar nuevo EPUB primero
             const blob = await createEpubBlob(
                 metadata,
                 documentHtml,
                 metadata["cover-image"],
                 css,
-                bodyClass,
+                bodyClass
             );
 
-            // Revocar URL anterior para limpiar memoria
+            // Crear nueva URL
+            const newUrl = URL.createObjectURL(blob);
+
+            // Limpiar URL anterior solo después de crear la nueva
+            // Esto evita que el visor se desmonte temporalmente
             if (epubUrl) {
                 URL.revokeObjectURL(epubUrl);
             }
 
-            // Crear nueva URL para el visor
-            epubUrl = URL.createObjectURL(blob);
+            // Actualizar con la nueva URL
+            epubUrl = newUrl;
 
         } catch (err) {
             console.error("Error generating EPUB preview:", err);
@@ -60,13 +65,6 @@
             isLoading = false;
         }
     }
-    
-    // Cleanup de la URL al desmontar
-    $effect(() => {
-        return () => {
-             if (epubUrl) URL.revokeObjectURL(epubUrl);
-        };
-    });
 </script>
 
 {#if epubUrl}

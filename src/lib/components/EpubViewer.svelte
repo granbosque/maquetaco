@@ -1,4 +1,23 @@
 <script>
+    /*
+      Visor de EPUB usando foliate-js
+
+      Este componente se convertirá en un componente genérico independiente de este proyecto, que sea
+      solo un interface simple para foliate-js.
+      
+      foliate-js muestra el epub y tiene una api de control simple,
+      este componente añade:
+      - barra de título y botones
+      - navegación con botones y tácil
+      - TOC que se muestra como popup
+      - progreso de lectura y información de sección actual
+      
+      Reactividad:
+      - Reacciona a cambios en `source` (File, Blob o URL string)
+      - Usa $effect para cargar el EPUB cuando cambia el source
+      - Estado local: navegación, progreso, TOC, estados de carga
+     */
+
     import { onMount, tick } from "svelte";
     import { ChevronLeft, ChevronRight, Book, List } from "lucide-svelte";
 
@@ -20,10 +39,11 @@
     let toc = $state([]);
     let showToc = $state(false);
     let isLoading = $state(true);
-    let isReady = $state(false); // Indicates if foliate-js is loaded
+    let isReady = $state(false);
+    let currentSource = $state(null);
+    let isLoadingEpub = $state(false);
 
     onMount(async () => {
-        // Registrar el custom element de foliate-js
         try {
             if (!customElements.get("foliate-view")) {
                 await import("foliate-js/view.js");
@@ -33,7 +53,6 @@
             console.error("Failed to load foliate-js", e);
         }
         
-        // Atajos de teclado
         window.addEventListener("keydown", handleKeydown);
         return () => {
             window.removeEventListener("keydown", handleKeydown);
@@ -43,29 +62,41 @@
         };
     });
 
-    // Reaccionar a cambios en source o container, pero solo si ya está listo
     $effect(() => {
-        if (isReady && source && container) {
-            // Usar untracked para evitar que loadEpub se vuelva a llamar inintencionadamente
-            // aunque aquí dependemos explícitamente de source y container
+        if (isReady && source && container && source !== currentSource && !isLoadingEpub) {
+            currentSource = source;
             loadEpub(source);
         }
     });
 
     async function loadEpub(epubSource) {
-        if (!container || !isReady) return;
+        if (!container || !isReady || !epubSource || isLoadingEpub) {
+            return;
+        }
+
+        if (!container.isConnected) {
+            console.warn("Container not connected to DOM, waiting...");
+            await tick();
+            if (!container.isConnected) {
+                console.error("Container still not connected after tick");
+                return;
+            }
+        }
 
         try {
+            isLoadingEpub = true;
             isLoading = true;
-            
-            // Wait for a tick to ensure UI is ready
             await tick();
 
-            // Limpiar vista anterior si existe
+            if (!container) {
+                console.error("Container is null after tick");
+                return;
+            }
+
+            // Limpiar vista anterior
             if (view) {
                 view.removeEventListener("relocate", handleRelocate);
                 view.removeEventListener("load", handleLoad);
-                // Intentar cerrar limpiamente
                 try {
                     await view.close?.(); 
                 } catch (e) {
@@ -74,34 +105,34 @@
                 view.remove();
                 view = null;
             }
-            container.innerHTML = "";
+            
+            if (container) {
+                container.innerHTML = "";
+            } else {
+                console.error("Container is null before setting innerHTML");
+                return;
+            }
 
             // Crear y montar el visor foliate
-            // Es importante que el custom element ya esté registrado
             const newView = document.createElement("foliate-view");
             newView.style.width = "100%";
             newView.style.height = "100%";
             container.appendChild(newView);
             view = newView;
 
-            // Escuchar eventos de navegación
             view.addEventListener("relocate", handleRelocate);
             view.addEventListener("load", handleLoad);
 
-            // Abrir el EPUB
-            // foliate-view.open accepts File, Blob, or URL string
-            // Esperamos un poco para asegurar que el componente está montado en el DOM
+            // Esperar a que el componente esté montado en el DOM
             await new Promise(r => setTimeout(r, 50));
             
             await view.open(epubSource);
             
-            // Obtener información del libro
             if (view.book) {
                 totalSections = view.book.sections?.length ?? 0;
                 toc = view.book.toc ?? [];
             }
             
-            // Inicializar el visor
             await view.init({
                 defaultStyles: true
             });
@@ -109,61 +140,52 @@
             if (initialLocation) {
                  await view.goTo(initialLocation);
             } else {
-                 // Inicializar sección actual
                 currentSection = 0;
                 await view.goTo(0);
             }
 
-            // Actualizar estado inicial
             updateNavigationState();
 
         } catch (err) {
             console.error("Error viewing EPUB:", err);
-            // Si falla, intentamos limpiar
-            container.innerHTML = "<div class='error-state'>Error al abrir el libro</div>";
+            if (container) {
+                container.innerHTML = "<div class='error-state'>Error al abrir el libro</div>";
+            }
         } finally {
             isLoading = false;
+            isLoadingEpub = false;
         }
     }
 
     function handleRelocate(e) {
         const { fraction, index } = e.detail;
 
-        // Actualizar progreso
         if (fraction !== undefined && fraction !== null) {
             progress = Math.round(fraction * 100);
         }
 
-        // Actualizar sección actual
         if (typeof index === 'number') {
             currentSection = index;
-
-            // Obtener título de la sección desde el libro
             if (view?.book?.sections?.[index]) {
                 const section = view.book.sections[index];
                 sectionTitle = section.label || `Capítulo ${index + 1}`;
             }
         }
 
-        // Actualizar estado de navegación
         updateNavigationState();
     }
 
     function handleLoad(e) {
         const { index } = e.detail;
 
-        // Actualizar sección actual cuando se carga una nueva sección
         if (typeof index === 'number') {
             currentSection = index;
-
-            // Obtener título de la sección desde el libro
             if (view?.book?.sections?.[index]) {
                 const section = view.book.sections[index];
                 sectionTitle = section.label || `Capítulo ${index + 1}`;
             }
         }
 
-        // Actualizar estado de navegación
         updateNavigationState();
     }
 
@@ -174,11 +196,7 @@
             return;
         }
 
-        // Determinar si podemos navegar
-        // No podemos retroceder si estamos al inicio
         canGoPrev = !(currentSection === 0 && progress <= 5);
-        
-        // No podemos avanzar si estamos al final
         canGoNext = !(currentSection >= totalSections - 1 && progress >= 95);
     }
 
@@ -186,11 +204,9 @@
         if (!view || !canGoPrev) return;
 
         try {
-            // Si estamos cerca del inicio de la sección actual y hay una anterior, ir a la sección anterior
             if (progress <= 5 && currentSection > 0) {
                  view.goTo(currentSection - 1);
             } else {
-                // Navegar dentro de la sección actual
                  view.prev();
             }
         } catch (err) {
@@ -202,11 +218,9 @@
         if (!view || !canGoNext) return;
 
         try {
-            // Si estamos cerca del final de la sección actual y hay una siguiente, ir a la siguiente sección
             if (progress >= 95 && currentSection < totalSections - 1) {
                  view.goTo(currentSection + 1);
             } else {
-                // Navegar dentro de la sección actual
                  view.next();
             }
         } catch (err) {
@@ -217,7 +231,6 @@
      function goToStart() {
         if (!view) return;
         try {
-            // Ir a la primera sección
              view.goTo({ index: 0 });
         } catch (err) {
             console.error("Error yendo al inicio:", err);
@@ -247,7 +260,6 @@
         showToc = !showToc;
     }
 
-    // Atajos de teclado
     function handleKeydown(e) {
         if (!view || e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
             return;
@@ -330,7 +342,6 @@
             {/if}
         </div>
         
-        <!-- Botones flotantes de navegación -->
         <button 
             class="nav-btn nav-btn-prev" 
             onclick={prevPage} 

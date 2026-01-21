@@ -86,7 +86,8 @@
     
     let selectedThemeId = $state(exportFormats[1].id);
     let pdfPreviewRef = $state(null);
-    let isLoading = $state(false);
+    let isLoading = $state(false); // Para la exportación
+    let previewLoading = $state(false); // Para la vista previa
     let error = $state(null);
     let coverImageCache = $state(null);
 
@@ -244,9 +245,9 @@
                 onclick={selectedTheme.type === "epub"
                     ? handleEpubExport
                     : handlePrint}
-                disabled={isLoading}
+                disabled={isLoading || previewLoading}
             >
-                {#if isLoading}
+                {#if isLoading || previewLoading}
                     <Loader2 size={16} class="spin" />
                 {:else if selectedTheme.type === "epub"}
                     <Download size={16} />
@@ -266,7 +267,7 @@
                 css={selectedTheme.css}
                 bodyClass={styleSettings.paragraphStyleClass}
                 {metadata}
-                bind:isLoading
+                bind:isLoading={previewLoading}
             />
         {:else}
             <PdfPreview
@@ -274,7 +275,7 @@
                 {documentHtml}
                 css={previewCss}
                 scale={selectedTheme.previewScale ?? 1}
-                bind:isLoading
+                bind:isLoading={previewLoading}
                 bind:error
             />
         {/if}
