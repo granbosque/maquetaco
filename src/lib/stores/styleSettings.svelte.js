@@ -47,7 +47,8 @@ export const styleSettings = {
     // Computed: CSS override para fuente
     get fontOverrideCSS() {
         const font = exportFonts.find(f => f.id === selectedFontId);
-        if (!font || font.id === 'georgia') return '';
+        if (!font) return '';
+        // Georgia también necesita override porque los temas usan Garamond/Noto Serif por defecto
         return `\n:root { --body-font-family: ${font.family} !important; }\n`;
     }
 };

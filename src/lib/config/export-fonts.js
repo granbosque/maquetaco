@@ -117,11 +117,5 @@ export const exportFonts = [
         name: 'Source Sans 3',
         family: "'Source Sans 3', -apple-system, sans-serif",
         description: 'Sans Adobe profesional'
-    },
-    {
-        id: 'georgia',
-        name: 'Georgia',
-        family: "Georgia, serif",
-        description: 'Sistema (sin descarga)'
     }
 ];

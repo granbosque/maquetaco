@@ -67,6 +67,7 @@
     import { renderCustomTemplate } from "$lib/converters/template-engine.js";
     import { downloadEpub } from "$lib/converters/md-to-epub.js";
     import { exportFormats } from "$lib/config/export-formats.js";
+    import { exportFonts } from "$lib/config/export-fonts.js";
     import { generateDefaultCover } from "$lib/utils/cover-generator.js";
     import PdfPreview from "$lib/components/PdfPreview.svelte";
     import EpubPreview from "$lib/components/EpubPreview.svelte";
@@ -157,7 +158,7 @@
             if (_imagePreview) {
                 if (!cancelled) coverImageCache = _imagePreview;
             } else {
-                const fontFamily = _font ? _font.family : "Georgia, serif";
+                const fontFamily = _font ? _font.family : exportFonts[0].family;
                 const cover = await generateDefaultCover(
                     _title || "Sin título",
                     _author || "",

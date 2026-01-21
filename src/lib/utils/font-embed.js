@@ -21,8 +21,7 @@ export const fontFiles = {
     'lexend': '/fonts/Lexend/Lexend-VariableFont_wght.ttf',
     'quando': '/fonts/Quando/Quando-Regular.ttf',
     'scope-one': '/fonts/Scope_One/ScopeOne-Regular.ttf',
-    'source-sans': '/fonts/Source_Sans_3/SourceSans3-VariableFont_wght.ttf',
-    'georgia': null // Sistema, no requiere archivo
+    'source-sans': '/fonts/Source_Sans_3/SourceSans3-VariableFont_wght.ttf'
 };
 
 /**
@@ -69,7 +68,7 @@ async function loadFontAsBase64(fontPath) {
 export async function generateEmbeddedFontCSS(fontId, fontFamily) {
     const fontPath = fontFiles[fontId];
 
-    // Si es Georgia o no hay archivo, no embeber
+    // Si no hay archivo, no embeber
     if (!fontPath) return '';
 
     const base64 = await loadFontAsBase64(fontPath);

@@ -15,7 +15,7 @@ import { generateEmbeddedFontCSS } from './font-embed.js';
  * @param {string} fontId - ID de la fuente para embed (opcional)
  * @returns {Promise<string>} Data URL de la imagen generada
  */
-export async function generateDefaultCover(title = "Sin Título", author = "", fontFamily = "Georgia, serif", fontId = null) {
+export async function generateDefaultCover(title = "Sin Título", author = "", fontFamily = "serif", fontId = null) {
     const width = 600;
     const height = 900;
 
