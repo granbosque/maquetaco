@@ -445,15 +445,16 @@
     /* H3 en adelante alineados a la izquierda para estructura interna */
     h3 {
         text-align: left;
-        font-size: 1.25em;
+        font-size: 1.3em;
         margin-top: 1.5em;
         margin-bottom: 0.5em;
-        font-weight: bold;
+        font-weight: normal;
+        font-variant: small-caps;
     }
 
     h4 {
         text-align: left;
-        font-size: 1.1em;
+        font-size: 1.2em;
         font-style: italic;
         margin-top: 1.2em;
         margin-bottom: 0.4em;
@@ -462,8 +463,9 @@
 
     h5 {
         text-align: left;
-        font-size: 1em;
-        font-weight: bold;
+        font-size: 1.1em;
+        font-weight: normal;
+        font-variant: small-caps;
         margin-top: 1em;
         margin-bottom: 0.3em;
     }

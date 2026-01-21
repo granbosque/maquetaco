@@ -130,24 +130,27 @@
 
 .preview-content h3 {
     text-align: left;
-    font-size: 1.15rem;
-    font-weight: bold;
+    font-size: 1.25rem;
+    font-weight: normal;
+    font-variant: small-caps;
     margin-top: 1.5rem;
     margin-bottom: 0.75rem;
 }
 
 .preview-content h4 {
     text-align: left;
-    font-size: 1.05rem;
+    font-size: 1.15rem;
     font-style: italic;
+    font-weight: normal;
     margin-top: 1.25rem;
     margin-bottom: 0.5rem;
 }
 
 .preview-content h5 {
     text-align: left;
-    font-size: 1rem;
-    font-weight: bold;
+    font-size: 1.1rem;
+    font-weight: normal;
+    font-variant: small-caps;
     margin-top: 1rem;
     margin-bottom: 0.5rem;
 }
