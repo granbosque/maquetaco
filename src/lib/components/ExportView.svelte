@@ -1,4 +1,66 @@
 <script>
+    /*
+      Componente principal de exportación que muestra una vista previa
+      y permite guardar los documentos generados.
+
+      Nota: a diferencia de PreviewView.svelte, que es una vista previa aproximada,
+      aquí si vemos el documento final exacto, con la disposición de páginas, etc)
+      y tal cual se va a guardar.
+      (¿sería buena idea cambmiar el tab "Vista previa" por algo como a "Revisar" o "Diseño"?)
+      
+      Funcionalidad:
+      1. Permite seleccionar el formato de exportación (PDF, EPUB, etc.) desde una lista de formatos
+         preconfigurados que vienenn en exportFormats. 
+      
+      2. Convierte el contenido markdown del editor a HTML usando convertDocument, 
+         y luego aplica la plantilla html y css (uno o varios) correspondientes según el formato seleccionado.
+         Los formatos de exportación pueden ser pdf o epub, pero todos se basan en convertir antes a html.
+         En el futuro quizás se añada exportación a docx u odt, que seguramente también parta del html y no del markdown.
+      
+      3. Si no hay portada, genera automáticamente una imagen svg básica con el mismo tipo de letra elegido.
+      
+      4. Muestra una vista previa del documento usando PdfPreview o EpubPreview según el formato de salida
+      
+      5. - Para exportar a PDF: se pasa documentHtml y previewCss a PdfPreview, que genera el HTML final 
+            con paged.js y lo muestra en un iframe. Sirve tanto como vista previa como documento final a guardar.
+          - Para exportar a EPUB: hay dos flujos separados:
+            * Vista previa: se pasa documentHtml, css, bodyClass y metadata a EpubPreview, que genera 
+              el blob EPUB internamente usando createEpubBlob() y lo muestra en un visor.
+            * Descarga: al hacer clic en exportar, handleEpubExport() llama a downloadEpub() que genera 
+              el blob y lo descarga directamente.
+          
+    Nota: este archivo está muy parcheado y el flujo es confuso, se puede mejorar mucho.
+    
+        - La generación de EPUB está duplicada (createEpubBlob en EpubPreview y exportToEpub en 
+            downloadEpub). Sería mejor centralizar esto para que sea más legible y mantenible.
+        
+        - El HTML final (no el intermedio) se genera en:
+            * PDF: PdfPreview.generateFullDocument() (paged-renderer.js) - crea el HTML completo 
+            con DOCTYPE, head, scripts de paged.js, etc.
+            * EPUB: EpubBook.createChapterDocument() (EpubBook.js) - convierte documentHtml en 
+            archivos XHTML estructurados por capítulos dentro del ZIP EPUB.
+            
+
+        También pendiente unificar css.
+
+
+      ---
+     
+      Reactividad:
+      
+        El componente es reactivo a cambios desde fuera: appState y styleSettings:
+        Los estilos se pueden cambiar desde la página de Edición, la de vista previa y desde esta misma.
+        
+        Estado local: formato seleccionado, referencia al preview PDF, estados de carga/error, imagne de portada
+      
+      Valores derivados: se recalculan automáticamente cuando cambian sus dependencias:
+        * Formato seleccionado y si es EPUB o PDF
+        * HTML del contenido (markdown convertido)
+        * Metadatos del documento (título, autor, TOC, etc.) y la imagen de portada
+        * HTML con template aplicado (si el formato lo requiere)
+        * CSS combinado del formato y configuraciones de usuario
+     */
+
     import { appState } from "$lib/stores/appState.svelte.js";
     import { styleSettings } from "$lib/stores/styleSettings.svelte.js";
     import { convertDocument } from "$lib/converters/md-to-html.js";
@@ -19,54 +81,36 @@
         Loader2,
     } from "lucide-svelte";
 
-    // Mapeo de iconos
     const icons = { Monitor, FileText, Printer, Smartphone, BookOpen };
-
-    let selectedTheme = $state(exportFormats[1]);
+    
     let selectedThemeId = $state(exportFormats[1].id);
-    let lastFormatId = $state(exportFormats[1].id); // Track format changes
-    let preserveScroll = $state(true); // Reset scroll only on format change
     let pdfPreviewRef = $state(null);
     let isLoading = $state(false);
     let error = $state(null);
+    let coverImageCache = $state(null);
 
-    $effect(() => {
-        const theme = exportFormats.find((t) => t.id === selectedThemeId);
-        if (theme) {
-            // Detect if format changed (not just style)
-            if (selectedThemeId !== lastFormatId) {
-                preserveScroll = false;
-                lastFormatId = selectedThemeId;
-            } else {
-                preserveScroll = true;
-            }
-            selectedTheme = theme;
-        }
-    });
+    let selectedTheme = $derived(
+        exportFormats.find((t) => t.id === selectedThemeId) || exportFormats[1]
+    );
 
-    // Determinar si el formato actual es EPUB
     let isEpubFormat = $derived(selectedTheme.type === "epub");
 
-    // Prepararar HTML y metadatos
-    let contentHtml = $state("");
-    let metadata = $state({});
-
-    // Effect para generar HTML y metadatos cuando cambian dependencias
-    $effect(() => {
-        // Leer valores del store para que el effect sea reactivo a sus cambios
-        const _paragraphStyle = styleSettings.paragraphStyleId;
-        const _font = styleSettings.fontId;
-        generateMetadata();
+    let contentHtml = $derived.by(() => {
+        const { html } = convertDocument(
+            appState.config.content,
+            appState.config.lang || "es"
+        );
+        return html;
     });
 
-    async function generateMetadata() {
-        // Convertir contenido a HTML con el idioma configurado
-        const lang = appState.config.lang || "es";
-        const { html } = convertDocument(appState.config.content, lang);
-        contentHtml = html;
+    let metadata = $derived.by(() => {
+        const h1Count = (contentHtml.match(/<h1/g) || []).length;
+        
+        const toc = appState.config.enableTOC !== undefined
+            ? appState.config.enableTOC
+            : h1Count > 2;
 
-        // Construir metadatos desde appState.config (la fuente de verdad)
-        const meta = {
+        return {
             title: appState.config.title || "Sin título",
             author: appState.config.author || "",
             publisher: appState.config.publisher || "",
@@ -76,60 +120,58 @@
             date: appState.config.date || "",
             lang: appState.config.lang || "es",
             includeBranding: appState.config.includeBranding !== false,
+            toc,
+            tocDepth: appState.config.tocDepth || 1,
+            paragraphStyleClass: styleSettings.paragraphStyleClass,
+            "cover-image": coverImageCache,
         };
+    });
 
-        // Lógica de Tabla de Contenidos (TOC)
-        const h1Count = (contentHtml.match(/<h1/g) || []).length;
-        if (appState.config.enableTOC === undefined) {
-            // Automático: si hay más de 2 capítulos
-            meta.toc = h1Count > 2;
-        } else {
-            // Manual: lo que diga el usuario
-            meta.toc = appState.config.enableTOC;
-        }
-        meta.tocDepth = appState.config.tocDepth || 1;
-
-        // Inyectar imagen de portada
-        if (appState.config.imagePreview) {
-            // Prioridad 1: Imagen cargada en UI (no regenerar)
-            meta["cover-image"] = appState.config.imagePreview;
-        } else {
-            // Prioridad 2: Generar portada con fuente seleccionada
-            const font = styleSettings.font;
-            const fontFamily = font ? font.family : "Georgia, serif";
-            const fontId = font ? font.id : null;
-            meta["cover-image"] = await generateDefaultCover(
-                meta.title,
-                meta.author,
-                fontFamily,
-                fontId,
-            );
-        }
-
-        // Añadir clase de estilo de párrafo
-        meta.paragraphStyleClass = styleSettings.paragraphStyleClass;
-
-        metadata = meta;
-    }
-
-    // HTML renderizado para preview
     let documentHtml = $derived.by(() => {
         if (selectedTheme.template) {
             return renderCustomTemplate(
                 selectedTheme.template,
                 metadata,
-                contentHtml,
+                contentHtml
             );
         }
         return contentHtml;
     });
 
-    // CSS completo para preview (derivado para que se actualice junto con documentHtml)
     let previewCss = $derived(
-        selectedTheme.css + 
-        (selectedTheme.headerPresets ? styleSettings.headerStyleCss : '') + 
+        selectedTheme.css +
+        (selectedTheme.headerPresets ? styleSettings.headerStyleCss : "") +
         styleSettings.fontOverrideCSS
     );
+
+    $effect(() => {
+        const _title = appState.config.title;
+        const _author = appState.config.author;
+        const _imagePreview = appState.config.imagePreview;
+        const _fontId = styleSettings.fontId;
+        const _font = styleSettings.font;
+
+        let cancelled = false;
+
+        (async () => {
+            if (_imagePreview) {
+                if (!cancelled) coverImageCache = _imagePreview;
+            } else {
+                const fontFamily = _font ? _font.family : "Georgia, serif";
+                const cover = await generateDefaultCover(
+                    _title || "Sin título",
+                    _author || "",
+                    fontFamily,
+                    _fontId
+                );
+                if (!cancelled) coverImageCache = cover;
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    });
 
     function handlePrint() {
         pdfPreviewRef?.print();
@@ -138,15 +180,18 @@
     async function handleEpubExport() {
         try {
             isLoading = true;
-            // Usar portada generada si no hay una cargada
-            const config = {
-                ...appState.config,
-                imagePreview: appState.config.imagePreview || metadata["cover-image"] || null
-            };
-            await downloadEpub(config, {
-                css: selectedTheme.css,
-                bodyClass: styleSettings.paragraphStyleClass
-            });
+            error = null;
+            
+            await downloadEpub(
+                {
+                    ...appState.config,
+                    imagePreview: appState.config.imagePreview || coverImageCache
+                },
+                {
+                    css: selectedTheme.css,
+                    bodyClass: styleSettings.paragraphStyleClass,
+                }
+            );
         } catch (e) {
             error = e.message;
             console.error("Error generando EPUB:", e);
@@ -198,9 +243,11 @@
                 onclick={selectedTheme.type === "epub"
                     ? handleEpubExport
                     : handlePrint}
-                disabled={selectedTheme.type !== "epub" && isLoading}
+                disabled={isLoading}
             >
-                {#if selectedTheme.type === "epub"}
+                {#if isLoading}
+                    <Loader2 size={16} class="spin" />
+                {:else if selectedTheme.type === "epub"}
                     <Download size={16} />
                 {:else}
                     <Printer size={16} />
@@ -212,17 +259,9 @@
 
     <!-- Preview Area -->
     <div class="preview-area">
-        {#if isLoading}
-            <div class="loading-overlay">
-                <div class="status-msg">
-                    <Loader2 size={24} class="spin" /> Generando...
-                </div>
-            </div>
-        {/if}
-
         {#if isEpubFormat}
             <EpubPreview
-                documentHtml={contentHtml}
+                {documentHtml}
                 css={selectedTheme.css}
                 bodyClass={styleSettings.paragraphStyleClass}
                 {metadata}
@@ -234,7 +273,6 @@
                 {documentHtml}
                 css={previewCss}
                 scale={selectedTheme.previewScale ?? 1}
-                {preserveScroll}
                 bind:isLoading
                 bind:error
             />

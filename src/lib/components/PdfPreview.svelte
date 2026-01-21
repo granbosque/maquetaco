@@ -1,41 +1,121 @@
 <script>
+    /*
+      Componente de vista previa PDF con paginación usando Paged.js
+      
+      Para exportar a PDF:
+      1. Se convierte el markdown a HTML, añadiendo el CSS correspondiente a las opciones 
+         seleccionadas (tamaño de página, fuente, etc). Esa conversión se hace en ExportView.svelte
+      
+      2. Se genera el HTML final con Paged.js, que aplica los estilos de página (cabeceras, etc)
+      
+      3. Ese HTML final ya está paginado y listo para guardar como PDF.
+         No hay forma de convertir directamente a PDF sin errores (Chrome headless u otras 
+         herramientas tienen problemas como la división por sílabas), así que se hace 
+         indirectamente a través de la ventana de impresión.
+      
+      El HTML final se muestra en un iframe para así usar la ventana de impresión únicamente 
+      con ese iframe.
+     
+      ---
+     
+      Reactividad:
+      
+      - PROPS ($props):
+        - documentHtml: HTML del cuerpo del documento (markdown convertido a HTML con template)
+        - css: CSS completo para la maquetación
+        - scale: Escala inicial del zoom según el formato
+        - isLoading/error ($bindable): Estado compartido con el componente padre
+      
+      - ESTADO ($state):
+        - iframeContainer: Referencia al contenedor DOM
+        - currentZoom: Zoom actual de la vista previa
+      
+      - EFECTOS ($effect):
+        - Re-renderiza automáticamente cuando cambian documentHtml, css o iframeContainer
+        - Sincroniza currentZoom con scale cuando scale cambia desde props
+        - Usa AbortController para cancelar renders obsoletos cuando llega uno nuevo
+     */
+
     import {
         generateFullDocument,
         renderInIframe,
     } from "$lib/converters/paged-renderer.js";
-    import { onMount } from "svelte";
-    import { ZoomIn, ZoomOut, RotateCcw } from "lucide-svelte";
+    import { ZoomIn, ZoomOut } from "lucide-svelte";
 
     let {
         documentHtml = "",
         css = "",
         scale = 1,
-        preserveScroll = true,
         isLoading = $bindable(false),
         error = $bindable(null),
     } = $props();
 
     let iframeContainer = $state(null);
-    let iframe = null; // No reactivo - solo se usa internamente
+    let iframe = null;
+    let scrollPosition = 0;
+
+    // Control de zoom
     let currentZoom = $state(1);
-    let baseScale = $derived(scale); // Scale base que viene de las props
-    let renderTimeout = null;
     const zoomStep = 0.1;
     const minZoom = 0.3;
     const maxZoom = 2;
 
-    onMount(() => renderDocument());
+    function getScrollElement() {
+        const doc = iframe?.contentWindow?.document;
+        return doc?.scrollingElement || doc?.documentElement || doc?.body || null;
+    }
 
-    $effect(() => {
-        // Ejecutar cuando cambie el HTML, CSS o contenedor
-        // Pequeño debounce para agrupar cambios rápidos (ej: fuente cambia CSS y regenera metadata)
-        if (iframeContainer && (documentHtml || css)) {
-            clearTimeout(renderTimeout);
-            renderTimeout = setTimeout(renderDocument, 50);
+    function saveScrollPosition() {
+        const el = getScrollElement();
+        scrollPosition = el ? el.scrollTop : 0;
+    }
+
+    function restoreScrollPosition() {
+        const el = getScrollElement();
+        if (el) el.scrollTop = scrollPosition;
+    }
+
+    async function updatePreview(signal) {
+        if (!iframeContainer) return;
+
+        saveScrollPosition();
+
+        isLoading = true;
+        error = null;
+
+        try {
+            const fullHtml = generateFullDocument(documentHtml ?? "", css ?? "");
+            const newIframe = await renderInIframe(fullHtml, iframeContainer);
+
+            if (signal.aborted) return;
+
+            iframe = newIframe;
+            isLoading = false;
+
+            if (scrollPosition > 0) {
+                requestAnimationFrame(() => {
+                    if (!signal.aborted) restoreScrollPosition();
+                });
+            }
+        } catch (e) {
+            if (signal.aborted) return;
+            error = e?.message ?? String(e);
+            isLoading = false;
         }
+    }
+
+    // Re-renderizar automáticamente cuando cambien las dependencias
+    $effect(() => {
+        if (!iframeContainer) return;
+        if (documentHtml === null && !css) return;
+
+        const controller = new AbortController();
+        updatePreview(controller.signal);
+
+        return () => controller.abort();
     });
 
-    // Actualizar zoom cuando cambia el scale de las props (cambio de formato)
+    // Sincronizar zoom con scale externo (al cambiar formato)
     $effect(() => {
         currentZoom = scale;
     });
@@ -49,46 +129,15 @@
     }
 
     function resetZoom() {
-        currentZoom = baseScale;
-    }
-
-    async function renderDocument() {
-        if (!iframeContainer) return;
-
-        // Guardar scroll del iframe actual antes de destruirlo
-        let scrollPosition = 0;
-        if (iframe?.contentWindow?.document) {
-            const doc = iframe.contentWindow.document;
-            scrollPosition = doc.documentElement.scrollTop || doc.body?.scrollTop || 0;
-        }
-
-        isLoading = true;
-        error = null;
-        try {
-            const fullHtml = generateFullDocument(documentHtml, css);
-            iframe = await renderInIframe(fullHtml, iframeContainer);
-            isLoading = false;
-
-            // Restaurar scroll en el nuevo iframe
-            if (preserveScroll && scrollPosition > 0) {
-                requestAnimationFrame(() => {
-                    iframe?.contentWindow?.document?.documentElement &&
-                        (iframe.contentWindow.document.documentElement.scrollTop = scrollPosition);
-                });
-            }
-        } catch (e) {
-            error = e.message;
-            isLoading = false;
-        }
+        currentZoom = scale;
     }
 
     export async function print() {
-        if (iframe) {
-            const { printIframe } = await import(
-                "$lib/converters/paged-renderer.js"
-            );
-            printIframe(iframe);
-        }
+        if (!iframe?.contentWindow) return;
+
+        const { printIframe } = await import("$lib/converters/paged-renderer.js");
+        iframe.contentWindow.focus();
+        printIframe(iframe);
     }
 </script>
 
@@ -129,7 +178,14 @@
     }
 
     .preview-container :global(iframe) {
+        /* zoom funciona bien en Chrome/Edge pero no en Firefox
+           Para compatibilidad cross-browser, usar zoom con fallback a transform: scale()
+           Nota: Si se requiere que el zoom afecte también al área scrollable (comportamiento tipo zoom),
+           mantener zoom. Si solo se necesita escala visual, usar transform: scale() con ajustes de contenedor */
         zoom: var(--preview-scale, 1);
+        /* Fallback para Firefox (opcional, descomentar si se necesita soporte Firefox) */
+        /* transform: scale(var(--preview-scale, 1)); */
+        /* transform-origin: top center; */
     }
 
     .zoom-controls {
