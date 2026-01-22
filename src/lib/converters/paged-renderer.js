@@ -30,7 +30,7 @@ export function generateFullDocument(bodyHtml, css, options = {}) {
     if (!css) {
         throw new Error("CSS is required for PDF generation");
     }
-    const { lang = 'es', bgApp = getAppBackgroundColor() } = options;
+    const { lang = 'es', bgApp = getAppBackgroundColor(), baselineGridDebugCss = '' } = options;
 
     return `<!DOCTYPE html>
 <html lang="${lang}">
@@ -45,6 +45,7 @@ html, body { background-color: ${bgApp} !important;}
 .pagedjs_page { background-color: white !important;}
 html.pagedjs-ready { overflow: auto; }
 ${css}
+${baselineGridDebugCss}
     </style>
     <script src="/paged.polyfill.js"></script>
     <script>

@@ -9,7 +9,7 @@
    - página final con colofón, sin numeración.
    - alineación perfecta al baseline grid: todos los espaciados verticales están calculados en múltiplos del baseline
    
-   IMPORTANTE: Todos los espaciados verticales están calculados en múltiplos del baseline (14.7pt = 5.186mm con line-height 1.4).
+   IMPORTANTE: Todos los espaciados verticales están calculados en múltiplos del baseline (12.6pt = 4.445mm con line-height 1.2).
    Para personalizar, modificar las variables en :root. Excepto el tamaño de página, que no se puede cambiar en variables (paged.js no lo soporta).
    NOTA: Los márgenes de página (@page content-pages) están definidos en archivos header-footer--*.css separados.
 */
@@ -27,12 +27,12 @@
         /* Familia. Opciones: 'Noto Serif', 'Noto Sans', Garamond, Georgia, serif, sans-serif */
         --body-font-size: 10.5pt;
         /* Tamaño base. Opciones: 11pt, 12pt, 13pt */
-        --body-line-height: 1.4;
+        --body-line-height: 1.2;
         /* Altura de línea. Opciones: 1–1.6. Recomendado: 1.4 para mejor legibilidad y alineación al baseline grid */
         
         /* Baseline grid - base de toda la alineación vertical */
         --baseline: calc(var(--body-font-size) * var(--body-line-height));
-        /* Calculado automáticamente: 10.5pt * 1.4 = 14.7pt (5.186mm) */
+        /* Calculado automáticamente: 10.5pt * 1.2 = 12.6pt (4.445mm) */
 
         /* Control de composición */
         --paragraph-orphans: 2;
@@ -305,6 +305,19 @@
     b {
         font-variant: small-caps;
         font-weight: normal;
+    }
+
+    /* Números de notas al pie: no deben afectar el baseline grid */
+    sup {
+        font-size: 0.7em;
+        line-height: 0.5;
+        vertical-align: super;
+        /* line-height reducido minimiza el impacto en la altura de línea */
+        /* vertical-align: super mantiene el comportamiento estándar de superíndice */
+    }
+    sup a {
+        color: inherit;
+        text-decoration: none;
     }
 
 
@@ -638,6 +651,49 @@
         display: block;
         margin-top: var(--baseline);
         margin-bottom: var(--baseline);
+    }
+
+    /* =========================================
+       CÓDIGO - Alineado al baseline grid
+       ========================================= */
+    
+    /* Código inline: respeta el line-height del párrafo */
+    code {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.9em;
+        line-height: var(--body-line-height);
+        /* Mantener el mismo line-height que el texto circundante */
+        vertical-align: baseline;
+        /* Asegurar alineación vertical con el texto */
+    }
+    
+    /* Bloques de código: alineados al baseline grid */
+    pre {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.85em;
+        line-height: var(--baseline);
+        /* Cada línea ocupa exactamente 1 línea del baseline grid */
+        margin-top: var(--baseline);
+        margin-bottom: var(--baseline);
+        padding: var(--baseline);
+        padding-top: calc(var(--baseline) * 0.5);
+        padding-bottom: calc(var(--baseline) * 0.5);
+        /* Padding interno también alineado al baseline */
+        page-break-inside: avoid;
+        break-inside: avoid;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    /* Código dentro de bloques pre: mantener alineación */
+    pre code {
+        font-size: 1em;
+        line-height: var(--baseline);
+        /* Cada línea del código ocupa 1 línea del baseline */
+        display: block;
+        padding: 0;
+        margin: 0;
     }
 
 

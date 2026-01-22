@@ -28,10 +28,13 @@
       
       - ESTADO ($state):
         - iframeContainer: Referencia al contenedor DOM
+        - iframe: Referencia al iframe renderizado
         - currentZoom: Zoom actual de la vista previa
+        - showGrid: Estado de visibilidad de la rejilla de ayuda
       
       - EFECTOS ($effect):
         - Re-renderiza automáticamente cuando cambian documentHtml, css o iframeContainer
+        - Aplica la rejilla de ayuda cuando cambia showGrid o el iframe
         - Sincroniza currentZoom con scale cuando scale cambia desde props
         - Usa AbortController para cancelar renders obsoletos cuando llega uno nuevo
      */
@@ -39,6 +42,7 @@
     import {
         generateFullDocument,
         renderInIframe,
+        printIframe,
     } from "$lib/converters/paged-renderer.js";
     import { ZoomIn, ZoomOut } from "lucide-svelte";
     import { Toolbar } from "bits-ui";
@@ -54,74 +58,110 @@
     } = $props();
 
     let iframeContainer = $state(null);
-    let iframe = null;
-    let scrollPosition = 0;
+    let iframe = $state(null);
 
     // Control de zoom
     let currentZoom = $state(1);
-    const zoomStep = 0.1;
-    const minZoom = 0.3;
-    const maxZoom = 2;
+    const ZOOM_STEP = 0.1;
+    const MIN_ZOOM = 0.3;
+    const MAX_ZOOM = 2;
 
     // Control del grid de ayuda
     let showGrid = $state(false);
 
+    // Constantes
+    const PANEL_OFFSET = 300; // px para centrado visual
+
+    // Helpers de scroll
     function getScrollElement() {
         const doc = iframe?.contentWindow?.document;
         return doc?.scrollingElement || doc?.documentElement || doc?.body || null;
     }
 
-    function saveScrollPosition() {
+    function preserveScroll(callback) {
         const el = getScrollElement();
-        scrollPosition = el ? el.scrollTop : 0;
-    }
-
-    function restoreScrollPosition() {
-        const el = getScrollElement();
-        if (el) el.scrollTop = scrollPosition;
+        const scrollTop = el?.scrollTop || 0;
+        callback();
+        requestAnimationFrame(() => {
+            const newEl = getScrollElement();
+            if (newEl) newEl.scrollTop = scrollTop;
+        });
     }
 
     async function updatePreview(signal) {
-        if (!iframeContainer) return;
-
-        saveScrollPosition();
+        if (!iframeContainer || (!documentHtml && !css)) return;
 
         isLoading = true;
         error = null;
 
         try {
-            const cssWithGrid = showGrid ? (css ?? "") + baselineGridDebugCss : (css ?? "");
-            const fullHtml = generateFullDocument(documentHtml ?? "", cssWithGrid);
+            // Siempre incluir el CSS de debug, pero condicionado a la clase show-baseline-grid
+            const fullHtml = generateFullDocument(documentHtml ?? "", css ?? "", {
+                baselineGridDebugCss
+            });
             const newIframe = await renderInIframe(fullHtml, iframeContainer);
 
             if (signal.aborted) return;
 
-            iframe = newIframe;
+            preserveScroll(() => {
+                iframe = newIframe;
+            });
+            
+            applyBaselineGrid(showGrid);
             isLoading = false;
-
-            if (scrollPosition > 0) {
-                requestAnimationFrame(() => {
-                    if (!signal.aborted) restoreScrollPosition();
-                });
-            }
         } catch (e) {
             if (signal.aborted) return;
             error = e?.message ?? String(e);
             isLoading = false;
         }
     }
+    
+    function applyBaselineGrid(enabled, maxAttempts = 10) {
+        if (!iframe?.contentWindow) {
+            return;
+        }
+        
+        try {
+            const doc = iframe.contentWindow.document;
+            if (!doc || !doc.documentElement) {
+                // Si el documento no está listo y aún tenemos intentos, reintentar
+                if (maxAttempts > 0) {
+                    requestAnimationFrame(() => applyBaselineGrid(enabled, maxAttempts - 1));
+                }
+                return;
+            }
+            
+            const htmlElement = doc.documentElement;
+            htmlElement?.classList.toggle('show-baseline-grid', enabled);
+        } catch (e) {
+            console.error('[applyBaselineGrid] error:', e);
+        }
+    }
 
-    // Re-renderizar automáticamente cuando cambien las dependencias (incluyendo el estado del grid)
+    // Actualizar automáticamente cuando cambien las dependencias (sin incluir showGrid)
     $effect(() => {
         if (!iframeContainer) return;
-        if (documentHtml === null && !css) return;
-        // Incluir showGrid como dependencia para re-renderizar cuando cambie
-        const _ = showGrid;
+        // No renderizar si no hay contenido ni CSS
+        if ((!documentHtml || documentHtml === null) && !css) return;
 
         const controller = new AbortController();
         updatePreview(controller.signal);
 
         return () => controller.abort();
+    });
+    
+    // Actualizar la clase del iframe cuando cambie showGrid (sin re-renderizar)
+    $effect(() => {
+        const currentIframe = iframe;
+        const currentShowGrid = showGrid;
+        
+        if (currentIframe) {
+            requestAnimationFrame(() => {
+                if (iframe === currentIframe) {
+                    applyBaselineGrid(currentShowGrid);
+                }
+            });
+        }
     });
 
     // Sincronizar zoom con scale externo (al cambiar formato)
@@ -130,28 +170,31 @@
     });
 
     function zoomIn() {
-        currentZoom = Math.min(maxZoom, currentZoom + zoomStep);
+        currentZoom = Math.min(MAX_ZOOM, currentZoom + ZOOM_STEP);
     }
 
     function zoomOut() {
-        currentZoom = Math.max(minZoom, currentZoom - zoomStep);
+        currentZoom = Math.max(MIN_ZOOM, currentZoom - ZOOM_STEP);
     }
 
     function resetZoom() {
         currentZoom = scale;
     }
 
-    export async function print() {
+    export function print() {
         if (!iframe?.contentWindow) return;
-
-        const { printIframe } = await import("$lib/converters/paged-renderer.js");
         iframe.contentWindow.focus();
         printIframe(iframe);
     }
 </script>
 
 <div class="preview-wrapper">
-    <div class="preview-container" bind:this={iframeContainer} style="--preview-scale: {currentZoom}"></div>
+    <div 
+        class="preview-container" 
+        bind:this={iframeContainer} 
+        style:--preview-scale={currentZoom}
+        style:--panel-offset="{PANEL_OFFSET}px"
+    ></div>
     
     <Toolbar.Root class="floating-toolbar">
         {#if showGridToggle}
@@ -160,9 +203,9 @@
                 onclick={() => showGrid = !showGrid}
                 title={showGrid 
                     ? "Ocultar rejilla de ayuda" 
-                    : "Muestra una rejilla con líneas horizontales para verificar la alineación vertical del texto y las líneas viudas y huérfanas"}
+                    : "Mostrar rejilla de ayuda"}
             >
-                {showGrid ? "Mostrar rejilla" : "Mostrar rejilla"}
+                {showGrid ? "Ocultar rejilla" : "Mostrar rejilla"}
             </Toolbar.Button>
             
             <div class="toolbar-separator"></div>
@@ -172,7 +215,7 @@
             class="toolbar-btn icon-only"
             onclick={zoomOut}
             title="Reducir zoom"
-            disabled={currentZoom <= minZoom}
+            disabled={currentZoom <= MIN_ZOOM}
         >
             <ZoomOut size={14} />
         </Toolbar.Button>
@@ -189,7 +232,7 @@
             class="toolbar-btn icon-only"
             onclick={zoomIn}
             title="Aumentar zoom"
-            disabled={currentZoom >= maxZoom}
+            disabled={currentZoom >= MAX_ZOOM}
         >
             <ZoomIn size={14} />
         </Toolbar.Button>
@@ -213,7 +256,7 @@
         justify-content: center;
         overflow: auto;
         /* Offset para compensar el panel flotante y centrar visualmente */
-        padding-left: 300px; /* ~280px panel + margins */
+        padding-left: var(--panel-offset, 300px);
     }
 
     .preview-container :global(iframe) {
@@ -225,40 +268,5 @@
         /* Fallback para Firefox (opcional, descomentar si se necesita soporte Firefox) */
         /* transform: scale(var(--preview-scale, 1)); */
         /* transform-origin: top center; */
-    }
-
-    /* Toolbar flotante en esquina inferior derecha */
-    :global(.floating-toolbar) {
-        position: absolute;
-        bottom: var(--space-lg);
-        right: var(--space-lg);
-        display: flex;
-        align-items: center;
-        gap: var(--space-xs);
-        background: var(--bg-surface);
-        border: 1px solid var(--border-muted);
-        border-radius: var(--radius);
-        padding: var(--space-xs);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        opacity: 0.7;
-        transition: opacity var(--transition);
-        z-index: 10;
-    }
-
-    :global(.floating-toolbar:hover) {
-        opacity: 1;
-    }
-
-    /* Ajustes específicos para botones en la toolbar flotante */
-    :global(.floating-toolbar .toolbar-btn) {
-        min-height: unset;
-        padding: var(--space-xs) var(--space-sm);
-        font-size: var(--text-xs);
-    }
-
-    :global(.floating-toolbar .toolbar-btn.icon-only) {
-        width: 24px;
-        height: 24px;
-        padding: var(--space-xs);
     }
 </style>

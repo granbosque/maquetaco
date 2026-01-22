@@ -201,6 +201,40 @@ header h1 {
     transform: scale(0.98);
 }
 
+/* Floating toolbar (se usa en preview) */
+.floating-toolbar {
+    position: absolute;
+    bottom: var(--space-lg);
+    right: var(--space-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-muted);
+    border-radius: var(--radius);
+    padding: var(--space-xs);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    opacity: 0.7;
+    transition: opacity var(--transition);
+    z-index: 10;
+}
+
+.floating-toolbar:hover {
+    opacity: 1;
+}
+
+.floating-toolbar .toolbar-btn {
+    min-height: unset;
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--text-xs);
+}
+
+.floating-toolbar .toolbar-btn.icon-only {
+    width: 24px;
+    height: 24px;
+    padding: var(--space-xs);
+}
+
 /* === EDITOR TOOLBAR SPECIFIC === */
 .editor-toolbar {
     display: flex;

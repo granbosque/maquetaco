@@ -1,6 +1,7 @@
 /* ============================================
    DEBUG: Grid de ayuda para baseline
    Solo visible en pantalla, no al imprimir
+   Condicionado a la clase 'show-baseline-grid' en el elemento html
    ============================================ */
 
 @media screen,
@@ -8,14 +9,18 @@ pagedjs-ignore {
     /* Definir --baseline en este contexto para que esté disponible */
     /* Debe coincidir con el valor definido en theme.css dentro de @media print */
     :root {
-        --baseline: calc(10.5pt * 1.4);  /* 14.7pt - debe coincidir con --baseline de theme.css */
+        --baseline: calc(10.5pt * 1.2);  /* 12.6pt - debe coincidir con --baseline de theme.css */
     }
 
-    /* grid de lineas */
-    /* Baseline grid solo en el área de contenido, alineado con el texto */
-    /* Excluir páginas en blanco */
-    .pagedjs_page:not(.pagedjs_blank_page) .pagedjs_area {
-        --pagedjs-baseline: calc(10.5pt * 1.4);  /* 14.7pt - debe coincidir con --baseline */
+    /* Solo aplicar estilos cuando el html tenga la clase show-baseline-grid */
+    html.show-baseline-grid {
+        /* grid de lineas */
+        /* Baseline grid solo en el área de contenido, alineado con el texto */
+        /* Excluir páginas en blanco */
+    }
+    
+    html.show-baseline-grid .pagedjs_page:not(.pagedjs_blank_page) .pagedjs_area {
+        --pagedjs-baseline: calc(10.5pt * 1.2);  /* 12.6pt - debe coincidir con --baseline */
         --pagedjs-baseline-color: rgba(0, 150, 255, 0.15);
         position: relative;
         /* Borde suave que no ocupa espacio */
@@ -24,7 +29,7 @@ pagedjs-ignore {
     }
     
     /* Grid aplicado solo al área de contenido (no en márgenes) */
-    .pagedjs_page:not(.pagedjs_blank_page) .pagedjs_area::before {
+    html.show-baseline-grid .pagedjs_page:not(.pagedjs_blank_page) .pagedjs_area::before {
         content: '';
         position: absolute;
         top: 0;
@@ -45,23 +50,28 @@ pagedjs-ignore {
     }
     
     /* Asegurar que el contenido esté por encima del grid */
-    .pagedjs_page_content {
+    html.show-baseline-grid .pagedjs_page_content {
         position: relative;
         z-index: 1;
     }
 
-    h1,h2,h3,h4,h5,h6 {
+    html.show-baseline-grid h1,
+    html.show-baseline-grid h2,
+    html.show-baseline-grid h3,
+    html.show-baseline-grid h4,
+    html.show-baseline-grid h5,
+    html.show-baseline-grid h6 {
         outline: 1px solid red;
         position: relative; /* Necesario para posicionar el pseudo-elemento */
     }
     
     /* Línea vertical a la derecha que muestra la altura total incluyendo márgenes */
-    h1::after,
-    h2::after,
-    h3::after,
-    h4::after,
-    h5::after,
-    h6::after {
+    html.show-baseline-grid h1::after,
+    html.show-baseline-grid h2::after,
+    html.show-baseline-grid h3::after,
+    html.show-baseline-grid h4::after,
+    html.show-baseline-grid h5::after,
+    html.show-baseline-grid h6::after {
         content: '';
         position: absolute;
         right: -5px; /* Posición a la derecha del elemento (más cerca) */
@@ -74,24 +84,24 @@ pagedjs-ignore {
     }
     
     /* Extender la línea para incluir márgenes superiores e inferiores */
-    h1::after {
+    html.show-baseline-grid h1::after {
         top: calc(var(--baseline) * -8); /* Extiende hacia arriba el margin-top */
         height: calc(100% + var(--baseline) * 8 + var(--baseline) * 3); /* Incluye margin-top y margin-bottom */
     }
     
-    h2::after {
+    html.show-baseline-grid h2::after {
         top: calc(var(--baseline) * -2);
         height: calc(100% + var(--baseline) * 2 + var(--baseline) * 1.5);
     }
     
-    h3::after {
+    html.show-baseline-grid h3::after {
         top: calc(var(--baseline) * -2);
         height: calc(100% + var(--baseline) * 2 + var(--baseline));
     }
     
-    h4::after,
-    h5::after,
-    h6::after {
+    html.show-baseline-grid h4::after,
+    html.show-baseline-grid h5::after,
+    html.show-baseline-grid h6::after {
         top: calc(var(--baseline) * -1);
         height: calc(100% + var(--baseline) + var(--baseline));
     }
