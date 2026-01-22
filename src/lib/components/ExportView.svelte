@@ -275,6 +275,7 @@
                 {documentHtml}
                 css={previewCss}
                 scale={selectedTheme.previewScale ?? 1}
+                showGridToggle={selectedTheme.id === 'default'}
                 bind:isLoading={previewLoading}
                 bind:error
             />

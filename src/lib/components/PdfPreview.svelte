@@ -48,6 +48,7 @@
         documentHtml = "",
         css = "",
         scale = 1,
+        showGridToggle = false,
         isLoading = $bindable(false),
         error = $bindable(null),
     } = $props();
@@ -153,15 +154,19 @@
     <div class="preview-container" bind:this={iframeContainer} style="--preview-scale: {currentZoom}"></div>
     
     <Toolbar.Root class="floating-toolbar">
-        <Toolbar.Button
-            class="toolbar-btn {showGrid ? 'active' : ''}"
-            onclick={() => showGrid = !showGrid}
-            title={showGrid ? "Ocultar grid de ayuda" : "Mostrar grid de ayuda"}
-        >
-            {showGrid ? "Ocultar grid" : "Mostrar grid"}
-        </Toolbar.Button>
-        
-        <div class="toolbar-separator"></div>
+        {#if showGridToggle}
+            <Toolbar.Button
+                class="toolbar-btn {showGrid ? 'active' : ''}"
+                onclick={() => showGrid = !showGrid}
+                title={showGrid 
+                    ? "Ocultar rejilla de ayuda" 
+                    : "Muestra una rejilla con líneas horizontales para verificar la alineación vertical del texto y las líneas viudas y huérfanas"}
+            >
+                {showGrid ? "Mostrar rejilla" : "Mostrar rejilla"}
+            </Toolbar.Button>
+            
+            <div class="toolbar-separator"></div>
+        {/if}
         
         <Toolbar.Button
             class="toolbar-btn icon-only"
