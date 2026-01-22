@@ -1,4 +1,4 @@
-/* CSS para generar un PDF imprimible con control fino de maquetación.
+/* CSS para generar un PDF imprimible con control fino de maquetación y alineación a baseline grid.
    Usa paged.js para compatibilidad con @page, margin boxes y saltos.
    Qué incluye:
    - primera página en blanco
@@ -7,8 +7,11 @@
    - control de viudas/huérfanas
    - cabecera de página con el número página en lado exterior (izquierdo/derecho), y título de obra y autor en la parte interior.
    - página final con colofón, sin numeración.
+   - alineación perfecta al baseline grid: todos los espaciados verticales están calculados en múltiplos del baseline
    
-   Para personalizar, modficar las variables en :root. Excepto el tamaño de página, que no se puede cambiar en variables (paged.js no lo soporta).
+   IMPORTANTE: Todos los espaciados verticales están calculados en múltiplos del baseline (14.7pt = 5.186mm con line-height 1.4).
+   Para personalizar, modificar las variables en :root. Excepto el tamaño de página, que no se puede cambiar en variables (paged.js no lo soporta).
+   NOTA: Los márgenes de página (@page content-pages) están definidos en archivos header-footer--*.css separados.
 */
 
 @media print {
@@ -24,8 +27,12 @@
         /* Familia. Opciones: 'Noto Serif', 'Noto Sans', Garamond, Georgia, serif, sans-serif */
         --body-font-size: 10.5pt;
         /* Tamaño base. Opciones: 11pt, 12pt, 13pt */
-        --body-line-height: 1;
-        /* Altura de línea. Opciones: 1–1.6 */
+        --body-line-height: 1.4;
+        /* Altura de línea. Opciones: 1–1.6. Recomendado: 1.4 para mejor legibilidad y alineación al baseline grid */
+        
+        /* Baseline grid - base de toda la alineación vertical */
+        --baseline: calc(var(--body-font-size) * var(--body-line-height));
+        /* Calculado automáticamente: 10.5pt * 1.4 = 14.7pt (5.186mm) */
 
         /* Control de composición */
         --paragraph-orphans: 2;
@@ -151,10 +158,10 @@
         padding: 0;
     }
 
-    /* Página de TOC (Tabla de Contenidos) - Sin numeración, márgenes estándar */
+    /* Página de TOC (Tabla de Contenidos) - Sin numeración, márgenes ajustados al baseline grid */
     @page toc-page {
-        margin-top: 26mm;
-        margin-bottom: 26mm;
+        margin-top: 27.25mm;
+        margin-bottom: 27.25mm;
         margin-left: 22mm;
         margin-right: 14mm;
     }
@@ -218,7 +225,7 @@
         font-size: 1.5em;
         font-weight: normal;
         font-variant: small-caps;
-        margin-bottom: 2em;
+        margin-bottom: calc(var(--baseline) * 2);
         margin-top: 0;
     }
 
@@ -230,8 +237,8 @@
 
     nav#TOC ul.toc-list li {
         position: relative;
-        margin-bottom: 0.5em;
-        line-height: 1.4;
+        margin-bottom: calc(var(--baseline) * 0.5);
+        line-height: var(--body-line-height);
     }
 
     nav#TOC ul.toc-list li a {
@@ -420,63 +427,81 @@
     }*/
 
 
-    /* Estilos para el cuerpo principal */
-    /* Estilos para el cuerpo principal */
+    /* =========================================
+       HEADINGS - Alineados al baseline grid
+       ========================================= */
+    
+    /* H1: Ocupa 8 líneas totales (8 arriba + contenido + 3 abajo) */
     h1 {
         text-align: var(--h1-text-align);
-        margin-top: 30%;
-        /* Inicio de capítulo bajado */
-        margin-bottom: 3rem;
-        /* Espacio generoso antes del texto */
+        margin-top: calc(var(--baseline) * 8);
+        /* 8 líneas desde arriba para inicio de capítulo */
+        margin-bottom: calc(var(--baseline) * 3);
+        /* 3 líneas de separación */
+        padding-top: 0;
+        padding-bottom: 0;
         font-weight: normal;
         font-size: 2.2em;
-        line-height: 1.2;
+        line-height: calc(var(--baseline) * 2);
+        /* H1 ocupa 2 líneas de altura */
     }
 
+    /* H2: Ocupa 5 líneas totales (2 arriba + 1.5 contenido + 1.5 abajo) */
     h2 {
-        text-align: center;
-        /* H2 centrado como subtítulo mayor */
-        margin-top: 2rem;
-        margin-bottom: 1.5rem;
+        text-align: var(--h2-text-align);
+        margin-top: calc(var(--baseline) * 2);
+        /* 2 líneas arriba */
+        margin-bottom: calc(var(--baseline) * 1.5);
+        /* 1.5 líneas abajo */
+        padding-top: 0;
+        padding-bottom: 0;
         font-weight: normal;
         font-size: 1.5em;
+        line-height: calc(var(--baseline) * 1.5);
+        /* H2 ocupa 1.5 líneas de altura */
     }
 
-    /* H3 en adelante alineados a la izquierda para estructura interna */
+    /* H3: Ocupa 3 líneas totales */
     h3 {
         text-align: left;
         font-size: 1.3em;
-        margin-top: 1.5em;
-        margin-bottom: 0.5em;
+        margin-top: calc(var(--baseline) * 2);
+        margin-bottom: var(--baseline);
+        padding-top: 0;
+        padding-bottom: 0;
         font-weight: normal;
         font-variant: small-caps;
+        line-height: var(--baseline);
     }
 
+    /* H4: Ocupa 2 líneas totales */
     h4 {
         text-align: left;
         font-size: 1.2em;
         font-style: italic;
-        margin-top: 1.2em;
-        margin-bottom: 0.4em;
+        margin-top: var(--baseline);
+        margin-bottom: var(--baseline);
+        padding-top: 0;
+        padding-bottom: 0;
         font-weight: normal;
+        line-height: var(--baseline);
     }
 
-    h5 {
+    /* H5 y H6: Ocupan 2 líneas totales */
+    h5, h6 {
         text-align: left;
         font-size: 1.1em;
         font-weight: normal;
         font-variant: small-caps;
-        margin-top: 1em;
-        margin-bottom: 0.3em;
+        margin-top: var(--baseline);
+        margin-bottom: var(--baseline);
+        padding-top: 0;
+        padding-bottom: 0;
+        line-height: var(--baseline);
     }
-
+    
     h6 {
-        text-align: left;
         font-size: 1em;
-        font-variant: small-caps;
-        font-weight: normal;
-        margin-top: 1em;
-        margin-bottom: 0.3em;
     }
 
     h2,
@@ -512,22 +537,32 @@
        Prioridad: Evitar dejar pocas líneas sueltas al FINAL de la página anterior. */
     hr + p,
     h1 + p,
-    h2 + p {
+    h2 + p,
+    h3 + p,
+    h4 + p,
+    h5 + p,
+    h6 + p {
         orphans: 4 !important;
         widows: 2 !important;
     }
 
-    /* sangría de primera linea excepto el primer párrafo de un bloque */
+    /* =========================================
+       PÁRRAFOS - Alineados al baseline
+       ========================================= */
+    
+    /* Párrafos principales: sin márgenes verticales, solo line-height */
     main p {
+        margin: 0;
+        padding: 0;
         text-indent: 0;
         text-align: justify;
+        line-height: var(--body-line-height);
         hyphens: auto;
         -webkit-hyphens: auto;
         -moz-hyphens: auto;
         -ms-hyphens: auto;
         word-wrap: break-word;
         overflow-wrap: break-word;
-        margin: 0;
     }
 
     main p+p {
@@ -535,28 +570,74 @@
     }
 
     /* Estilo alternativo: párrafos separados sin sangría */
-    body.paragraph-spaced {
-        main p {
-            margin-bottom: 1em;
-        }
-        
-        /* no solo p+p, porque entonces no se aplicaría tras un salto de página */
-        main p {
-            text-indent: 0 !important;
-        }
+    body.paragraph-spaced main p {
+        margin-bottom: var(--baseline);
+        text-indent: 0 !important;
     }
 
-    hr,
-    .hr {
+    /* =========================================
+       LISTAS - Alineadas al baseline
+       ========================================= */
+    
+    /* Listas ordenadas y no ordenadas: márgenes alineados al baseline */
+    main ol,
+    main ul {
+        margin-top: var(--baseline);
+        margin-bottom: var(--baseline);
+        padding-left: 1.5em;
+        line-height: var(--body-line-height);
+    }
+    
+    /* Elementos de lista: alineados al baseline */
+    main ol li,
+    main ul li {
+        margin: 0;
+        padding: 0;
+        line-height: var(--body-line-height);
+        text-align: justify;
+    }
+    
+    /* Espaciado entre elementos de lista: usar padding-bottom en lugar de margin */
+    main ol li + li,
+    main ul li + li {
+        margin-top: 0;
+        padding-top: 0;
+    }
+    
+    /* Listas anidadas: mantener alineación al baseline */
+    main ol ol,
+    main ul ul,
+    main ol ul,
+    main ul ol {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    /* =========================================
+       SEPARADORES - Alineados al baseline
+       ========================================= */
+    
+    /* HR ocupa exactamente 3 líneas (1 arriba + elemento + 1 abajo) */
+    hr, .hr {
         border: 0;
-        height: 1rem;
+        height: var(--baseline);
+        margin-top: var(--baseline);
+        margin-bottom: var(--baseline);
+        padding: 0;
+        background: transparent;
     }
 
-    img,
-    svg {
+    /* =========================================
+       IMÁGENES Y OTROS ELEMENTOS
+       ========================================= */
+    
+    img, svg {
         max-width: 100%;
         page-break-inside: avoid;
         break-inside: avoid;
+        display: block;
+        margin-top: var(--baseline);
+        margin-bottom: var(--baseline);
     }
 
 

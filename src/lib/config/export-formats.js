@@ -7,6 +7,7 @@
 import { headerStyles } from '$lib/config/export-header-styles.js';
 import pdfPrintTemplate from '$lib/export-themes/print/template.html?raw';
 import printCss from '$lib/export-themes/print/theme.css?raw';
+import baselineGridDebugCss from '$lib/export-themes/print/baseline-grid--debug.css?raw';
 import pdfScreenTemplate from '$lib/export-themes/screen/template.html?raw';
 import screenCss from '$lib/export-themes/screen/theme.css?raw';
 import mobileCss from '$lib/export-themes/screen/mobile.css?raw';

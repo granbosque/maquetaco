@@ -5,9 +5,10 @@
 @media print {
 
     /* Páginas de contenido */
+    /* Márgenes ajustados al baseline grid para 34 líneas exactas de contenido */
     @page content-pages {
-        margin-top: 26mm;
-        margin-bottom: 26mm;
+        margin-top: 27.25mm;
+        margin-bottom: 24.75mm;
     }
     
     @page content-pages:left {

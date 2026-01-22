@@ -41,6 +41,8 @@
         renderInIframe,
     } from "$lib/converters/paged-renderer.js";
     import { ZoomIn, ZoomOut } from "lucide-svelte";
+    import { Toolbar } from "bits-ui";
+    import baselineGridDebugCss from '$lib/export-themes/print/baseline-grid--debug.css?raw';
 
     let {
         documentHtml = "",
@@ -59,6 +61,9 @@
     const zoomStep = 0.1;
     const minZoom = 0.3;
     const maxZoom = 2;
+
+    // Control del grid de ayuda
+    let showGrid = $state(false);
 
     function getScrollElement() {
         const doc = iframe?.contentWindow?.document;
@@ -84,7 +89,8 @@
         error = null;
 
         try {
-            const fullHtml = generateFullDocument(documentHtml ?? "", css ?? "");
+            const cssWithGrid = showGrid ? (css ?? "") + baselineGridDebugCss : (css ?? "");
+            const fullHtml = generateFullDocument(documentHtml ?? "", cssWithGrid);
             const newIframe = await renderInIframe(fullHtml, iframeContainer);
 
             if (signal.aborted) return;
@@ -104,10 +110,12 @@
         }
     }
 
-    // Re-renderizar automáticamente cuando cambien las dependencias
+    // Re-renderizar automáticamente cuando cambien las dependencias (incluyendo el estado del grid)
     $effect(() => {
         if (!iframeContainer) return;
         if (documentHtml === null && !css) return;
+        // Incluir showGrid como dependencia para re-renderizar cuando cambie
+        const _ = showGrid;
 
         const controller = new AbortController();
         updatePreview(controller.signal);
@@ -144,17 +152,43 @@
 <div class="preview-wrapper">
     <div class="preview-container" bind:this={iframeContainer} style="--preview-scale: {currentZoom}"></div>
     
-    <div class="zoom-controls">
-        <button class="zoom-btn" onclick={zoomOut} title="Reducir zoom" disabled={currentZoom <= minZoom}>
+    <Toolbar.Root class="floating-toolbar">
+        <Toolbar.Button
+            class="toolbar-btn {showGrid ? 'active' : ''}"
+            onclick={() => showGrid = !showGrid}
+            title={showGrid ? "Ocultar grid de ayuda" : "Mostrar grid de ayuda"}
+        >
+            {showGrid ? "Ocultar grid" : "Mostrar grid"}
+        </Toolbar.Button>
+        
+        <div class="toolbar-separator"></div>
+        
+        <Toolbar.Button
+            class="toolbar-btn icon-only"
+            onclick={zoomOut}
+            title="Reducir zoom"
+            disabled={currentZoom <= minZoom}
+        >
             <ZoomOut size={14} />
-        </button>
-        <button class="zoom-btn zoom-reset" onclick={resetZoom} title="Restablecer zoom">
+        </Toolbar.Button>
+        
+        <Toolbar.Button
+            class="toolbar-btn"
+            onclick={resetZoom}
+            title="Restablecer zoom"
+        >
             {Math.round(currentZoom * 100)}%
-        </button>
-        <button class="zoom-btn" onclick={zoomIn} title="Aumentar zoom" disabled={currentZoom >= maxZoom}>
+        </Toolbar.Button>
+        
+        <Toolbar.Button
+            class="toolbar-btn icon-only"
+            onclick={zoomIn}
+            title="Aumentar zoom"
+            disabled={currentZoom >= maxZoom}
+        >
             <ZoomIn size={14} />
-        </button>
-    </div>
+        </Toolbar.Button>
+    </Toolbar.Root>
 </div>
 
 <style>
@@ -188,54 +222,38 @@
         /* transform-origin: top center; */
     }
 
-    .zoom-controls {
+    /* Toolbar flotante en esquina inferior derecha */
+    :global(.floating-toolbar) {
         position: absolute;
-        bottom: 1rem;
-        right: 1rem;
+        bottom: var(--space-lg);
+        right: var(--space-lg);
         display: flex;
-        gap: 2px;
+        align-items: center;
+        gap: var(--space-xs);
         background: var(--bg-surface);
         border: 1px solid var(--border-muted);
         border-radius: var(--radius);
-        padding: 3px;
+        padding: var(--space-xs);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         opacity: 0.7;
-        transition: opacity 0.2s ease;
+        transition: opacity var(--transition);
+        z-index: 10;
     }
 
-    .zoom-controls:hover {
+    :global(.floating-toolbar:hover) {
         opacity: 1;
     }
 
-    .zoom-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 28px;
+    /* Ajustes específicos para botones en la toolbar flotante */
+    :global(.floating-toolbar .toolbar-btn) {
+        min-height: unset;
+        padding: var(--space-xs) var(--space-sm);
+        font-size: var(--text-xs);
+    }
+
+    :global(.floating-toolbar .toolbar-btn.icon-only) {
+        width: 24px;
         height: 24px;
-        border: none;
-        background: transparent;
-        color: var(--text-muted);
-        cursor: pointer;
-        border-radius: var(--radius-sm);
-        transition: background 0.15s ease, color 0.15s ease;
-    }
-
-    .zoom-btn:hover:not(:disabled) {
-        background: var(--bg-muted);
-        color: var(--text);
-    }
-
-    .zoom-btn:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
-    }
-
-    .zoom-reset {
-        width: auto;
-        padding: 0 6px;
-        font-size: 0.6875rem;
-        font-weight: 500;
-        font-variant-numeric: tabular-nums;
+        padding: var(--space-xs);
     }
 </style>

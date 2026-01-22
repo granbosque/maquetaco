@@ -1,0 +1,98 @@
+/* ============================================
+   DEBUG: Grid de ayuda para baseline
+   Solo visible en pantalla, no al imprimir
+   ============================================ */
+
+@media screen,
+pagedjs-ignore {
+    /* Definir --baseline en este contexto para que esté disponible */
+    /* Debe coincidir con el valor definido en theme.css dentro de @media print */
+    :root {
+        --baseline: calc(10.5pt * 1.4);  /* 14.7pt - debe coincidir con --baseline de theme.css */
+    }
+
+    /* grid de lineas */
+    /* Baseline grid solo en el área de contenido, alineado con el texto */
+    /* Excluir páginas en blanco */
+    .pagedjs_page:not(.pagedjs_blank_page) .pagedjs_area {
+        --pagedjs-baseline: calc(10.5pt * 1.4);  /* 14.7pt - debe coincidir con --baseline */
+        --pagedjs-baseline-color: rgba(0, 150, 255, 0.15);
+        position: relative;
+        /* Borde suave que no ocupa espacio */
+        outline: 1px solid rgba(0, 150, 255, 0.2);
+        outline-offset: -1px;
+    }
+    
+    /* Grid aplicado solo al área de contenido (no en márgenes) */
+    .pagedjs_page:not(.pagedjs_blank_page) .pagedjs_area::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        background-image: linear-gradient(
+            transparent 0%,
+            transparent calc(var(--pagedjs-baseline) - 1px),
+            var(--pagedjs-baseline-color) calc(var(--pagedjs-baseline) - 1px),
+            var(--pagedjs-baseline-color) var(--pagedjs-baseline)
+        );
+        background-size: 100% var(--pagedjs-baseline);
+        background-repeat: repeat-y;
+        background-position: 0 0;
+        z-index: 0;
+    }
+    
+    /* Asegurar que el contenido esté por encima del grid */
+    .pagedjs_page_content {
+        position: relative;
+        z-index: 1;
+    }
+
+    h1,h2,h3,h4,h5,h6 {
+        outline: 1px solid red;
+        position: relative; /* Necesario para posicionar el pseudo-elemento */
+    }
+    
+    /* Línea vertical a la derecha que muestra la altura total incluyendo márgenes */
+    h1::after,
+    h2::after,
+    h3::after,
+    h4::after,
+    h5::after,
+    h6::after {
+        content: '';
+        position: absolute;
+        right: -5px; /* Posición a la derecha del elemento (más cerca) */
+        top: 0;
+        bottom: 0;
+        width: 5px; /* Más grueso */
+        background-color: rgba(255, 0, 0, 0.4); /* Más suave con transparencia */
+        pointer-events: none; /* No interfiere con interacciones */
+        z-index: 1000;
+    }
+    
+    /* Extender la línea para incluir márgenes superiores e inferiores */
+    h1::after {
+        top: calc(var(--baseline) * -8); /* Extiende hacia arriba el margin-top */
+        height: calc(100% + var(--baseline) * 8 + var(--baseline) * 3); /* Incluye margin-top y margin-bottom */
+    }
+    
+    h2::after {
+        top: calc(var(--baseline) * -2);
+        height: calc(100% + var(--baseline) * 2 + var(--baseline) * 1.5);
+    }
+    
+    h3::after {
+        top: calc(var(--baseline) * -2);
+        height: calc(100% + var(--baseline) * 2 + var(--baseline));
+    }
+    
+    h4::after,
+    h5::after,
+    h6::after {
+        top: calc(var(--baseline) * -1);
+        height: calc(100% + var(--baseline) + var(--baseline));
+    }
+}
