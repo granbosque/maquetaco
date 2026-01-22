@@ -61,11 +61,29 @@ pagedjs-ignore {
     html.show-baseline-grid h4,
     html.show-baseline-grid h5,
     html.show-baseline-grid h6 {
-        outline: 1px solid red;
+        outline: 1px solid rgba(220, 150, 50, 0.25); /* Outline naranja */
         position: relative; /* Necesario para posicionar el pseudo-elemento */
     }
     
-    /* Línea vertical a la derecha que muestra la altura total incluyendo márgenes */
+    /* Línea vertical en el margen izquierdo que muestra la altura total incluyendo márgenes */
+    /* Márgenes en color más claro y ancho, contenido en color más oscuro y delgado */
+    html.show-baseline-grid h1::before,
+    html.show-baseline-grid h2::before,
+    html.show-baseline-grid h3::before,
+    html.show-baseline-grid h4::before,
+    html.show-baseline-grid h5::before,
+    html.show-baseline-grid h6::before {
+        content: '';
+        position: absolute;
+        left: -2px; /* Cerca del borde del grid */
+        top: 0;
+        width: 3px; /* Ancho estándar para márgenes */
+        background-color: rgba(220, 150, 50, 0.2); /* Naranja claro para márgenes */
+        pointer-events: none;
+        z-index: 1000;
+    }
+    
+    /* Línea para el contenido del elemento (más oscura y delgada) */
     html.show-baseline-grid h1::after,
     html.show-baseline-grid h2::after,
     html.show-baseline-grid h3::after,
@@ -74,35 +92,117 @@ pagedjs-ignore {
     html.show-baseline-grid h6::after {
         content: '';
         position: absolute;
-        right: -5px; /* Posición a la derecha del elemento (más cerca) */
+        left: -1px; /* Ligeramente más cerca del borde que la línea de márgenes */
         top: 0;
         bottom: 0;
-        width: 5px; /* Más grueso */
-        background-color: rgba(255, 0, 0, 0.4); /* Más suave con transparencia */
-        pointer-events: none; /* No interfiere con interacciones */
-        z-index: 1000;
+        width: 2px; /* Delgado estándar para contenido */
+        background-color: rgba(220, 150, 50, 0.5); /* Naranja más oscuro para el contenido */
+        pointer-events: none;
+        z-index: 1001;
     }
     
-    /* Extender la línea para incluir márgenes superiores e inferiores */
-    html.show-baseline-grid h1::after {
+    /* Extender las líneas para incluir márgenes superiores e inferiores */
+    html.show-baseline-grid h1::before {
         top: calc(var(--baseline) * -8); /* Extiende hacia arriba el margin-top */
         height: calc(100% + var(--baseline) * 8 + var(--baseline) * 3); /* Incluye margin-top y margin-bottom */
     }
     
-    html.show-baseline-grid h2::after {
+    html.show-baseline-grid h1::after {
+        top: 0; /* Solo el contenido, sin márgenes */
+        height: 100%;
+    }
+    
+    html.show-baseline-grid h2::before {
         top: calc(var(--baseline) * -2);
         height: calc(100% + var(--baseline) * 2 + var(--baseline) * 1.5);
     }
     
-    html.show-baseline-grid h3::after {
+    html.show-baseline-grid h2::after {
+        top: 0;
+        height: 100%;
+    }
+    
+    html.show-baseline-grid h3::before {
         top: calc(var(--baseline) * -2);
         height: calc(100% + var(--baseline) * 2 + var(--baseline));
+    }
+    
+    html.show-baseline-grid h3::after {
+        top: 0;
+        height: 100%;
+    }
+    
+    html.show-baseline-grid h4::before,
+    html.show-baseline-grid h5::before,
+    html.show-baseline-grid h6::before {
+        top: calc(var(--baseline) * -1);
+        height: calc(100% + var(--baseline) + var(--baseline));
     }
     
     html.show-baseline-grid h4::after,
     html.show-baseline-grid h5::after,
     html.show-baseline-grid h6::after {
-        top: calc(var(--baseline) * -1);
-        height: calc(100% + var(--baseline) + var(--baseline));
+        top: 0;
+        height: 100%;
+    }
+    
+    /* Marcas para <hr> en el margen izquierdo */
+    html.show-baseline-grid hr {
+        position: relative;
+        outline: 1px solid rgba(200, 120, 50, 0.3); /* Borde naranja suave */
+    }
+    
+    html.show-baseline-grid hr::before {
+        content: '';
+        position: absolute;
+        left: -2px; /* Cerca del borde del grid */
+        top: 0;
+        bottom: 0;
+        width: 3px; /* Mismo ancho estándar que otras marcas de márgenes */
+        background-color: rgba(200, 120, 50, 0.2); /* Color naranja suave para márgenes */
+        pointer-events: none;
+        z-index: 1000;
+    }
+    
+    html.show-baseline-grid hr::after {
+        content: '';
+        position: absolute;
+        left: -1px; /* Ligeramente más cerca del borde */
+        top: 0;
+        bottom: 0;
+        width: 2px; /* Delgado estándar para contenido */
+        background-color: rgba(200, 120, 50, 0.4); /* Color naranja más oscuro para contenido */
+        pointer-events: none;
+        z-index: 1001;
+    }
+    
+    /* Marcas para <p> en gris muy claro en el margen izquierdo */
+    html.show-baseline-grid p {
+        position: relative;
+    }
+    
+    html.show-baseline-grid p::before {
+        content: '';
+        position: absolute;
+        left: -2px; /* Cerca del borde del grid */
+        top: calc(var(--baseline) * -0.5); /* Incluye margin-top aproximado */
+        bottom: calc(var(--baseline) * -0.5); /* Incluye margin-bottom aproximado */
+        width: 3px; /* Mismo ancho estándar que otras marcas de márgenes */
+        background-color: rgba(150, 150, 150, 0.15); /* Gris muy claro para márgenes */
+        pointer-events: none;
+        z-index: 1000;
+    }
+    
+    /* Línea para el contenido del párrafo */
+    html.show-baseline-grid p::after {
+        content: '';
+        position: absolute;
+        left: -1px; /* Ligeramente más cerca del borde que la línea de márgenes */
+        top: 0;
+        bottom: 0;
+        width: 2px; /* Delgado estándar para contenido */
+        background-color: rgba(150, 150, 150, 0.3); /* Gris para el contenido */
+        pointer-events: none;
+        z-index: 1001;
     }
 }
