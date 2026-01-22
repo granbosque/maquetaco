@@ -169,6 +169,13 @@
         currentZoom = scale;
     });
 
+    // ocultar el grid cuando no estamos en una plantilla que permita activarlo (cuando no se muestra el botón)
+    $effect(() => {
+        if (!showGridToggle && showGrid) {
+            showGrid = false;
+        }
+    });
+
     function zoomIn() {
         currentZoom = Math.min(MAX_ZOOM, currentZoom + ZOOM_STEP);
     }
