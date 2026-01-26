@@ -20,8 +20,5 @@ export const nullController = {
     },
     getSelection() {
         return null;
-    },
-    setHeadingType(line, type) {
-        console.warn('EditorController: Editor no inicializado, no se puede cambiar tipo de encabezado', line, type);
     }
 };

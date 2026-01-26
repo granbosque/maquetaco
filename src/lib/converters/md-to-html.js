@@ -129,7 +129,7 @@ function applyPandocAttributes(html, attributes) {
 
         for (const heading of headings) {
             if (heading.textContent.trim() === title.trim()) {
-                // Añadir clases
+                // Añadir clases al heading
                 if (attrs.classes.length > 0) {
                     heading.classList.add(...attrs.classes);
                 }
@@ -137,12 +137,6 @@ function applyPandocAttributes(html, attributes) {
                 // Añadir ID
                 if (attrs.id) {
                     heading.id = attrs.id;
-                }
-
-                // Añadir clases al section padre si existe
-                const section = heading.closest('section');
-                if (section && attrs.classes.length > 0) {
-                    section.classList.add(...attrs.classes);
                 }
             }
         }
