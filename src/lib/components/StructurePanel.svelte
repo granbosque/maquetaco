@@ -6,8 +6,7 @@
         - level: nivel del encabezado (1-6)
         - line: número de línea del encabezado
         - text: texto del encabezado
-        - id: slug generado del texto (ojo que no son únicos!)
-        - classes: array de clases CSS extraídas de atributos Pandoc
+        - classes: array de clases CSS extraídas (en formato de atributos Pandoc)
 
         Ese estado se actualiza cuando cambia el contenido del editor (con un debounce de 300ms)
         y se extrae la estructura a partir del markdown usando extractHeadings().
@@ -39,16 +38,20 @@
             </button>
         </div>
     </div>
-    {#if appState.config.toc?.length}
+    {#if appState.toc?.length}
         <div class="content">
             <nav class="toc">
-                {#each appState.config.toc as heading}
+                {#each appState.toc as heading}
                     <button
                         type="button"
                         class="toc-item level-{heading.level}"
                         onclick={() => scrollToLine(heading.line)}
                     >
-                        {heading.text}
+                    {heading.text} 
+                    <!-- pendiente mostrar clases del heading como iconos, al menos las que sean controladas
+                    <span class="classes">{heading.classes.join(', ')}
+                    </span>
+                    -->
                     </button>
                 {/each}
             </nav>
@@ -84,6 +87,7 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         font-size: 0.85rem;
+        justify-content: space-between;
     }
 
     .toc-item:hover {
@@ -129,4 +133,5 @@
         font-size: 0.85rem;
         font-style: italic;
     }
+
 </style>

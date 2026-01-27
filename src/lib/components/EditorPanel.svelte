@@ -22,7 +22,6 @@
     } from "lucide-svelte";
 
     import { appState } from "$lib/stores/appState.svelte.js";
-    import { extractHeadings } from "$lib/utils/markdown.js";
     import { createCodeMirrorController } from "$lib/editor/CodeMirrorController.js";
     import {
         maquetacoTheme,
@@ -83,9 +82,6 @@
         updateListenerExtension,
     ];
 
-    // Debounced TOC extraction
-    let debounceTimer;
-
     /* State for handling initialization FOUC */
     let editorReady = $state(false);
 
@@ -126,17 +122,6 @@
             }
         }, 10);
     }
-
-    $effect(() => {
-        const content = appState.config.content;
-
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            appState.config.toc = extractHeadings(content);
-        }, 300);
-
-        return () => clearTimeout(debounceTimer);
-    });
 </script>
 
 <section class="panel surface">

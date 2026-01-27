@@ -8,7 +8,7 @@
 /**
  * Extrae los headings de un documento Markdown
  * @param {string} content - Contenido markdown
- * @returns {Array<{level: number, text: string, id: string, line: number, classes: string[]}>}
+ * @returns {Array<{level: number, text: string, line: number, classes: string[]}>}
  */
 export function extractHeadings(content) {
     if (!content) return [];
@@ -22,9 +22,13 @@ export function extractHeadings(content) {
         const line = lines[i];
         const trimmedLine = line.trim();
 
-        // Detectar frontmatter YAML
+        // Detectar frontmatter YAML (solo al inicio: --- en línea 1, cierre en el siguiente ---)
         if (trimmedLine === '---') {
-            inFrontmatter = !inFrontmatter;
+            if (i === 0) {
+                inFrontmatter = true;
+            } else if (inFrontmatter) {
+                inFrontmatter = false;
+            }
             continue;
         }
         if (inFrontmatter) continue;
@@ -38,8 +42,8 @@ export function extractHeadings(content) {
         // Saltar líneas dentro de bloques de código
         if (inCodeBlock) continue;
 
-        // Detectar headings: # Título, ## Subtítulo, etc.
-        const match = line.match(/^(#{1,6})\s+(.+)$/);
+        // Detectar headings: # Título, ## Subtítulo, o #    (sin texto)
+        const match = line.match(/^(#{1,6})\s+(.*)$/);
         if (match) {
             const level = match[1].length;
             let text = match[2].trim();
@@ -59,16 +63,12 @@ export function extractHeadings(content) {
                 }
             }
 
-            // Generar slug/ID
-            const id = text.toLowerCase()
-                .replace(/[^\w\s-]/g, '')
-                .replace(/\s+/g, '-');
+            if (!text) text = '(Sin título)';
 
             // Línea 1-indexed (i es 0-indexed)
             headings.push({
                 level,
                 text,
-                id,
                 line: i + 1,
                 classes
             });
@@ -84,7 +84,10 @@ export function extractHeadings(content) {
  * @returns {string} Slug generado
  */
 export function slugify(text) {
+    if (!text) return '';
     return text
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase()
         .replace(/[^\w\s-]/g, '')
         .replace(/\s+/g, '-')
