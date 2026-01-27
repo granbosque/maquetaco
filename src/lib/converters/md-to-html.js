@@ -116,6 +116,15 @@ function convertToAngularQuotes(html, lang) {
         .replace(/\u201D/g, '»'); // " → »
 }
 
+function autonumberH1s(html) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const h1s = doc.querySelectorAll('h1');
+    h1s.forEach((h1, index) => {
+        h1.setAttribute('data-index', index);
+    });
+    return doc.body.innerHTML;
+}
 function applyPandocAttributes(html, attributes) {
     if (attributes.size === 0) return html;
 
@@ -204,10 +213,13 @@ export function markdownToHtml(markdown, lang) {
     // 3. Aplicar atributos Pandoc al HTML
     html = applyPandocAttributes(html, attributes);
 
-    // 4. Convertir comillas a angulares si el idioma lo requiere
+    // 4. Añadir data-index a todos los h1
+    html = autonumberH1s(html);
+
+    // 5. Convertir comillas a angulares si el idioma lo requiere
     html = convertToAngularQuotes(html, lang);
 
-    // 5. Si no hay ningún <section>, envolver todo el contenido en uno
+    // 6. Si no hay ningún <section>, envolver todo el contenido en uno
     if (html.trim() && !html.includes('<section>')) {
         html = `<section>${html}</section>`;
     }

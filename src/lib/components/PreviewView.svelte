@@ -1,4 +1,13 @@
 <script>
+    /* 
+        Vista previa del documento, con una plantilla para vista previa que 
+        simula el aspecto general del documento final (fuentes, sangrías, espacios, títulos)
+        pero no la distribución en páginas definitiva, ya que depende del formato al que se exporte.
+
+        Lee el contenido de appState, conviete a html y monta el html final.
+        Además añade un botón (pendiente de terminar) para cada sección.
+
+    */
     import { appState } from "$lib/stores/appState.svelte.js";
     import { styleSettings } from "$lib/stores/styleSettings.svelte.js";
     import { convertDocument } from "$lib/converters/md-to-html.js";
@@ -7,12 +16,49 @@
     import StyleSelectors from "$lib/components/StyleSelectors.svelte";
     import "$lib/styles/preview.css";
 
-    // Convertir el markdown a HTML y aplicar plantilla reactivamente
+    function addSectionConfigButtons(html) {
+        if (!html) return html;
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        const sections = doc.querySelectorAll("section");
+        sections.forEach((section) => {
+            const h1 = section.querySelector("h1");
+            if (!h1) return;
+            const index = h1.getAttribute("data-index");
+            if (index == null) return;
+            const btn = doc.createElement("button");
+            btn.setAttribute("type", "button");
+            btn.setAttribute("class", "section-config-btn");
+            btn.setAttribute("data-section-index", index);
+
+            // si la sección en appstate.toc tiene clases, se añaden como texto (pendiente sustituir por iconos)
+            // en otro caso, el índice
+            const classes = appState.toc[parseInt(index)]?.classes;
+            if (classes && classes.length) {
+                btn.textContent = classes.join(", ");
+            } else {
+                btn.textContent = `Sección ${parseInt(index)+1}`;
+            }
+            section.insertBefore(btn, h1);
+        });
+        return doc.body.innerHTML;
+    }
+
+    // Convertir el markdown a HTML con una plantilla css
+    // - el html se calcula usando reactividad, depende de appSate
+    // - el archivo css que se usa aquí es una versión simplificada de los css finales, con lo que tienen en común todos los formatos de exportación
+    // La conversión se hace en dos pasos:
+    // 1. Convierte el markdown a html, solo el cuerpo del documento, excluyendo el frontmatter
+    // 2. Monta el html completo usando una plantilla (mustache) que incluye la portada, toc, dedicatoria, colofón, etc.
+    //    el html de paso 1 se pasa como body a la plantilla.
     let previewHtml = $derived.by(() => {
         const lang = appState.config.lang || "es";
-        const { html } = convertDocument(appState.config.content, lang);
 
-        // Construir metadatos desde appState.config
+        const { html: bodyHtml } = convertDocument(appState.config.content, lang);
+
+        // a renderTemplate hay que pasar el objeto con los metadata, 
+        // porque genera automáticamente una página de portada, toc, páginas especiales, etc
+        // (pendiente: centralizar la construcción de este objeto, porque en exportView está repetido)
         const metadata = {
             title: appState.config.title || "",
             author: appState.config.author || "",
@@ -23,8 +69,8 @@
             colophon: appState.config.colophon || "",
         };
 
-        // Lógica de TOC (igual que en ExportView)
-        const h1Count = (html.match(/<h1/g) || []).length;
+        // activación semiautomática del toc (pendiente mejorar y unificar)
+        const h1Count = (bodyHtml.match(/<h1/g) || []).length;
         if (appState.config.enableTOC === undefined) {
             metadata.toc = h1Count > 2;
         } else {
@@ -32,13 +78,12 @@
         }
         metadata.tocDepth = appState.config.tocDepth || 1;
 
-        return renderTemplate("preview", metadata, html);
+        const bodyWithSectionButtons = addSectionConfigButtons(bodyHtml);
+        return renderTemplate("preview", metadata, bodyWithSectionButtons);
     });
 
-    // Clase de estilo de párrafo
     let paragraphClass = $derived(styleSettings.paragraphStyleClass);
 
-    // Estilo inline para la fuente
     let fontStyle = $derived.by(() => {
         const font = styleSettings.font;
         return font ? `font-family: ${font.family};` : '';
@@ -129,6 +174,22 @@
 
     .preview-content.paragraph-spaced :global(p + p) {
         text-indent: 0;
+    }
+
+    /* los estilos para los botones de configuración de sección tienen que estar
+       como global para que se apliquen al html generado en runtime */
+    :global(section) {
+        position: relative;
+    }
+    :global(.section-config-btn) {
+        position: absolute;
+        right: 1em;
+        top: -0.5rem;
+        padding: var(--space-xs) var(--space-sm);
+        border-radius: var(--radius);
+        background-color: #f4f0e3;
+        font-size: var(--text-xs);
+        font-family: var(--font-main);
     }
 </style>
 
