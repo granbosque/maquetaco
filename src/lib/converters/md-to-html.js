@@ -300,3 +300,27 @@ export function generateTableOfContents(html, depth = 1) {
 
     return tocHtml;
 }
+
+/**
+ * Extrae las secciones del HTML como array de objetos.
+ * Cada sección es un bloque completo (título + contenido) para poder renderizarlas por separado.
+ * @param {string} html - HTML generado por markdownToHtml
+ * @returns {Array<{id: string, classes: string[], html: string, index: number}>}
+ */
+export function extractSections(html) {
+    if (!html) return [];
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const sections = doc.querySelectorAll('section');
+
+    return Array.from(sections).map((section, idx) => {
+        const h1 = section.querySelector('h1');
+        return {
+            id: section.id || h1?.id || `section-${idx}`,
+            classes: Array.from(section.classList),
+            html: section.innerHTML.trim(),
+            index: parseInt(h1?.dataset?.index ?? idx, 10)
+        };
+    });
+}

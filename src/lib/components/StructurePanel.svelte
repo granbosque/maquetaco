@@ -21,6 +21,7 @@
     */
     import { appState } from "../stores/appState.svelte.js";
     import { X } from "lucide-svelte";
+    import SectionStyleIcons from "./SectionStyleIcons.svelte";
 
     let { open = true, onClose = () => {} } = $props();
 
@@ -47,11 +48,8 @@
                         class="toc-item level-{heading.level}"
                         onclick={() => scrollToLine(heading.line)}
                     >
-                    {heading.text} 
-                    <!-- pendiente mostrar clases del heading como iconos, al menos las que sean controladas
-                    <span class="classes">{heading.classes.join(', ')}
-                    </span>
-                    -->
+                    {heading.text}
+                    <SectionStyleIcons classes={heading.classes} />
                     </button>
                 {/each}
             </nav>
