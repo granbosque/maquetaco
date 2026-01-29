@@ -125,6 +125,34 @@ function autonumberH1s(html) {
     });
     return doc.body.innerHTML;
 }
+
+/**
+ * Traslada las clases del h1 al section que lo envuelve.
+ * Útil para que estilos y selectores que dependen de la sección (p. ej. EPUB, PDF) puedan usar las clases Pandoc.
+ * @param {string} html - HTML con <section> y <h1> ya con clases aplicadas
+ * @param {Object} [opts] - Opciones
+ * @param {boolean} [opts.removeFromH1=true] - Si true, quita las clases del h1 después de copiarlas al section
+ * @returns {string} HTML modificado
+ */
+function transferH1ClassesToSection(html, opts = {}) {
+    const { removeFromH1 = true } = opts;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const sections = doc.querySelectorAll('section');
+
+    sections.forEach((section) => {
+        const h1 = section.querySelector(':scope > h1');
+        if (!h1 || !h1.classList.length) return;
+
+        const classes = Array.from(h1.classList);
+        section.classList.add(...classes);
+        if (removeFromH1) {
+            classes.forEach((c) => h1.classList.remove(c));
+        }
+    });
+
+    return doc.body.innerHTML;
+}
 function applyPandocAttributes(html, attributes) {
     if (attributes.size === 0) return html;
 
@@ -216,10 +244,13 @@ export function markdownToHtml(markdown, lang) {
     // 4. Añadir data-index a todos los h1
     html = autonumberH1s(html);
 
-    // 5. Convertir comillas a angulares si el idioma lo requiere
+    // 5. Trasladar clases del h1 al section que lo envuelve
+    html = transferH1ClassesToSection(html);
+
+    // 6. Convertir comillas a angulares si el idioma lo requiere
     html = convertToAngularQuotes(html, lang);
 
-    // 6. Si no hay ningún <section>, envolver todo el contenido en uno
+    // 7. Si no hay ningún <section>, envolver todo el contenido en uno
     if (html.trim() && !html.includes('<section>')) {
         html = `<section>${html}</section>`;
     }

@@ -84,7 +84,8 @@ export async function exportToEpub(config, options = {}) {
             epub.addChapter({
                 id: `chapter-${String(i + 1).padStart(3, '0')}`,
                 title: section.title || `Capítulo ${i + 1}`,
-                content: section.html
+                content: section.html,
+                ...(section.classes?.length && { sectionClasses: section.classes })
             });
         });
     } else {
@@ -123,9 +124,10 @@ export async function exportToEpub(config, options = {}) {
 
 /**
  * Extrae las secciones del HTML generado por md-to-html
- * Cada <section> corresponde a un H1 en el markdown original
+ * Cada <section> corresponde a un H1 en el markdown original.
+ * Las clases del section (trasladadas desde el H1 por md-to-html) se devuelven para pasarlas a EpubBook.
  * @param {string} html - HTML con <section>s
- * @returns {Array<{title: string, html: string}>}
+ * @returns {Array<{title: string, html: string, classes: string[]}>}
  */
 function extractSections(html) {
     if (!html) return [];
@@ -139,13 +141,13 @@ function extractSections(html) {
     }
 
     return Array.from(sections).map(section => {
-        // Buscar el H1 dentro de la sección para obtener el título
         const h1 = section.querySelector('h1');
         const title = h1 ? h1.textContent.trim() : '';
 
         return {
             title,
-            html: section.innerHTML
+            html: section.innerHTML,
+            classes: Array.from(section.classList)
         };
     });
 }
@@ -374,7 +376,8 @@ export async function createEpubBlob(metadata, htmlContent, coverImageDataUrl = 
             epub.addChapter({
                 id: `chapter-${String(i + 1).padStart(3, '0')}`,
                 title: section.title || `Capítulo ${i + 1}`,
-                content: section.html
+                content: section.html,
+                ...(section.classes?.length && { sectionClasses: section.classes })
             });
         });
     } else {

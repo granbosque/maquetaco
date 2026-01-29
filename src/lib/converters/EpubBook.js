@@ -44,6 +44,7 @@ import JSZip from 'jszip';
  * @property {string} content - Contenido HTML (fragmento, no documento completo)
  * @property {string} [role] - Rol semántico: 'dedication', 'preface', 'chapter', 'colophon', etc.
  * @property {boolean} [showInToc=true] - Si debe aparecer en la tabla de contenidos
+ * @property {string[]} [sectionClasses] - Clases CSS para el <section> del capítulo (p. ej. desde atributos Pandoc del H1)
  */
 
 export class EpubBook {
@@ -214,6 +215,7 @@ export class EpubBook {
      * @param {string} chapter.content - Fragmento HTML del contenido
      * @param {string} [chapter.role='chapter'] - Rol semántico del capítulo
      * @param {boolean} [chapter.showInToc=true] - Si aparece en la tabla de contenidos
+     * @param {string[]} [chapter.sectionClasses] - Clases CSS para el <section> del capítulo (p. ej. desde H1 Pandoc)
      */
     addChapter(chapter) {
         // Validaciones básicas
@@ -240,7 +242,8 @@ export class EpubBook {
             title: chapter.title,
             content: chapter.content,
             role: chapter.role || 'chapter',
-            showInToc: chapter.showInToc !== false // true por defecto
+            showInToc: chapter.showInToc !== false, // true por defecto
+            sectionClasses: chapter.sectionClasses ?? null
         });
     }
 
@@ -595,6 +598,9 @@ ${tocItems}
         const epubType = this.#roleToEpubType(chapter.role);
         const epubTypeAttr = epubType ? ` epub:type="${epubType}"` : '';
         const bodyClassAttr = this.#bodyClass ? ` class="${this.#bodyClass}"` : '';
+        const sectionClassesAttr = (chapter.sectionClasses?.length)
+            ? ` class="${chapter.sectionClasses.join(' ')}"`
+            : '';
 
         const cssLink = this.#stylesheet 
             ? '<link rel="stylesheet" type="text/css" href="styles.css"/>'
@@ -615,7 +621,7 @@ ${tocItems}
     ${cssLink}
 </head>
 <body${bodyClassAttr}>
-    <section${epubTypeAttr}>
+    <section${epubTypeAttr}${sectionClassesAttr}>
         ${xhtmlContent}
     </section>
 </body>
