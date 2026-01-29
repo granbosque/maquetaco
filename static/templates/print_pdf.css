@@ -8,7 +8,7 @@
    - cabecera de página con el número página en lado exterior (izquierdo/derecho), y título de obra y autor en la parte interior.
    - página final con colofón, sin numeración.
    
-   Para personalizar, modficar las variables en :root. Excepto el tamaño de página, que no se puede cambiar en variables (paged.js no lo soporta).
+   Para personalizar, modificar las variables en :root. Excepto el tamaño de página, que no se puede cambiar en variables (paged.js no lo soporta).
 */
 
 @media print {
@@ -358,17 +358,21 @@
         text-indent: 0;
     }
 
-    h1.unlisted,
-    h2.unlisted,
-    h3.unlisted,
-    h4.unlisted,
-    h5.unlisted,
-    h6.unlisted {
+    h1.no-title,
+    h2.no-title,
+    h3.no-title,
+    h4.no-title,
+    h5.no-title,
+    h6.no-title {
         display: none;
     }
 
 }
 
+
+
+/* -- hasta aquí ---------------------------------------- */
+  
 
 /* A partir de aquí es código de paged.js para la vista previa en el navegador */
 /* CSS for Paged.js interface – v0.4 */

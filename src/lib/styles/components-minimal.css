@@ -403,7 +403,7 @@ label {
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-bottom: var(--space-sm);
+    margin:0;
 }
 
 input[type="text"],
@@ -512,6 +512,15 @@ textarea.expandable:focus {
     gap: var(--space-xs);
 }
 
+/* Título de grupo en formularios (p. ej. encima de un ToggleGroup) */
+.form-group-label {
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
 /* Inline checkbox label */
 .checkbox-inline {
     display: flex;
@@ -528,6 +537,7 @@ textarea.expandable:focus {
     cursor: pointer;
     margin-top: var(--space-sm);
     width: fit-content;
+    accent-color: var(--color-secondary-hover);
     /* Don't take full width if not needed */
 }
 
@@ -814,6 +824,77 @@ textarea.expandable:focus {
     box-shadow: none;
 }
 
+/* Header del SectionStyleForm (título + botón cerrar) */
+.section-form-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding:0;
+    margin:0;
+    margin-bottom: var(--space-xs);
+}
+
+.section-form-header .menu-header {
+    margin: 0;
+    flex: 1;
+}
+
+.section-form-header .close-btn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xxs);
+    border: none;
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--text-subtle);
+    cursor: pointer;
+    transition: color var(--transition), background-color var(--transition);
+}
+
+.section-form-header .close-btn:hover {
+    color: var(--text);
+    background-color: var(--bg-muted);
+}
+
+/* Toggle groups en formularios (SectionStyleForm, popovers) */
+.form-toggle-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.form-toggle-field .form-group-label {
+    margin: 0;
+}
+
+.form-toggle-field .align-hint {
+    margin: 0;
+}
+
+.form-toggle-field .view-toggle {
+    width: 100%;
+    display: flex;
+}
+
+.view-toggle.section-toggle {
+    padding: 2px;
+    gap: 2px;
+}
+
+.view-toggle.section-toggle .view-toggle-item {
+    flex: 1;
+    justify-content: center;
+    padding: 4px 8px;
+    font-size: var(--text-xs);
+    gap: var(--space-xs);
+}
+
+.view-toggle.section-toggle .view-toggle-item svg {
+    flex-shrink: 0;
+}
 
 /* === ACCORDION FORMAT ITEMS === */
 
@@ -962,3 +1043,17 @@ textarea.expandable:focus {
     background: var(--bg-muted);
     color: var(--text);
 }
+
+.hue-rotation-children {
+    --rotation: 12deg;
+}
+.hue-rotation-children > *:nth-child(1) { filter: hue-rotate(calc(var(--rotation) * -2)); }
+.hue-rotation-children > *:nth-child(2) { filter: hue-rotate(calc(var(--rotation) * -1)); }
+.hue-rotation-children > *:nth-child(3) { filter: hue-rotate(calc(var(--rotation) * 0)); }
+.hue-rotation-children > *:nth-child(4) { filter: hue-rotate(calc(var(--rotation) * 1)); }
+.hue-rotation-children > *:nth-child(5) { filter: hue-rotate(calc(var(--rotation) * 2)); }
+.hue-rotation-children > *:nth-child(6) { filter: hue-rotate(calc(var(--rotation) * 3)); }
+.hue-rotation-children > *:nth-child(7) { filter: hue-rotate(calc(var(--rotation) * 4)); }
+.hue-rotation-children > *:nth-child(8) { filter: hue-rotate(calc(var(--rotation) * 5)); }
+.hue-rotation-children > *:nth-child(9) { filter: hue-rotate(calc(var(--rotation) * 6)); }
+.hue-rotation-children > *:nth-child(10) { filter: hue-rotate(calc(var(--rotation) * 7)); }

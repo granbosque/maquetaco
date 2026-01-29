@@ -21,7 +21,9 @@
     */
     import { appState } from "../stores/appState.svelte.js";
     import { X } from "lucide-svelte";
+    import { EllipsisVertical } from "lucide-svelte";
     import SectionStyleIcons from "./SectionStyleIcons.svelte";
+    import OptionsPopover from "./OptionsPopover.svelte";
 
     let { open = true, onClose = () => {} } = $props();
 
@@ -43,14 +45,28 @@
         <div class="content">
             <nav class="toc">
                 {#each appState.toc as heading}
-                    <button
-                        type="button"
-                        class="toc-item level-{heading.level}"
-                        onclick={() => scrollToLine(heading.line)}
-                    >
-                    {heading.text}
-                    <SectionStyleIcons classes={heading.classes} />
+
+                    <!-- botón con otro botón dentro... mejorable
+                        Si se pulsa en título (o espacio blanco) va a la línea correspondiente
+                        Si se pulsa en los iconos, abre el menú de opciones -->
+                    <button type="button" class="toc-item level-{heading.level}"
+                        onclick={() => scrollToLine(heading.line)}>
+                        <div class="toc-item-text">{heading.text}</div>
+                        {#if heading.level==1}
+                        <OptionsPopover tocItem={heading}>
+                            {#snippet trigger()}
+                                <div class="toc-item-icons">
+                                    <SectionStyleIcons classes={heading.classes} />
+                                    <!-- Si no hay nada en SectionStyleIcons, el botón de menú se muestra siempre.
+                                         Si hay algo, el botón de menú se muestra solo en hover (con efecto de colapso).
+                                         align="end" en el popover ancla al borde derecho del trigger. -->
+                                    <EllipsisVertical size={16} />
+                                </div>
+                            {/snippet}
+                        </OptionsPopover>
+                        {/if}
                     </button>
+
                 {/each}
             </nav>
         </div>
@@ -68,7 +84,8 @@
         gap: 0.15rem;
     }
 
-    button.toc-item {
+    /* Triggers del popover (renderizados por OptionsPopover) */
+    .toc :global(button.toc-item) {
         display: flex;
         align-items: center;
         width: 100%;
@@ -88,41 +105,41 @@
         justify-content: space-between;
     }
 
-    .toc-item:hover {
+    .toc :global(.toc-item:hover) {
         background-color: rgba(102, 187, 106, 0.1);
     }
 
-    .toc-item.level-1 {
+    .toc :global(.toc-item.level-1) {
         padding-left: 0.5rem;
         font-weight: 400;
     }
 
-    .toc-item.level-2 {
+    .toc :global(.toc-item.level-2) {
         padding-left: 1.25rem;
         font-weight: 300;
     }
 
-    .toc-item.level-3,
-    .toc-item.level-4,
-    .toc-item.level-5,
-    .toc-item.level-6 {
+    .toc :global(.toc-item.level-3),
+    .toc :global(.toc-item.level-4),
+    .toc :global(.toc-item.level-5),
+    .toc :global(.toc-item.level-6) {
         font-weight: 300;
         opacity: 0.85;
     }
 
-    .toc-item.level-3 {
+    .toc :global(.toc-item.level-3) {
         padding-left: 2rem;
     }
 
-    .toc-item.level-4 {
+    .toc :global(.toc-item.level-4) {
         padding-left: 2.75rem;
     }
 
-    .toc-item.level-5 {
+    .toc :global(.toc-item.level-5) {
         padding-left: 3.5rem;
     }
 
-    .toc-item.level-6 {
+    .toc :global(.toc-item.level-6) {
         padding-left: 4.25rem;
     }
 
@@ -130,6 +147,37 @@
         color: var(--text-muted);
         font-size: 0.85rem;
         font-style: italic;
+    }
+
+    .toc-item {
+        display: flex;
+        flex-direction: row;
+    }
+    .toc-item-text {
+        flex: 1;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .toc-item-icons {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.25rem;
+        flex-shrink: 0;
+    }
+
+    /* Si hay iconos en SectionStyleIcons, el botón de menú (último hijo) solo se muestra en hover; al ocultar, colapsa su ancho con transición */
+    :global(.toc-item-icons:has(.section-style-icons:not(:empty)) > :last-child) {
+        max-width: 0;
+        opacity: 0;
+        overflow: hidden;
+        min-width: 0;
+        transition: max-width var(--transition), opacity var(--transition);
+    }
+    .toc :global(.toc-item:hover .toc-item-icons:has(.section-style-icons:not(:empty)) > :last-child) {
+        max-width: 1.5rem;
+        opacity: 1;
     }
 
 </style>

@@ -766,16 +766,75 @@
         text-indent: 0;
     }
 
-    h1.unlisted,
-    h2.unlisted,
-    h3.unlisted,
-    h4.unlisted,
-    h5.unlisted,
-    h6.unlisted {
+    h1.no-title, .no-title h1,
+    h2.no-title,
+    h3.no-title,
+    h4.no-title,
+    h5.no-title,
+    h6.no-title {
         display: none;
     }
 
 }
+
+/* Estilos de sección 
+  (desde maquetaco se pueden elegir estas opciones, son una serie de clases predefinidas
+  que sobreescriben los estilos por defecto).
+  Los de ancho, alineación y párrafos son iguales en todas las plantillas.
+  Los de centrado vertical requieren ajustar el alto de la página, (y para epub se convierte el contenido en <table> para asegurar compatibilidad)
+*/
+/* ancho de columna */
+section:has(>h1.narrow), section.narrow {
+    padding-left: 20%;
+    padding-right: 20%;
+}
+section:has(>h1.right-column), section.right-column {
+    padding-left: 25%;
+}
+
+/* alineación de texto, por defecto justify*/
+section:has(>h1.text-left) p, section.text-left p {
+    text-align: left;
+}
+section:has(>h1.text-center) p, section.text-center p {
+    text-align: center;
+}
+section:has(>h1.text-right) p, section.text-right p {
+    text-align: right;
+}
+/* tamaño de texto, el tamaño de texto se aplica a p, no al propio título */
+section:has(>h1.text-small), section.text-small {
+    font-size: 0.8rem;
+}
+section:has(>h1.text-large), section.text-large {
+    font-size: 1.2rem;
+}
+/* separación de párrafos, por defecto es sin separación y con sangría */
+section.paragraph-spaced p+p, .preview-content.paragraph-spaced p+p {
+    text-indent: 0;
+    margin-bottom: 1em;    
+}
+
+/* Alineación vertical, esto solo tiene efecto si el contenido cabe en una sola página */
+main:has(.vcenter), main:has(.vbottom) {
+    height: 100%; /* necesario con paged.js porque por defecto no ocupa todo. así además mantiente los márgentes de la página */
+}
+section:has(>h1.vcenter), section.vcenter {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+section:has(>h1.vcenter) h1, h1.vcenter {
+    margin-top: -5rem; /* para que el no cuente en el centrado */
+}
+section:has(>h1.vbottom), section.vbottom {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    height: 100%;
+}
+/* -- hasta aquí sección especiales ------------------------------------------------ */
 
 
 /* A partir de aquí es código de paged.js para la vista previa en el navegador */

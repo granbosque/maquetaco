@@ -15,6 +15,9 @@ export const nullController = {
     scrollToLine(line) {
         console.warn('EditorController: Editor no inicializado, no se puede navegar a línea', line);
     },
+    replaceLine(_lineNumber, _newText) {
+        return false;
+    },
     focus() {
         console.warn('EditorController: Editor no inicializado');
     },

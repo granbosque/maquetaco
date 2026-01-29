@@ -225,13 +225,13 @@
     text-indent: 0;
 }
 
-/* === TÍTULOS OCULTOS (unlisted) === */
-.preview-content h1.unlisted,
-.preview-content h2.unlisted,
-.preview-content h3.unlisted,
-.preview-content h4.unlisted,
-.preview-content h5.unlisted,
-.preview-content h6.unlisted {
+/* === TÍTULOS OCULTOS (no-title) === */
+.preview-content h1.no-title,
+.preview-content h2.no-title,
+.preview-content h3.no-title,
+.preview-content h4.no-title,
+.preview-content h5.no-title,
+.preview-content h6.no-title {
     display: none;
 }
 
@@ -276,6 +276,89 @@
     color: blue;
     text-decoration: underline;
 }
+
+
+/* Estilos se sección especiales.
+   -------------------------------------------------------------------------------
+   Al convetir md a html, se envueve en <section> cada h1 con su contenido, 
+   estos estilos realmente se aplican al h1, pero los usamos para formatear la sección completa.
+
+    const managedClasses = ["no-toc", "no-title", 
+    "narrow", "right-column", 
+    "vcenter", "vbottom", 
+    "text-left", "text-center", "text-right",
+     "text-small", "text-large", 
+     "paragraph-spaced"];
+
+*/
+/* ancho de columna */
+section:has(>h1.narrow), section.narrow {
+    padding-left: 20%;
+    padding-right: 20%;
+}
+section:has(>h1.right-column), section.right-column {
+    padding-left: 25%;
+}
+
+/* alineación de texto, por defecto justify*/
+section:has(>h1.text-left) p, section.text-left p {
+    text-align: left;
+}
+section:has(>h1.text-center) p, section.text-center p {
+    text-align: center;
+}
+section:has(>h1.text-right) p, section.text-right p {
+    text-align: right;
+}
+/* tamaño de texto, el tamaño de texto se aplica a p, no al propio título */
+section:has(>h1.text-small), section.text-small {
+    font-size: 0.8rem;
+}
+section:has(>h1.text-large), section.text-large {
+    font-size: 1.2rem;
+}
+/* separación de párrafos, por defecto es sin separación y con sangría */
+section.paragraph-spaced p+p, .preview-content.paragraph-spaced p+p {
+    text-indent: 0;
+    margin-bottom: 1em;    
+}
+/* para la alineación vertical, simulamos un alto mínimo para la sección y usamos flex,
+además dibujamos una flecha indicadora o dos */
+section:has(>h1.vcenter), section.vcenter {
+    min-height: 30em;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+/* flechas indicadoras: largas (asta + punta), color teal */
+section:has(>h1.vcenter) > :nth-child(2)::before,
+section.vcenter > :nth-child(2)::before,
+section:has(>h1.vbottom) > :nth-child(2)::before,
+section.vbottom > :nth-child(2)::before {
+    content: '';
+    display: block;
+    width: 12px;
+    height: 2rem;
+    margin: 0 auto 0.5rem auto;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 32'%3E%3Cline x1='6' y1='0' x2='6' y2='22' stroke='%230d9488' stroke-width='2' stroke-linecap='round'/%3E%3Cpolygon points='6,32 0,22 12,22' fill='%230d9488'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+/* flecha hacia arriba debajo del último hijo */
+section:has(>h1.vcenter) > :last-child::after,
+section.vcenter > :last-child::after {
+    content: '';
+    display: block;
+    width: 12px;
+    height: 2rem;
+    margin: 0.5rem auto 0 auto;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 32'%3E%3Cline x1='6' y1='32' x2='6' y2='10' stroke='%230d9488' stroke-width='2' stroke-linecap='round'/%3E%3Cpolygon points='6,0 0,10 12,10' fill='%230d9488'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+section:has(>h1.vbottom), section.vbottom {
+    min-height: 30em;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+/* hasta aquí -------------------------------------------------------------------- */
 
 /* Estilos específicos para la web de maquetaco */
 

@@ -12,6 +12,7 @@
      */
 
     import SectionStyleIcons from "./SectionStyleIcons.svelte";
+    import OptionsPopover from "./OptionsPopover.svelte";
     import { appState } from "$lib/stores/appState.svelte.js";
     
     let { metadata, sections, toc, paragraphClass, fontStyle } = $props();
@@ -51,17 +52,19 @@
 
     <!-- Secciones del cuerpo -->
     <main class="main-content">
-        {#each sections as section (section.index)}
+        {#each sections as section}
          <!-- localizar en appState.toc las propiedades de esta sección (por index)-->
          {@const tocSection = appState.toc[section.index]}
          <section id={section.id} class={[...section.classes, getSectionClasses(section.index)].filter(Boolean).join(' ')}>
-            <button type="button" class="section-config-btn">
-                {#if tocSection.classes?.length}
-                    <SectionStyleIcons classes={tocSection.classes} />
-                {:else}
-                    Sección {section.index + 1}
-                {/if}
-            </button>
+            <OptionsPopover triggerClass="section-config-btn" tocItem={tocSection}>
+                {#snippet trigger()}
+                    {#if tocSection.classes?.length}
+                        <SectionStyleIcons classes={tocSection.classes} />
+                    {:else}
+                        Sección {section.index + 1}
+                    {/if}
+                {/snippet}
+            </OptionsPopover>
             {@html section.html}
         </section>
         {/each}
@@ -81,7 +84,7 @@
         margin: 0 auto;
     }
 
-    /* Estilos de párrafo para la preview */
+    /* Estilos de párrafo para la preview 
     .preview-content :global(p) {
         margin: 0;
         text-indent: 0;
@@ -91,7 +94,6 @@
         text-indent: 1.5em;
     }
 
-    /* Estilo alternativo: párrafos separados */
     .preview-content.paragraph-spaced :global(p) {
         margin-bottom: 1em;
         text-indent: 0;
@@ -100,12 +102,13 @@
     .preview-content.paragraph-spaced :global(p + p) {
         text-indent: 0;
     }
-
+*/
     section {
         position: relative;
     }
 
-    .section-config-btn {
+    /* Trigger del popover (renderizado por OptionsPopover) */
+    section :global(.section-config-btn) {
         position: absolute;
         right: 1em;
         top: -0.5rem;

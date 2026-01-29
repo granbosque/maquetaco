@@ -18,6 +18,7 @@
     import WelcomeModal from "$lib/components/WelcomeModal.svelte";
     import CompatibilityToast from "$lib/components/CompatibilityToast.svelte";
     import { onMount } from "svelte";
+    import { leadingDebounce } from "$lib/utils/timing.js";
 
     // Trigger HMR
     // Vista activa: 'editor' | 'preview' | 'export'
@@ -36,15 +37,13 @@
         }
     });
 
-    // Actualiza appState.toc cuando cambia el contenido (debounce 300ms). Siempre montado, así toc se mantiene al día aunque content cambie desde editor, import, o en el futuro desde StructurePanel/PreviewView.
-    let tocDebounceTimer;
+    // Actualiza appState.toc cuando cambia el contenido (debounce 300ms con ejecución inmediata al inicio).
+    const updateTOCOnContentChange = leadingDebounce((content) => {
+        appState.toc = extractHeadings(content);
+    }, 300);
+
     $effect(() => {
-        const content = appState.config.content;
-        clearTimeout(tocDebounceTimer);
-        tocDebounceTimer = setTimeout(() => {
-            appState.toc = extractHeadings(content);
-        }, 300);
-        return () => clearTimeout(tocDebounceTimer);
+        updateTOCOnContentChange(appState.config.content);
     });
 
     function handleViewChange(view) {

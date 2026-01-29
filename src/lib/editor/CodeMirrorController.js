@@ -104,6 +104,27 @@ export function createCodeMirrorController(view) {
                 console.warn('CodeMirrorController: No se pudo navegar a línea', lineNumber, e);
             }
         },
+        /**
+         * Reemplaza el contenido de una línea por número (1-based).
+         * La actualización se hace en el doc de CodeMirror; el binding con appState.config.content la sincroniza.
+         * @param {number} lineNumber - Número de línea (1-based)
+         * @param {string} newText - Nuevo texto de la línea (sin salto de línea final)
+         * @returns {boolean} true si se reemplazó, false si la línea no existe
+         */
+        replaceLine(lineNumber, newText) {
+            if (!view) return false;
+            try {
+                const line = view.state.doc.line(lineNumber);
+                view.dispatch({
+                    changes: { from: line.from, to: line.to, insert: newText },
+                    userEvent: "input.section-style"
+                });
+                return true;
+            } catch (e) {
+                console.warn('CodeMirrorController: No se pudo reemplazar línea', lineNumber, e);
+                return false;
+            }
+        },
         focus() {
             view?.focus();
         },

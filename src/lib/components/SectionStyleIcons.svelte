@@ -7,11 +7,22 @@
      * 
      * pendiente enlazar el botón con un panel de configuración de la sección.
      */
-    import { EyeOff, BookmarkX, EllipsisVertical } from "lucide-svelte";
-
+    import { EyeOff, BookmarkX, EllipsisVertical, PanelLeftRightDashed, PanelLeftDashed, FoldVertical, ArrowDownToLine, AlignCenter, AlignRight, ZoomOut, ZoomIn} from "lucide-svelte";
+    import ParagraphIndentIcon from "$lib/icons/ParagraphIndent.svelte";
+    import ParagraphSpacedIcon from "$lib/icons/ParagraphSpaced.svelte";    
     const MANAGED = [
-        { class: "unlisted", Icon: EyeOff },
+        { class: "no-title", Icon: EyeOff },
         { class: "no-toc", Icon: BookmarkX },
+        { class: "narrow", Icon: PanelLeftRightDashed },
+        { class: "right-column", Icon: PanelLeftDashed },
+        { class: "vcenter", Icon: FoldVertical },
+        { class: "vbottom", Icon: ArrowDownToLine },
+        { class: "text-center", Icon: AlignCenter },
+        { class: "text-right", Icon: AlignRight },
+        { class: "text-small", Icon: ZoomOut },
+        { class: "text-large", Icon: ZoomIn },
+        { class: "paragraph-spaced", Icon: ParagraphSpacedIcon },
+        { class: "paragraph-indent", Icon: ParagraphIndentIcon }
     ];
 
     let { classes = [], showEllipsis = false } = $props();

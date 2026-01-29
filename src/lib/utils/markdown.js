@@ -94,3 +94,66 @@ export function slugify(text) {
         .replace(/-+/g, '-')
         .trim();
 }
+
+
+
+export function actualizarClasesEnLineaMarkdown(
+    lineaOriginal,
+    clasesParaAñadir = [],
+    clasesParaEliminar = []
+  ) {
+    // Normaliza "clase" o ".clase" → "clase"
+    const limpiar = (c) => c.trim().replace(/^\./, "");
+    
+    const aAñadir = clasesParaAñadir.map(limpiar).filter(Boolean);
+    const aEliminar = new Set(clasesParaEliminar.map(limpiar).filter(Boolean));
+  
+    // Extrae: "texto base" + "{atributos}" + "espacios finales"
+    const match = lineaOriginal.match(/^(.*?)\s*\{([^}]*)\}(\s*)$/);
+    
+    if (!match) {
+      // Sin atributos: añade si es necesario
+      if (aAñadir.length === 0) return lineaOriginal;
+      
+      const nuevasClases = aAñadir.map(c => `.${c}`).join(' ');
+      return `${lineaOriginal.trimEnd()} {${nuevasClases}}`;
+    }
+  
+    const [, textoBase, atributosRaw, espaciosFinales] = match;
+    const tokens = atributosRaw.trim().split(/\s+/).filter(Boolean);
+  
+    // Procesa tokens: mantiene todo excepto clases a eliminar
+    const clasesVistas = new Set();
+    const tokensFinales = [];
+  
+    for (const token of tokens) {
+      if (token.startsWith('.')) {
+        const clase = limpiar(token);
+        
+        // Salta si: está en la lista de eliminar o es duplicado
+        if (aEliminar.has(clase) || clasesVistas.has(clase)) continue;
+        
+        clasesVistas.add(clase);
+        tokensFinales.push(`.${clase}`);
+      } else {
+        // Mantiene #id, key=value, etc.
+        tokensFinales.push(token);
+      }
+    }
+  
+    // Añade clases nuevas al final
+    for (const clase of aAñadir) {
+      if (!clasesVistas.has(clase)) {
+        clasesVistas.add(clase);
+        tokensFinales.push(`.${clase}`);
+      }
+    }
+  
+    // Si no quedan atributos, elimina el bloque
+    if (tokensFinales.length === 0) {
+      return textoBase.trimEnd() + espaciosFinales;
+    }
+  
+    return `${textoBase.trimEnd()} {${tokensFinales.join(' ')}}${espaciosFinales}`;
+  }
+  
