@@ -135,6 +135,15 @@ b {
     font-size: 0.8em;
 }
 
+/* Contenido del branding (usa vertical-align-wrapper + vbottom del tema) */
+.made-with-content {
+    opacity: 0.6;
+}
+.made-with-content p {
+    margin: 0;
+    font-size: 0.85em;
+}
+
 /* Página de índice visible */
 .toc-list {
     list-style: none;
@@ -206,21 +215,28 @@ section.paragraph-spaced p+p, .preview-content.paragraph-spaced p+p {
 /* Alineación vertical, esto solo tiene efecto si el contenido cabe en una sola página 
     esto no funciona en la mayoría de lectores, pendiente convertir a <table>
 */
-section:has(>h1.vcenter), section.vcenter {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+
+/* Wrapper para centrado vertical (table/table-cell); usado por vcenter y vbottom */
+body:has(.vertical-align-wrapper) {
     height: 100%;
 }
-section:has(>h1.vcenter) h1, h1.vcenter {
-    margin-top: -5rem; /* para que el no cuente en el centrado */
+section:has(.vertical-align-wrapper) {
+    height: 100%;
+}
+.vertical-align-wrapper {
+    display: table;
+    width: 100%;
+    height: 100%;
+}
+.vcenter {
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+}
+.vbottom {
+    display: table-cell;
+    text-align: center;
+    vertical-align: bottom;
 }
 
-section:has(>h1.vbottom), section.vbottom {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    height: 100%;
-}
 /* -- hasta aquí sección especiales ------------------------------------------------ */
-
