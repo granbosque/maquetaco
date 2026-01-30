@@ -639,7 +639,8 @@ function detectHeuristicHeadingsInBody(html, hasExistingHeadings) {
     // Determinamos el nivel objetivo: H6 si ya hay headings (subtítulos), H1 si no hay nada (estructura plana)
     const targetTag = hasExistingHeadings ? 'h6' : 'h1';
 
-    for (const p of paragraphs) {
+    for (let i = 0; i < paragraphs.length; i++) {
+        const p = paragraphs[i];
         const text = p.textContent.trim();
         
         // Criterios de exclusión rápidos
@@ -648,15 +649,26 @@ function detectHeuristicHeadingsInBody(html, hasExistingHeadings) {
         // Criterio 1: Longitud (menos de 20 palabras aprox, usaremos 150 caracteres como proxy seguro)
         if (text.length > 150) continue;
 
-        // Criterio 2: NO termina en punto (o : o ; o ,)
-        if (/[.,:;]$/.test(text)) continue;
+        // Criterio 2: DEBE terminar en letra (a-z)
+        if (!/[a-zA-ZáéíóúÁÉÍÓÚñÑ]$/.test(text)) continue;
+
+        // Criterio NUEVO: Look-ahead. Si acaba en minúscula y el siguiente empieza en minúscula, NO es título
+        // (Probablemente sea un párrafo cortado por un salto de página o error de formato)
+        const endsInLowercase = /[a-záéíóúñ]$/.test(text);
+        if (endsInLowercase && i < paragraphs.length - 1) {
+            const nextP = paragraphs[i + 1];
+            const nextText = nextP.textContent.trim();
+            
+            // Si el siguiente no es un token y empieza por minúscula, descartamos éste como título
+            if (nextText && !nextText.includes('[[EMPTY_LINE]]')) {
+                const startsWithLowercase = /[a-záéíóúñ]/.test(nextText.charAt(0));
+                if (startsWithLowercase) continue;
+            }
+        }
 
         // Criterio 3: Patrón de inicio (Mayúscula o Número)
         // Regla relajada: Basta con que empiece por Mayúscula o Número (y cumpla lo anterior: sin punto, corto).
         // Esto cubre tanto "Título" como "1. Título" como "TÍTULO"
-        const startsWithCapOrNum = /^[A-ZÁÉÍÓÚÑ0-9]/.test(text.toUpperCase()); 
-        // Nota: text.toUpperCase() en el test es redundante si la regex incluye minúsculas, 
-        // pero queremos saber si el ORIGINAL empieza por mayúscula.
         const firstChar = text.charAt(0);
         const isStartValid = /[A-ZÁÉÍÓÚÑ0-9]/.test(firstChar);
 
