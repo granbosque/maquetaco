@@ -138,6 +138,7 @@ b {
 /* Contenido del branding (usa vertical-align-wrapper + vbottom del tema) */
 .made-with-content {
     opacity: 0.6;
+    padding-top: 70%;
 }
 .made-with-content p {
     margin: 0;
@@ -237,6 +238,7 @@ section:has(.vertical-align-wrapper) {
     display: table-cell;
     text-align: center;
     vertical-align: bottom;
+    padding-top:60%;
 }
 
 /* -- hasta aquí sección especiales ------------------------------------------------ */
