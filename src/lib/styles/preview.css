@@ -226,6 +226,7 @@
 }
 
 /* === TÍTULOS OCULTOS (no-title) === */
+.preview-content section.no-title h1,
 .preview-content h1.no-title,
 .preview-content h2.no-title,
 .preview-content h3.no-title,

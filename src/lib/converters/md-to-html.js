@@ -321,6 +321,10 @@ export function generateTableOfContents(html, depth = 1) {
         const text = heading.textContent;
         const id = heading.id;
         const level = parseInt(heading.tagName.substring(1), 10);
+
+        if (heading.classList.contains('no-toc')) return;
+        if (heading.parentElement.classList.contains('no-toc')) return;
+
         if (text && id) {
             // Añadir clase de nivel para posible indentación CSS
             tocHtml += `  <li class="toc-level-${level}"><a href="#${id}"><span class="toc-text">${text}</span></a></li>\n`;
