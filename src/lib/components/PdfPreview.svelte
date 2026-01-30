@@ -37,6 +37,7 @@
         - Aplica la rejilla de ayuda cuando cambia showGrid o el iframe
         - Sincroniza currentZoom con scale cuando scale cambia desde props
         - Usa AbortController para cancelar renders obsoletos cuando llega uno nuevo
+        - Usa untrack para evitar bucles infinitos en el renderizado
      */
 
     import {
@@ -47,6 +48,7 @@
     import { ZoomIn, ZoomOut } from "lucide-svelte";
     import { Toolbar } from "bits-ui";
     import baselineGridDebugCss from '$lib/export-themes/print/baseline-grid--debug.css?raw';
+    import { untrack } from 'svelte';
 
     let {
         documentHtml = "",
@@ -66,26 +68,33 @@
     const MIN_ZOOM = 0.3;
     const MAX_ZOOM = 2;
 
-    // Control del grid de ayuda
+    // grid que indica las lineas de texto para que se pueda ver a simple vista la alineación y justificado
     let showGrid = $state(false);
 
-    // Constantes
+    // Constantes para eliminar
     const PANEL_OFFSET = 300; // px para centrado visual
 
-    // Helpers de scroll
     function getScrollElement() {
         const doc = iframe?.contentWindow?.document;
         return doc?.scrollingElement || doc?.documentElement || doc?.body || null;
     }
 
-    function preserveScroll(callback) {
-        const el = getScrollElement();
-        const scrollTop = el?.scrollTop || 0;
-        callback();
-        requestAnimationFrame(() => {
-            const newEl = getScrollElement();
-            if (newEl) newEl.scrollTop = scrollTop;
-        });
+    // Espera a que el contenido del iframe esté listo para interactuar
+    async function waitForIframeReady(iframe, timeout = 1000) {
+        const start = performance.now();
+        
+        while (performance.now() - start < timeout) {
+            const doc = iframe?.contentWindow?.document;
+            const scrollElement = doc?.scrollingElement || doc?.documentElement;
+            
+            // Verificar que el documento esté listo y tenga contenido (scrollHeight > 0)
+            if (scrollElement && doc?.readyState === 'complete' && scrollElement.scrollHeight > 0) {
+                return;
+            }
+            
+            // Esperar al siguiente frame para no bloquear el hilo principal
+            await new Promise(resolve => requestAnimationFrame(resolve));
+        }
     }
 
     async function updatePreview(signal) {
@@ -94,8 +103,11 @@
         isLoading = true;
         error = null;
 
+        // Guardar scroll del iframe anterior 
+        const oldScrollTop = getScrollElement()?.scrollTop || 0;
+
         try {
-            // Siempre incluir el CSS de debug, pero condicionado a la clase show-baseline-grid
+            // Siempre incluye el CSS de debug, pero condicionado a la clase show-baseline-grid
             const fullHtml = generateFullDocument(documentHtml ?? "", css ?? "", {
                 baselineGridDebugCss
             });
@@ -103,9 +115,17 @@
 
             if (signal.aborted) return;
 
-            preserveScroll(() => {
-                iframe = newIframe;
-            });
+            // Creamos un nuevo iframe, no es que se sustituya el contenido
+            iframe = newIframe;
+            
+            // Esperar a que el contenido esté renderizado y restaurar scroll
+            await waitForIframeReady(newIframe);
+            if (signal.aborted) return;
+            
+            const scrollElement = getScrollElement();
+            if (scrollElement) {
+                scrollElement.scrollTop = oldScrollTop;
+            }
             
             applyBaselineGrid(showGrid);
             isLoading = false;
@@ -116,36 +136,34 @@
         }
     }
     
-    function applyBaselineGrid(enabled, maxAttempts = 10) {
-        if (!iframe?.contentWindow) {
-            return;
-        }
+    function applyBaselineGrid(enabled) {
+        const doc = iframe?.contentWindow?.document;
+        const htmlElement = doc?.documentElement;
         
-        try {
-            const doc = iframe.contentWindow.document;
-            if (!doc || !doc.documentElement) {
-                // Si el documento no está listo y aún tenemos intentos, reintentar
-                if (maxAttempts > 0) {
-                    requestAnimationFrame(() => applyBaselineGrid(enabled, maxAttempts - 1));
-                }
-                return;
-            }
-            
-            const htmlElement = doc.documentElement;
-            htmlElement?.classList.toggle('show-baseline-grid', enabled);
-        } catch (e) {
-            console.error('[applyBaselineGrid] error:', e);
+        if (htmlElement) {
+            htmlElement.classList.toggle('show-baseline-grid', enabled);
         }
     }
+    
 
-    // Actualizar automáticamente cuando cambien las dependencias (sin incluir showGrid)
+    // Actualizar automáticamente cuando cambien las dependencias (sin incluir showGrid ni iframe)
     $effect(() => {
-        if (!iframeContainer) return;
+        // para forzar effect con estas variables
+        const html = documentHtml;
+        const style = css;
+        const container = iframeContainer;
+
+        if (!container) return;
         // No renderizar si no hay contenido ni CSS
-        if ((!documentHtml || documentHtml === null) && !css) return;
+        if ((!html || html === null) && !style) return;
 
         const controller = new AbortController();
-        updatePreview(controller.signal);
+        
+        //  untrack para evitar que cambios internos reinicien el efecto 
+        // pendiente simplificar esto
+        untrack(() => {
+            updatePreview(controller.signal);
+        });
 
         return () => controller.abort();
     });
@@ -164,7 +182,6 @@
         }
     });
 
-    // Sincronizar zoom con scale externo (al cambiar formato)
     $effect(() => {
         currentZoom = scale;
     });
@@ -267,13 +284,7 @@
     }
 
     .preview-container :global(iframe) {
-        /* zoom funciona bien en Chrome/Edge pero no en Firefox
-           Para compatibilidad cross-browser, usar zoom con fallback a transform: scale()
-           Nota: Si se requiere que el zoom afecte también al área scrollable (comportamiento tipo zoom),
-           mantener zoom. Si solo se necesita escala visual, usar transform: scale() con ajustes de contenedor */
+        /* zoom funciona bien en Chrome/Edge pero no en Firefox, pendiente buscar fallback */
         zoom: var(--preview-scale, 1);
-        /* Fallback para Firefox (opcional, descomentar si se necesita soporte Firefox) */
-        /* transform: scale(var(--preview-scale, 1)); */
-        /* transform-origin: top center; */
     }
 </style>
