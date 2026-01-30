@@ -251,7 +251,7 @@ export function markdownToHtml(markdown, lang) {
     html = convertToAngularQuotes(html, lang);
 
     // 7. Si no hay ningún <section>, envolver todo el contenido en uno
-    if (html.trim() && !html.includes('<section>')) {
+    if (html.trim() && !html.includes('<section')) {
         html = `<section>${html}</section>`;
     }
 
