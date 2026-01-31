@@ -627,58 +627,78 @@ function tryExtractMetadataFromParagraphs(html) {
 function detectHeuristicHeadingsInBody(html, hasExistingHeadings) {
     if (!html) return { html, warnings: [], modified: false };
 
-    // Usamos DOMParser para manipular el DOM de forma segura
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
     const warnings = [];
     let modified = false;
 
-    // Seleccionamos todos los párrafos directos
     const paragraphs = Array.from(doc.body.querySelectorAll('p'));
-
-    // Determinamos el nivel objetivo: H6 si ya hay headings (subtítulos), H1 si no hay nada (estructura plana)
     const targetTag = hasExistingHeadings ? 'h6' : 'h1';
 
-    for (let i = 0; i < paragraphs.length; i++) {
-        const p = paragraphs[i];
+    /**
+     * Comprueba si un párrafo cumple los criterios básicos de título.
+     */
+    function isValidHeadingCandidate(p, index) {
         const text = p.textContent.trim();
         
-        // Criterios de exclusión rápidos
-        if (text.length === 0 || text.includes('[[EMPTY_LINE]]')) continue;
+        if (text.length === 0 || text.includes('[[EMPTY_LINE]]')) return false;
+        if (text.length > 150) return false;
+        if (!/[a-zA-ZáéíóúÁÉÍÓÚñÑ]$/.test(text)) return false;
 
-        // Criterio 1: Longitud (menos de 20 palabras aprox, usaremos 150 caracteres como proxy seguro)
-        if (text.length > 150) continue;
-
-        // Criterio 2: DEBE terminar en letra (a-z)
-        if (!/[a-zA-ZáéíóúÁÉÍÓÚñÑ]$/.test(text)) continue;
-
-        // Criterio NUEVO: Look-ahead. Si acaba en minúscula y el siguiente empieza en minúscula, NO es título
-        // (Probablemente sea un párrafo cortado por un salto de página o error de formato)
         const endsInLowercase = /[a-záéíóúñ]$/.test(text);
-        if (endsInLowercase && i < paragraphs.length - 1) {
-            const nextP = paragraphs[i + 1];
+        if (endsInLowercase && index < paragraphs.length - 1) {
+            const nextP = paragraphs[index + 1];
             const nextText = nextP.textContent.trim();
-            
-            // Si el siguiente no es un token y empieza por minúscula, descartamos éste como título
             if (nextText && !nextText.includes('[[EMPTY_LINE]]')) {
                 const startsWithLowercase = /[a-záéíóúñ]/.test(nextText.charAt(0));
-                if (startsWithLowercase) continue;
+                if (startsWithLowercase) return false;
             }
         }
 
-        // Criterio 3: Patrón de inicio (Mayúscula o Número)
-        // Regla relajada: Basta con que empiece por Mayúscula o Número (y cumpla lo anterior: sin punto, corto).
-        // Esto cubre tanto "Título" como "1. Título" como "TÍTULO"
         const firstChar = text.charAt(0);
-        const isStartValid = /[A-ZÁÉÍÓÚÑ0-9]/.test(firstChar);
+        return /[A-ZÁÉÍÓÚÑ0-9]/.test(firstChar);
+    }
 
-        if (isStartValid) {
+    /**
+     * Comprueba si un párrafo está íntegramente (o mayoritariamente) en negrita.
+     */
+    function isBold(p) {
+        // Buscamos si hay etiquetas strong o b
+        const boldElem = p.querySelector('strong, b');
+        if (!boldElem) return false;
+
+        // Si el texto de la negrita es casi igual al texto del párrafo, lo consideramos heading en negrita
+        const pText = p.textContent.trim();
+        const bText = boldElem.textContent.trim();
+        
+        // Margen de diferencia pequeño por si hay algún espacio o puntuación fuera
+        return bText.length >= pText.length * 0.9;
+    }
+
+    // 1. Pre-escaneo: ¿Hay algún candidato que esté en negrita?
+    let hasAnyBoldHeading = false;
+    for (let i = 0; i < paragraphs.length; i++) {
+        const p = paragraphs[i];
+        if (isValidHeadingCandidate(p, i) && isBold(p)) {
+            hasAnyBoldHeading = true;
+            break;
+        }
+    }
+
+    // 2. Procesado real
+    for (let i = 0; i < paragraphs.length; i++) {
+        const p = paragraphs[i];
+        
+        if (isValidHeadingCandidate(p, i)) {
+            // Si el documento parece usar negritas para títulos, descartamos los que no lo sean
+            if (hasAnyBoldHeading && !isBold(p)) continue;
+
             // ¡Es un heading!
             const newHeading = doc.createElement(targetTag);
             newHeading.innerHTML = p.innerHTML;
             p.replaceWith(newHeading);
             
-            warnings.push(`Heurística: Se convirtió párrafo a ${targetTag.toUpperCase()}: "${text.substring(0, 50)}..."`);
+            warnings.push(`Heurística: Se convirtió párrafo a ${targetTag.toUpperCase()}: "${p.textContent.trim().substring(0, 50)}..."`);
             modified = true;
         }
     }
