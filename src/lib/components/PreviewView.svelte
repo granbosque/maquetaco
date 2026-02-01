@@ -58,7 +58,8 @@
 
     let fontStyle = $derived.by(() => {
         const font = styleSettings.font;
-        return font ? `font-family: ${font.family};` : '';
+        const r = font ? `--font-base: ${font.family} !important;` : '';
+        return r;
     });
 </script>
 
