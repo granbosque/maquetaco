@@ -55,11 +55,14 @@
         --title-page-margin-top: 25%;
         --title-page-margin-bottom: 5%;
         --title-page-max-width: 80%;
+
+        --page-width: 210mm;
+        --page-height: 297mm;
     }
 
-    /* Reglas generales de página (A5) */
+    /* Reglas generales de página (A4), cuidado que no sirve usar var */
     @page {
-        size: 148mm 210mm;
+        size:  210mm 297mm;
         margin: 0;
     }
 
@@ -81,10 +84,10 @@
 
     /* Páginas de contenido */
     @page content-pages {
-        margin-top: 26mm;
-        margin-bottom: 26mm;
-        margin-left: 14mm;
-        margin-right: 14mm;
+        margin-top: 36mm;
+        margin-bottom: 36mm;
+        margin-left: 34mm;
+        margin-right: 34mm;
 
         @bottom-center {
             content: var(--page-number-content-center);
@@ -125,8 +128,8 @@
     /* Imagen de portada */
     .cover-image {
         /* page: cover-page; <-- Eliminado para evitar salto */
-        width: 148mm;
-        height: 210mm;
+        width: 210mm;
+        height: 297mm;
         margin: 0;
         padding: 0;
         display: flex;
@@ -457,6 +460,9 @@
         font-variant: small-caps;
         font-weight: normal;
     }
+    strong:not(:first-of-type) {
+        text-transform: lowercase;
+    }
 
     /* =========================================
        CONTROL DE PAGINACIÓN (VIUDAS Y HUÉRFANAS)
@@ -631,3 +637,5 @@ pagedjs-ignore {
         /* Centrado para single-page view */
     }
 }
+
+

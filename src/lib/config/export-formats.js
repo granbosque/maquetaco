@@ -30,7 +30,7 @@ export const exportFormats = [
     {
         id: 'screen',
         type: 'pdf',
-        name: 'PDF Pantalla',
+        name: 'PDF A4',
         description: 'Para leer en pantalla. Incluye portada como primera página, márgenes simétricos, sin encabezado.',
         icon: 'Monitor',
         buttonText: 'Guardar PDF',
