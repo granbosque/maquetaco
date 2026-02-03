@@ -159,11 +159,11 @@
                 ></textarea>
             </Label.Root>
 
-            <label for="enableTOC" class="checkbox-inline">
+            <label for="toc" class="checkbox-inline">
                 <input
-                    id="enableTOC"
+                    id="toc"
                     type="checkbox"
-                    bind:checked={appState.config.enableTOC}
+                    bind:checked={appState.config.toc}
                 />
                 <span>Generar índice</span>
             </label>

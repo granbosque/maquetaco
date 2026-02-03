@@ -36,10 +36,10 @@
 
         // Activación semiautomática del TOC
         const h1Count = (bodyHtml.match(/<h1/g) || []).length;
-        if (appState.config.enableTOC === undefined) {
+        if (appState.config.toc === undefined) {
             meta.showToc = h1Count > 2;
         } else {
-            meta.showToc = appState.config.enableTOC;
+            meta.showToc = appState.config.toc;
         }
         meta.tocDepth = appState.config.tocDepth || 1;
         meta.tableOfContentsHtml = meta.showToc ? generateTableOfContents(bodyHtml, meta.tocDepth) : "";

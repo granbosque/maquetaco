@@ -97,7 +97,7 @@ export function generateFrontmatter(metadata) {
             quotingType: '"',
             forceQuotes: false
         });
-        return `---\n${yamlStr}---`;
+        return `---\n${yamlStr}---\n`;
     } catch (e) {
         console.warn('Error generating YAML frontmatter:', e);
         return '';

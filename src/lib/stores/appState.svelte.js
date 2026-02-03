@@ -22,7 +22,7 @@ class AppState {
         date: new Date().getFullYear().toString(),
         lang: 'es',
         includeBranding: true, // Mostrar "Maquetado con Maquetaco" al final
-        enableTOC: undefined,  // undefined = automático, true/false = manual
+        toc: undefined,  // undefined = automático, true/false = manual
         tocDepth: 1,           // Nivel máximo de encabezados en TOC (1=solo H1, 2=H1+H2, etc.)
         imagePreview: '',  // Portada del documento (base64)
 
@@ -34,6 +34,8 @@ class AppState {
         // otros:
         fileName: 'Ningún archivo cargado',
         
+        // Metadatos completos del frontmatter (conserva campos personalizados no manejados por esta app)
+        rawMetadata: {},
         
     });
 

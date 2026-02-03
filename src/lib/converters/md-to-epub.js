@@ -53,7 +53,7 @@ export async function exportToEpub(config, options = {}) {
     }
 
     // 5. Página de índice visible (si está habilitada)
-    if (config.enableTOC) {
+    if (config.toc) {
         epub.enableTocPage({
             title: 'Índice',
             depth: config.tocDepth || 1

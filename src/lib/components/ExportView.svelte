@@ -108,8 +108,8 @@
     let metadata = $derived.by(() => {
         const h1Count = (contentHtml.match(/<h1/g) || []).length;
         
-        const toc = appState.config.enableTOC !== undefined
-            ? appState.config.enableTOC
+        const toc = appState.config.toc !== undefined
+            ? appState.config.toc
             : h1Count > 2;
 
         return {

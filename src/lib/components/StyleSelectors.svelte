@@ -66,10 +66,10 @@
     <div class="style-selector options-section">
         <div class="toc-option">
             <label class="checkbox-inline">
-                <input type="checkbox" bind:checked={appState.config.enableTOC} />
+                <input type="checkbox" bind:checked={appState.config.toc} />
                 <span>Índice</span>
             </label>
-            {#if appState.config.enableTOC}
+            {#if appState.config.toc}
                 <select 
                     bind:value={appState.config.tocDepth} 
                     class="toc-depth-select"

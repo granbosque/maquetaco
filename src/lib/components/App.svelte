@@ -75,7 +75,7 @@
         const h1Count = matches ? matches.length : 0;
 
         // Activar TOC automáticamente si hay más de 2 capítulos
-        appState.config.enableTOC = h1Count > 2;
+        appState.config.toc = h1Count > 2;
     }
 
     function handleFileInput(event) {
@@ -159,7 +159,10 @@
                 // Parsear frontmatter si existe
                 const { metadata, content } = parseFrontmatter(fullText);
 
-                // Poblar metadatos en appState.config
+                // Guardar TODOS los metadatos (preserva campos personalizados)
+                appState.config.rawMetadata = metadata;
+
+                // Poblar campos conocidos en appState.config
                 if (metadata.title) appState.config.title = metadata.title;
                 if (metadata.subtitle)
                     appState.config.subtitle = metadata.subtitle;
@@ -176,7 +179,9 @@
                 if (metadata.colophon)
                     appState.config.colophon = metadata.colophon;
                 if (metadata.toc !== undefined)
-                    appState.config.enableTOC = metadata.toc;
+                    appState.config.toc = metadata.toc;
+                if (metadata.tocDepth !== undefined)
+                    appState.config.tocDepth = metadata.tocDepth;
 
                 // Guardar solo el contenido (sin frontmatter)
                 appState.config.content = content;

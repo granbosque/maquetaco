@@ -2,16 +2,19 @@
  * Utilidades para guardar documentos markdown con frontmatter YAML
  */
 
-/**
- * Genera frontmatter YAML con los metadatos del documento
- * Solo incluye campos que tengan valor
- * @param {Object} config - Configuración con los metadatos
- * @returns {string} - Frontmatter YAML o string vacío
- */
-export function generateFrontmatter(config) {
-    const metadata = {};
+import { generateFrontmatter, combineWithFrontmatter } from './frontmatter.js';
 
-    // Solo incluir campos con valor
+/**
+ * Prepara metadatos para el frontmatter combinando rawMetadata con campos conocidos
+ * Los campos conocidos tienen prioridad sobre rawMetadata
+ * @param {Object} config - Configuración con los metadatos
+ * @returns {Object} - Objeto de metadatos para frontmatter
+ */
+function prepareMetadata(config) {
+    // Empezar con rawMetadata (preserva campos personalizados)
+    const metadata = { ...config.rawMetadata };
+
+    // Sobrescribir con campos conocidos (tienen prioridad)
     if (config.title) metadata.title = config.title;
     if (config.author) metadata.author = config.author;
     if (config.subtitle) metadata.subtitle = config.subtitle;
@@ -22,27 +25,10 @@ export function generateFrontmatter(config) {
     if (config.lang && config.lang !== 'es') metadata.lang = config.lang;
     if (config.dedication) metadata.dedication = config.dedication;
     if (config.colophon) metadata.colophon = config.colophon;
-    if (config.enableTOC) metadata.toc = true; // Guardar como 'toc' por simplicidad
+    if (config.toc !== undefined) metadata.toc = config.toc;
+    if (config.tocDepth !== undefined && config.tocDepth !== 1) metadata.tocDepth = config.tocDepth;
 
-    // Si no hay metadatos, no generar frontmatter
-    if (Object.keys(metadata).length === 0) return '';
-
-    // Generar YAML a mano para control total del formato
-    const lines = ['---'];
-    for (const [key, value] of Object.entries(metadata)) {
-        // Escapar valores que contengan caracteres especiales YAML
-        const stringValue = String(value);
-        if (stringValue.includes(':') || stringValue.includes('#') ||
-            stringValue.includes('"') || stringValue.includes("'") ||
-            stringValue.includes('\n') || stringValue.startsWith(' ')) {
-            // Usar comillas dobles y escapar comillas internas
-            lines.push(`${key}: "${stringValue.replace(/"/g, '\\"')}"`);
-        } else {
-            lines.push(`${key}: ${stringValue}`);
-        }
-    }
-    lines.push('---', '');
-    return lines.join('\n');
+    return metadata;
 }
 
 /**
@@ -51,8 +37,9 @@ export function generateFrontmatter(config) {
  * @returns {string} - Nombre de archivo con extensión .md
  */
 export function generateFileName(config) {
-    if (config.title) {
-        return config.title
+    const title = config.title?.trim();
+    if (title && title !== 'Introducción a Maquetaco') {
+        return title
             .toLowerCase()
             .replace(/[^a-z0-9áéíóúüñ\s]/gi, '')
             .replace(/\s+/g, '-')
@@ -60,7 +47,17 @@ export function generateFileName(config) {
     }
 
     if (config.fileName && config.fileName !== 'Ningún archivo cargado') {
+        // Si ya tiene un nombre de archivo (porque se abrió uno), lo usamos convirtiendo la extensión
         return config.fileName.replace(/\.(docx|txt)$/i, '.md');
+    }
+
+    // Fallback al título por defecto si no hay otro nombre
+    if (title) {
+        return title
+            .toLowerCase()
+            .replace(/[^a-z0-9áéíóúüñ\s]/gi, '')
+            .replace(/\s+/g, '-')
+            .substring(0, 50) + '.md';
     }
 
     return 'documento.md';
@@ -80,8 +77,11 @@ export async function saveDocument(config) {
     // Reintegrar imágenes (blob -> base64) para que el archivo sea portable
     content = await inlineBlobImages(content);
 
-    const frontmatter = generateFrontmatter(config);
-    const fullDocument = frontmatter + content;
+    // Preparar metadatos combinando rawMetadata con campos conocidos
+    const metadata = prepareMetadata(config);
+    
+    // Generar documento completo con frontmatter
+    const fullDocument = combineWithFrontmatter(metadata, content);
     const fileName = generateFileName(config);
 
     // Crear y descargar el archivo
