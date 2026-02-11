@@ -325,6 +325,7 @@
                 </Tooltip.Root>
             </div>
 
+
             <div class="toolbar-spacer"></div>
 
             <!-- Toggle panel derecho (visible cuando cerrado O en overlay mode) -->
@@ -383,5 +384,10 @@
 
     .content.ready {
         opacity: 1;
+    }
+
+    :global(.codemirror-wrapper) {
+        max-width: 50em;
+        margin: 0 auto;
     }
 </style>
