@@ -133,6 +133,8 @@
                 if (metadata.title) appState.config.title = metadata.title;
                 if (metadata.author) appState.config.author = metadata.author;
 
+                appState.config.rawMetadata = metadata;
+
                 // Log warnings to console only (not embedded in document)
                 if (warnings && warnings.length > 0) {
                     console.log("⚠️ Importación DOCX:", warnings);
