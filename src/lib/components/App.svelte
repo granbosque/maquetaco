@@ -59,9 +59,12 @@
     }
 
     function executeClear() {
+        // Contenido
         appState.config.content = "";
         appState.config.fileName = "Ningún archivo cargado";
-        // Restablecer metadatos si es necesario
+
+        // Metadatos: volver a estado inicial
+        appState.resetMetadataToDefaults();
     }
 
     /**

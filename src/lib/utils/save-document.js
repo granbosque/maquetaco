@@ -38,7 +38,7 @@ function prepareMetadata(config) {
  */
 export function generateFileName(config) {
     const title = config.title?.trim();
-    if (title && title !== 'Introducción a Maquetaco') {
+    if (title && title !== 'Título de la obra') {
         return title
             .toLowerCase()
             .replace(/[^a-z0-9áéíóúüñ\s]/gi, '')
