@@ -387,6 +387,7 @@
     }
 
     :global(.codemirror-wrapper) {
+        width: 100%;
         max-width: 50em;
         margin: 0 auto;
     }
