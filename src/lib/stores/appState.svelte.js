@@ -1,10 +1,9 @@
 // Estado global de la aplicación usando Svelte 5 runes
 import { nullController } from "$lib/editor/EditorController.js";
 import { extractHeadings } from "$lib/utils/markdown.js";
-
+import { tick } from "svelte";
 // Contenido inicial cargado desde archivo md, que sirve de presentación y guía
 import defaultContent from '$lib/data/initialContent.md?raw';
-
 
 class AppState {
     
@@ -37,6 +36,9 @@ class AppState {
         
         // Metadatos completos del frontmatter (conserva campos personalizados no manejados por esta app)
         rawMetadata: {},
+
+        // Flag de cambios respecto al último estado limpio (guardado, nuevo o abierto)
+        isDirty: false,
         
     });
 
@@ -56,7 +58,9 @@ class AppState {
         this.resetMetadataToDefaults();
         this.defaultContent = defaultContent;
         this.config.title = 'Introduction to Maquetaco';
-                
+
+        // El estado inicial del documento se considera limpio
+        this.markClean();
     }
 
     /**
@@ -83,6 +87,29 @@ class AppState {
 
         // Metadatos crudos del frontmatter (campos personalizados)
         this.config.rawMetadata = {};
+    }
+
+    /**
+     * Marca el estado actual del documento como“limpio
+     * Se debe llamar tras guardar o tras cargar/crear un documento nuevo.
+     */
+    async markClean() {
+        await tick(); // por si acaso se ha cambiado algo en documento y todavía no se ha aplicado
+        this.config.isDirty = false;
+        console.log('documento marcado como limpio');
+    }
+
+    /**
+     * Directamente marca el documento como modificado cuando se detecta un cambio en contenido o metadatos. (effect en App.svelte)
+     *
+     * Implementación actual: no compara snapshots, simplemente pone isDirty = true ante cualquier cambio relevante.
+     *
+     * Si el usuario vuelve manualmente al estado exacto anterior, seguirá marcándose como Modificado hasta que se vuelva a guardar,
+     * pero eso es un problema menor.
+     */
+    updateDirtyFlag() {
+        this.config.isDirty = true;
+        console.log('documento marcado como modificado');
     }
 }
 

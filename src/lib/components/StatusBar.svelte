@@ -7,7 +7,12 @@
 </script>
 
 <footer class="statusbar">
-    <span class="status-text">{appState.config.fileName}</span>
+    <span class="status-text">
+        {appState.config.fileName}
+        {#if appState.config.isDirty}
+            - Modificado
+        {/if}
+    </span>
     <div class="status-icons">
         <a
             href="https://github.com/granbosque/maquetaco"

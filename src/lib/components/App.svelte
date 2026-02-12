@@ -38,12 +38,33 @@
     });
 
     // Actualiza appState.toc cuando cambia el contenido (debounce 300ms con ejecución inmediata al inicio).
+    // (está aquí y no en appstate.svelte.js para que esté montado siempre)
     const updateTOCOnContentChange = leadingDebounce((content) => {
         appState.toc = extractHeadings(content);
     }, 300);
 
     $effect(() => {
         updateTOCOnContentChange(appState.config.content);
+    });
+
+    // Recalcula isDirty cuando cambia el contenido o metadatos
+    $effect(() => {
+        const cfg = appState.config;
+        // Accedemos explícitamente a los campos que afecta (pero creo que con svelte 5 se puede hacer de alguna manera mejor)
+        void cfg.content;
+        void cfg.rawMetadata;
+        void cfg.title;
+        void cfg.author;
+        void cfg.publisher;
+        void cfg.copyright;
+        void cfg.dedication;
+        void cfg.colophon;
+        void cfg.date;
+        void cfg.lang;
+        void cfg.toc;
+        void cfg.tocDepth;
+        void cfg.imagePreview;
+        appState.updateDirtyFlag();
     });
 
     function handleViewChange(view) {
@@ -65,6 +86,8 @@
 
         // Metadatos: volver a estado inicial
         appState.resetMetadataToDefaults();
+
+        appState.markClean();
     }
 
     /**
@@ -148,6 +171,9 @@
 
                 // Actualizar TOC automáticamente según número de capítulos
                 updateTOCFromContent(content);
+
+                // Documento recién importado: estado limpio
+                appState.markClean();
             } catch (e) {
                 console.error("Error procesando DOCX:", e);
                 appState.config.fileName = `Error: ${file.name}`;
@@ -196,11 +222,19 @@
                 if (metadata.toc === undefined) {
                     updateTOCFromContent(content);
                 }
+
+                // Documento de texto recién importado: estado limpio
+                appState.markClean();
             };
             reader.readAsText(file);
         } else {
             console.log("Tipo de archivo no soportado:", file.type);
         }
+    }
+
+    async function handleSave() {
+        await saveDocument(appState.config);
+        appState.markClean();
     }
 </script>
 
@@ -247,7 +281,7 @@
                 {#if activeView === "editor"}
                     <EditorView
                         onImport={handleImport}
-                        onSave={() => saveDocument(appState.config)}
+                        onSave={handleSave}
                         onClear={handleClear}
                     />
                 {:else if activeView === "preview"}
