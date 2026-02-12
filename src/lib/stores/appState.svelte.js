@@ -31,8 +31,21 @@ class AppState {
         // pero por ahora no he visto problemas de rendimiento con documentos grandes y así controlamos mejor la reactividad, sin depender de codemirror
         content: defaultContent,
 
-        // otros:
+        // otros (no se guardan en frontmatter, solo estado de la app):
         fileName: 'Ningún archivo cargado',
+
+        // Ruta de origen del archivo (cuando tiene sentido).
+        //  En web solo almacenamos el nombre (`file.name`), y más adelante en Tauri podrá ser una ruta absoluta en disco.
+        // Para documentos importados desde DOCX se deja a null porque se considera un documento nuevo, nunca vamos a guardar como docx
+        sourcePath: null,
+
+        /* Tipo de origen del documento:
+          - 'none'   → documento nuevo / sin archivo vinculado
+          - 'md'     → abierto desde un .md
+          - 'txt'    → abierto desde un .txt
+          - 'docx'   → importado desde un .docx (solo lectura respecto al original)
+         */
+        sourceType: 'none',
         
         // Metadatos completos del frontmatter (conserva campos personalizados no manejados por esta app)
         rawMetadata: {},

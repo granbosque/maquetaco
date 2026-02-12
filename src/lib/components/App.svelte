@@ -83,6 +83,8 @@
         // Contenido
         appState.config.content = "";
         appState.config.fileName = "Ningún archivo cargado";
+        appState.config.sourcePath = null;
+        appState.config.sourceType = "none";
 
         // Metadatos: volver a estado inicial
         appState.resetMetadataToDefaults();
@@ -169,6 +171,10 @@
                 appState.config.content = content;
                 appState.config.fileName = file.name;
 
+                // DOCX se trata como “origen de importación” (no se sobreescribe el binario)
+                appState.config.sourceType = "docx";
+                appState.config.sourcePath = null;
+
                 // Actualizar TOC automáticamente según número de capítulos
                 updateTOCFromContent(content);
 
@@ -217,6 +223,18 @@
                 // Guardar solo el contenido (sin frontmatter)
                 appState.config.content = content;
                 appState.config.fileName = file.name;
+
+                // Para .md / .txt guardamos el origen pensando en guardado directo futuro
+                if (file.name.endsWith(".md")) {
+                    appState.config.sourceType = "md";
+                } else if (file.name.endsWith(".txt")) {
+                    appState.config.sourceType = "txt";
+                } else {
+                    appState.config.sourceType = "none";
+                }
+                // En entorno web solo conocemos el nombre, no la ruta absoluta
+                appState.config.sourcePath = file.name;
+                debugger;
 
                 // Actualizar TOC automáticamente según número de capítulos (solo si no estaba definido en frontmatter)
                 if (metadata.toc === undefined) {
