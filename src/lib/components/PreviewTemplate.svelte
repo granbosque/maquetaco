@@ -25,7 +25,7 @@
 
 </script>
 
-<article class="preview-content {paragraphClass}" style={fontStyle}>
+<article class="preview-content {paragraphClass} selectable" style={fontStyle}>
     <!-- Portada -->
     {#if metadata.title}
     <div class="title-block">

@@ -270,6 +270,7 @@
 
 .preview-content strong {
     font-variant: small-caps;
+    font-weight: normal;
 }
 
 .preview-content a,
@@ -319,7 +320,7 @@ section:has(>h1.text-large), section.text-large {
     font-size: 1.2rem;
 }
 /* separación de párrafos, por defecto es sin separación y con sangría */
-section.paragraph-spaced p+p, .preview-content.paragraph-spaced p+p {
+section.paragraph-spaced p, .preview-content.paragraph-spaced p {
     text-indent: 0;
     margin-bottom: 1em;    
 }
