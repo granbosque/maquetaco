@@ -29,7 +29,7 @@ function extractPandocAttributes(markdown) {
     const attributes = new Map();
 
     // Regex para headings con atributos: # Título {.clase1 .clase2 #id}
-    const headingRegex = /^(#{1,6})\s+(.+?)\s*\{([^}]+)\}\s*$/gm;
+    const headingRegex = /^(#{1,6})\s+(.*?)\s*\{([^}]+)\}\s*$/gm;
 
     const processedMarkdown = markdown.replace(headingRegex, (match, hashes, title, attrString) => {
 
@@ -64,17 +64,23 @@ function extractPandocAttributes(markdown) {
 }
 
 /**
- * Plugin to ensure IDs don't start with a number (invalid in CSS selectors)
+ * Plugin de rehype para garantizar que los IDs generados sean válidos en selectores CSS.
+ * 1. Evita que los IDs comiencen por número (añade el prefijo 's-').
+ * 2. Asigna un ID genérico válido (ej. 'h-blank-1') a los encabezados sin texto (como `# {-}`).
  */
 function rehypeSafeIds() {
     return (tree) => {
+        let counter = 0;
         const visit = (node) => {
             if (node.type === 'element' && /^h[1-6]$/.test(node.tagName)) {
-                if (node.properties && node.properties.id) {
+                if (!node.properties) node.properties = {};
+                
+                if (!node.properties.id || node.properties.id.trim() === '') {
+                    counter++;
+                    node.properties.id = `h-blank-${counter}`;
+                } else if (/^\d/.test(node.properties.id)) {
                     // Prefix if it starts with a digit
-                    if (/^\d/.test(node.properties.id)) {
-                        node.properties.id = 's-' + node.properties.id;
-                    }
+                    node.properties.id = 's-' + node.properties.id;
                 }
             }
             if (node.children && node.children.length > 0) {
